@@ -1,0 +1,26 @@
+class Program {
+  int height;
+  int weight;
+
+  void Eat()
+  {
+    weight = weight * 2 + 5 % 100;
+  }
+
+  void Moo(boolean moo)
+  {
+    char message;
+    message = 'o';
+    if (moo)
+    {
+      makeSound(message);
+    }
+  }
+
+  void main() {
+    betsy = Cow;
+    betsy.height = 5;
+    betsy.weight = 10;
+    besty.name = 'b';
+  }
+}
