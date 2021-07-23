@@ -1,13 +1,24 @@
 grammar decaf;	
 
-DIGIT: [0-9] ;
+// Tokens inician con mayuscula
+
+//A fragment will never be counted as a token, it only serves to simplify a grammar.
+
+fragment DIGIT: [0-9] ; 
 
 LETTER: ('a'..'z'|'A'..'Z') ;
-ID : LETTER (LETTER|DIGIT)*;
-num : DIGIT (DIGIT)*;
-//CHAR_L : LETTER;
 
-//program : 'class' 'Program' '{' (declaration)* '}';
+
+ID : LETTER (LETTER|DIGIT)*;
+
+NUM : DIGIT (DIGIT)*;
+
+WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+
+
+//Parse Rules 
+// inician con minuscula
+
 start : 'class' 'Program' '{' (declaration)* '}';
 
 declaration : structDeclaration
@@ -16,7 +27,7 @@ declaration : structDeclaration
             ;
 
 varDeclaration  : varType ID ';'
-                | varType ID '[' num ']' ';'
+                | varType ID '[' NUM ']' ';'
                 ;
 
 structDeclaration : 'struct' ID '{' (varDeclaration)* '}';
@@ -69,7 +80,7 @@ expression  : location
             | '(' expression ')'
             ;
 
-methodCall : ID '(' arg (',' arg)* ')';
+methodCall : ID '(' arg? (',' arg)* ')';
 
 arg : expression ;
 
@@ -106,7 +117,7 @@ literal : int_literal
         | bool_literal
         ;
 
-int_literal : num ;
+int_literal : NUM ;
 
 char_literal : '\'' LETTER '\'' ;
 
@@ -114,7 +125,3 @@ bool_literal    : 'true'
                 | 'false'
                 ;
 
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-
-
-//Reserved words
