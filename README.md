@@ -25,3 +25,25 @@ class
 antlr -Dlanguage=Python3 <nombreGramatica>.g4
 Python3 Main.py
 ```
+## Pruebas 
+
+### cow
+Programa con un poquito de todas las reglas, desde declaración de estructuras hasta métodos y condiciones
+#### Programa sin ningún error
+[Código Fuente](./decafPrograms/cow.txt)
+<img src="./Pruebas/cow.svg">
+
+#### Programa con errores
+[Código Fuente](./decafPrograms/cowErr.txt)
+<img src="./Pruebas/cowErr.png">
+
+### hello_world
+Programa simple, solo se imprime una H
+#### Programa sin ningún error
+[Código Fuente](./decafPrograms/hello_world.txt)
+<img src="./Pruebas/hello_world.svg">
+
+### hello_worldErr
+#### Programa con errores
+[Código Fuente](./decafPrograms/hello_worldErr.txt)
+<img src="./Pruebas/hello_worldErr.png">
