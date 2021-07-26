@@ -8,12 +8,10 @@ fragment DIGIT: [0-9] ;
 
 LETTER: ('a'..'z'|'A'..'Z') ;
 
-
-ID : LETTER (LETTER|DIGIT)*;
+WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
 NUM : DIGIT (DIGIT)*;
 
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
 
 //Parse Rules 
@@ -21,26 +19,28 @@ WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
 start : 'class' 'Program' '{' (declaration)* '}';
 
+id : LETTER (LETTER|DIGIT)*;
+
 declaration : structDeclaration
             | varDeclaration
             | methodDeclaration
             ;
 
-varDeclaration  : varType ID ';'
-                | varType ID '[' NUM ']' ';'
+varDeclaration  : varType id ';'
+                | varType id '[' NUM ']' ';'
                 ;
 
-structDeclaration : 'struct' ID '{' (varDeclaration)* '}';
+structDeclaration : 'struct' id '{' (varDeclaration)* '}' (';')?;
 
 varType : 'int'
         | 'char'
         | 'boolean'
-        | 'struct' ID
+        | 'struct' id
         | structDeclaration
         | 'void'
         ;
 
-methodDeclaration : methodType ID '(' (parameter (',' parameter)*)* ')' block ;
+methodDeclaration : methodType id '(' (parameter (',' parameter)*)* ')' block ;
 
 methodType  : 'int'
             | 'char'
@@ -48,8 +48,9 @@ methodType  : 'int'
             | 'void'
             ;
 
-parameter   : parameterType ID
-            | parameterType ID '[' ']'
+parameter   : parameterType id
+            | parameterType id '[' ']'
+            | 'void'
             ;
 
 
@@ -69,7 +70,7 @@ statement   : 'if' '(' expression ')' block ('else' block)?
             | (expression)? ';'
             ;
 
-location : (ID | ID '[' expression ']') ( '.' location)? ;
+location : (id | id '[' expression ']') ( '.' location)? ;
 
 expression  : location
             | methodCall
@@ -80,7 +81,7 @@ expression  : location
             | '(' expression ')'
             ;
 
-methodCall : ID '(' arg? (',' arg)* ')';
+methodCall : id '(' arg? (',' arg)* ')';
 
 arg : expression ;
 
