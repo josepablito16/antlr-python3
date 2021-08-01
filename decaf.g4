@@ -19,28 +19,28 @@ NUM : DIGIT (DIGIT)*;
 
 start : 'class' 'Program' '{' (declaration)* '}';
 
-id : LETTER (LETTER|DIGIT)*;
+id_tok : LETTER (LETTER|DIGIT)*;
 
 declaration : structDeclaration
             | varDeclaration
             | methodDeclaration
             ;
 
-varDeclaration  : varType id ';'
-                | varType id '[' NUM ']' ';'
+varDeclaration  : varType id_tok ';'
+                | varType id_tok '[' NUM ']' ';'
                 ;
 
-structDeclaration : 'struct' id '{' (varDeclaration)* '}' (';')?;
+structDeclaration : 'struct' id_tok '{' (varDeclaration)* '}' (';')?;
 
 varType : 'int'
         | 'char'
         | 'boolean'
-        | 'struct' id
+        | 'struct' id_tok
         | structDeclaration
         | 'void'
         ;
 
-methodDeclaration : methodType id '(' (parameter (',' parameter)*)* ')' block ;
+methodDeclaration : methodType id_tok '(' (parameter (',' parameter)*)* ')' block ;
 
 methodType  : 'int'
             | 'char'
@@ -48,8 +48,8 @@ methodType  : 'int'
             | 'void'
             ;
 
-parameter   : parameterType id
-            | parameterType id '[' ']'
+parameter   : parameterType id_tok
+            | parameterType id_tok '[' ']'
             | 'void'
             ;
 
@@ -70,7 +70,7 @@ statement   : 'if' '(' expression ')' block ('else' block)?
             | (expression)? ';'
             ;
 
-location : (id | id '[' expression ']') ( '.' location)? ;
+location : (id_tok | id_tok '[' expression ']') ( '.' location)? ;
 
 expression  : location
             | methodCall
@@ -81,7 +81,7 @@ expression  : location
             | '(' expression ')'
             ;
 
-methodCall : id '(' arg? (',' arg)* ')';
+methodCall : id_tok '(' arg? (',' arg)* ')';
 
 arg : expression ;
 

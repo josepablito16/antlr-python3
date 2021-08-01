@@ -17,6 +17,15 @@ class decafListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by decafParser#id_tok.
+    def enterId_tok(self, ctx:decafParser.Id_tokContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#id_tok.
+    def exitId_tok(self, ctx:decafParser.Id_tokContext):
+        pass
+
+
     # Enter a parse tree produced by decafParser#declaration.
     def enterDeclaration(self, ctx:decafParser.DeclarationContext):
         pass
