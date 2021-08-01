@@ -6,7 +6,7 @@ grammar decaf;
 
 fragment DIGIT: [0-9] ; 
 
-LETTER: ('a'..'z'|'A'..'Z') ;
+LETTER: ('a'..'z'|'A'..'Z')+ ;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
