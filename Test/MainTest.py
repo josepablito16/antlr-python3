@@ -15,3 +15,6 @@ assert f3.err == 'El tipo de la funcion y el tipo de retorno no coinciden', "El 
 
 f4 = Funcion("int", [], Variable('r1', 'int'))
 assert f4.err == None, "Funcion bien declarada"
+
+f5 = Funcion("void", [])
+assert f5.err == None, "Funcion bien declarada"

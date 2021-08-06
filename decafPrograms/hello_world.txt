@@ -2,5 +2,6 @@ class Program{
     void main()
     {
         print('H');
+        return 0;
     }
 }

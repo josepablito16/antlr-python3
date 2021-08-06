@@ -4,6 +4,15 @@ from decafLexer import decafLexer
 from decafListener import decafListener
 from decafParser import decafParser
 import sys
+from Funcion import *
+from Variable import *
+
+
+def extraerDatosFuncion(children, rule_names):
+    print('extraerDatosFuncion')
+    for child in children:
+        if not(isinstance(child, TerminalNode)):
+            print(rule_names[child.getRuleIndex()])
 
 
 class KeyPrinter(decafListener):
@@ -19,6 +28,10 @@ def traverse(tree, rule_names, indent=0):
     else:
         print("{0}R='{1}'".format("  " * indent,
                                   rule_names[tree.getRuleIndex()]))
+        if rule_names[tree.getRuleIndex()] == 'methodDeclaration':
+            print('eoooo \n')
+            extraerDatosFuncion(tree.children, rule_names)
+
         if (tree.children != None):
             for child in tree.children:
                 traverse(child, rule_names, indent + 1)

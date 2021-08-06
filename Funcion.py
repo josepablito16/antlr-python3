@@ -16,6 +16,3 @@ class Funcion:
             else:
                 if(self.tipo != self.retorno.tipo):
                     self.err = 'El tipo de la funcion y el tipo de retorno no coinciden'
-
-
-
