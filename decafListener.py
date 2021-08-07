@@ -116,6 +116,15 @@ class decafListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by decafParser#returnStatement.
+    def enterReturnStatement(self, ctx:decafParser.ReturnStatementContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#returnStatement.
+    def exitReturnStatement(self, ctx:decafParser.ReturnStatementContext):
+        pass
+
+
     # Enter a parse tree produced by decafParser#location.
     def enterLocation(self, ctx:decafParser.LocationContext):
         pass

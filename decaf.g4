@@ -1,4 +1,4 @@
-grammar decaf;	
+grammar decaf;  
 
 // Tokens inician con mayuscula
 
@@ -59,16 +59,17 @@ parameterType   : 'int'
                 | 'boolean'
                 ;
 
-block : '{' (varDeclaration)* (statement)* '}' ;
+block : '{' (varDeclaration)* (statement)* returnStatement? '}' ;
 
 statement   : 'if' '(' expression ')' block ('else' block)?
             | 'while' '(' expression ')' block
-            | 'return' (expression)? ';'
             | methodCall ';'
             | block
             | location '=' expression
             | (expression)? ';'
             ;
+
+returnStatement : 'return' (expression)? ';';
 
 location : (id_tok | id_tok '[' expression ']') ( '.' location)? ;
 
