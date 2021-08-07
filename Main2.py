@@ -3,6 +3,7 @@ from antlr4.tree.Trees import TerminalNode
 from decafLexer import decafLexer
 from decafListener import decafListener
 from decafParser import decafParser
+from Variable import *
 import sys
 
 
@@ -22,19 +23,43 @@ def procesarRetorno(tree, rule_names):
         return None, None
 
 
+def procesarParametro(tree):
+    tipo = tree[0].getText()
+    nombre = tree[1].getText()
+
+    return Variable(nombre, tipo)
+
+
 def procesarFuncion(tree, rule_names):
 
-    # > de 5, tiene parametros
-    '''
-    methodType 0
-    id_tok 1
-    ( 2
-    parameter 3-len()-2
-    ) -2
-    block -1
-    '''
     if(len(tree) > 5):
-        pass
+        '''
+        > de 5, tiene parametros
+        methodType 0
+        id_tok 1
+        ( 2
+        parameter 3-len()-2
+        ) -2
+        block -1
+        '''
+        tipo = tree[0].getText()
+        nombre = tree[1].getText()
+        tipoRetorno, retorno = procesarRetorno(tree[-1].children, rule_names)
+
+        '''
+        Se recorren los hijos que corresponden a los parametros,
+        saltando los hijos ,
+        '''
+        parametros = []
+        for i in range(3, len(tree)-2, 2):
+            parametros.append(procesarParametro(tree[i].children))
+
+        print(f'''
+        tipo = {tipo}
+        nombre = {nombre}
+        parametros = {parametros}
+        tipoRetorno = {tipoRetorno}
+        retorno = {retorno}''')
     else:
         '''
         5 sin parametros
