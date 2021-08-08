@@ -4,6 +4,7 @@ from decafLexer import decafLexer
 from decafListener import decafListener
 from decafParser import decafParser
 from Variable import *
+from Funcion import *
 import sys
 
 
@@ -54,12 +55,25 @@ def procesarFuncion(tree, rule_names):
         for i in range(3, len(tree)-2, 2):
             parametros.append(procesarParametro(tree[i].children))
 
+        """
         print(f'''
         tipo = {tipo}
         nombre = {nombre}
         parametros = {parametros}
         tipoRetorno = {tipoRetorno}
         retorno = {retorno}''')
+        """
+
+        func = None
+        if tipoRetorno != None:
+            func = Funcion(tipo, parametros, Variable(retorno, tipoRetorno))
+        else:
+            func = Funcion(tipo, parametros)
+
+        func.validar()
+        print(func.err)
+        print(func)
+
     else:
         '''
         5 sin parametros
@@ -73,16 +87,105 @@ def procesarFuncion(tree, rule_names):
         tipo = tree[0].getText()
         nombre = tree[1].getText()
         tipoRetorno, retorno = procesarRetorno(tree[4].children, rule_names)
+        """
         print(f'''
         tipo = {tipo}
         nombre = {nombre}
         tipoRetorno = {tipoRetorno}
         retorno = {retorno}''')
+        """
+
+        func = None
+        if tipoRetorno != None:
+            func = Funcion(tipo, [], Variable(retorno, tipoRetorno))
+        else:
+            func = Funcion(tipo)
+
+        func.validar()
+        print(func.err)
+        print(func)
 
 
-class KeyPrinter(decafListener):
-    def exitKey(self, ctx):
-        print("Hello: %s" % ctx.ID())
+class DecafPrinter(decafListener):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def procesarLiteral(self, literal):
+        '''
+        literal
+        int_literal
+        char_literal
+        bool_literal
+        '''
+
+        if (literal.int_literal()):
+            # int_literal
+            return Variable('Test', 'int')
+            print(f"literal int {literal.int_literal().getText()}")
+
+        elif (literal.char_literal()):
+            # int_literal
+            return Variable('Test', 'char')
+            print(f"literal char {literal.char_literal().getText()}")
+
+        elif (literal.bool_literal()):
+            # int_literal
+            return Variable('Test', 'boolean')
+            print(f"literal bool {literal.bool_literal().getText()}")
+
+    def procesarRetorno(self, returnStatement):
+
+        if (returnStatement.expression().literal()):
+            # es literal
+            return self.procesarLiteral(returnStatement.expression().literal())
+
+        return 1
+
+    def procesarParametros(self, parametros):
+        parametrosList = []
+
+        if (parametros[0].getText() == 'void' and len(parametros) == 1):
+            return parametrosList
+
+        for i in parametros:
+            nombre = i.id_tok().getText()
+            tipo = i.parameterType().getText()
+            parametrosList.append(Variable(nombre, tipo))
+
+        return parametrosList
+
+    def enterMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
+
+        tipo = ctx.methodType().getText()
+        nombre = ctx.id_tok().getText()
+        retorno = None
+        parametros = []
+        if(ctx.block().returnStatement()):
+            # hay retorno
+            print('Hay retorno')
+            retorno = self.procesarRetorno(
+                ctx.block().returnStatement())
+
+        if(len(ctx.parameter()) > 0):
+            # Hay parametros
+            parametros = self.procesarParametros(ctx.parameter())
+
+        func = None
+        if (retorno != None):
+            # la funcion no tiene retorno
+            func = Funcion(tipo, parametros, retorno)
+        else:
+            func = Funcion(tipo, parametros)
+
+        func.validar()
+
+        if (func.err != None):
+            print(f'Error en funcion linea {ctx.start.line}: {func.err}')
+        print(f'''
+        tipo = {tipo}
+        nombre = {nombre}
+        parametros = {parametros}
+        retorno = {retorno}''')
 
 
 def traverse(tree, rule_names, indent=0):
@@ -110,11 +213,11 @@ def main():
     parser = decafParser(stream)
     tree = parser.start()
 
-    printer = KeyPrinter()
+    printer = DecafPrinter()
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
 
-    traverse(tree, parser.ruleNames)
+    #traverse(tree, parser.ruleNames)
 
     # print(tree.getText())
     # print(tree.getRuleIndex())

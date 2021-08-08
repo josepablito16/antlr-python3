@@ -6,7 +6,7 @@ class Funcion:
         self.err = None
         self.validar()
 
-    def validar(self):
+    def validar(self, regla=None):
         if (self.tipo == 'void'):
             if(self.retorno != None):
                 self.err = 'Funcion void no retorna nada'
@@ -16,3 +16,6 @@ class Funcion:
             else:
                 if(self.tipo != self.retorno.tipo):
                     self.err = 'El tipo de la funcion y el tipo de retorno no coinciden'
+
+    def __repr__(self):
+        return f"<Funcion>{self.tipo}({self.argumentos}): {self.retorno}"
