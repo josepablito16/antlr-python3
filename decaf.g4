@@ -10,7 +10,7 @@ LETTER: ('a'..'z'|'A'..'Z')+ ;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
 
-NUM : DIGIT (DIGIT)*;
+NUM : '-'? DIGIT (DIGIT)*;
 
 
 

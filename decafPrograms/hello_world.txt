@@ -1,7 +1,9 @@
 class Program{
     void main(void)
     {
+        int a;
+	    int array[10000];
         print('H');
-        
+        return 0;
     }
 }

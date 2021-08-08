@@ -181,11 +181,20 @@ class DecafPrinter(decafListener):
 
         if (func.err != None):
             print(f'Error en funcion linea {ctx.start.line}: {func.err}')
+        """
         print(f'''
         tipo = {tipo}
         nombre = {nombre}
         parametros = {parametros}
         retorno = {retorno}''')
+        """
+
+    def enterVarDeclaration(self, ctx: decafParser.VarDeclarationContext):
+        if(len(ctx.children) == 6):
+            # es la declaracion de un array
+            if(int(ctx.children[3].getText()) < 0):
+                print(
+                    f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser positiva")
 
 
 def traverse(tree, rule_names, indent=0):
