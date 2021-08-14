@@ -1,20 +1,30 @@
 class Funcion:
-    def __init__(self, tipo, argumentos=[], retorno=None):
+    def __init__(self, tipo, argumentos=[], retorno=[]):
         self.tipo = tipo
         self.argumentos = argumentos
         self.retorno = retorno
         self.err = None
         self.validar()
 
-    def validar(self, regla=None):
+    def validarRetorno(self):
+        control = self.retorno[0]
+        for i in self.retorno:
+            if (i != control):
+                return None
+        return control
+
+    def validar(self):
+        print(self)
         if (self.tipo == 'void'):
-            if(self.retorno != None):
+            if(len(self.retorno) > 0):
                 self.err = 'Funcion void no retorna nada'
         else:
-            if(self.retorno == None):
+            if(len(self.retorno) == 0):
                 self.err = 'Falta retorno de funcion'
             else:
-                if(self.tipo != self.retorno.tipo):
+                if(self.tipo != self.validarRetorno()):
+                    print(self.tipo)
+                    print(self.validarRetorno())
                     self.err = 'El tipo de la funcion y el tipo de retorno no coinciden'
 
     def __repr__(self):

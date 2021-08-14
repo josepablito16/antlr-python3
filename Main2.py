@@ -8,104 +8,6 @@ from Funcion import *
 import sys
 
 
-def procesarRetorno(tree, rule_names):
-    '''
-        si el penultimo hijo es de tipo returnStatement
-        entonces tiene valor de retorno, sino la func
-        no retorna nada 
-    '''
-    if(rule_names[tree[-2].getRuleIndex()] == 'returnStatement'):
-        tipoRetorno = rule_names[tree[-2].children[1]
-                                 .children[0].children[0].getRuleIndex()]
-        retorno = tree[-2].children[1].children[0].getText()
-
-        return tipoRetorno, retorno
-    else:
-        return None, None
-
-
-def procesarParametro(tree):
-    tipo = tree[0].getText()
-    nombre = tree[1].getText()
-
-    return Variable(nombre, tipo)
-
-
-def procesarFuncion(tree, rule_names):
-
-    if(len(tree) > 5):
-        '''
-        > de 5, tiene parametros
-        methodType 0
-        id_tok 1
-        ( 2
-        parameter 3-len()-2
-        ) -2
-        block -1
-        '''
-        tipo = tree[0].getText()
-        nombre = tree[1].getText()
-        tipoRetorno, retorno = procesarRetorno(tree[-1].children, rule_names)
-
-        '''
-        Se recorren los hijos que corresponden a los parametros,
-        saltando los hijos ,
-        '''
-        parametros = []
-        for i in range(3, len(tree)-2, 2):
-            parametros.append(procesarParametro(tree[i].children))
-
-        """
-        print(f'''
-        tipo = {tipo}
-        nombre = {nombre}
-        parametros = {parametros}
-        tipoRetorno = {tipoRetorno}
-        retorno = {retorno}''')
-        """
-
-        func = None
-        if tipoRetorno != None:
-            func = Funcion(tipo, parametros, Variable(retorno, tipoRetorno))
-        else:
-            func = Funcion(tipo, parametros)
-
-        func.validar()
-        print(func.err)
-        print(func)
-
-    else:
-        '''
-        5 sin parametros
-
-        methodType 0
-        id_tok 1
-        ( 2
-        ) 3
-        block 4
-        '''
-        tipo = tree[0].getText()
-        nombre = tree[1].getText()
-        tipoRetorno, retorno = procesarRetorno(tree[4].children, rule_names)
-        """
-        print(f'''
-        tipo = {tipo}
-        nombre = {nombre}
-        tipoRetorno = {tipoRetorno}
-        retorno = {retorno}''')
-        """
-
-        func = None
-        if tipoRetorno != None:
-            func = Funcion(tipo, [], Variable(retorno, tipoRetorno))
-        else:
-            func = Funcion(tipo)
-
-        func.validar()
-        print(func.err)
-        print(func)
-
-
 class DecafPrinter(decafListener):
     def __init__(self) -> None:
         super().__init__()
@@ -120,17 +22,17 @@ class DecafPrinter(decafListener):
 
         if (literal.int_literal()):
             # int_literal
-            return Variable('Test', 'int')
+            return 'int'
             print(f"literal int {literal.int_literal().getText()}")
 
         elif (literal.char_literal()):
             # int_literal
-            return Variable('Test', 'char')
+            return 'char'
             print(f"literal char {literal.char_literal().getText()}")
 
         elif (literal.bool_literal()):
             # int_literal
-            return Variable('Test', 'boolean')
+            return 'boolean'
             print(f"literal bool {literal.bool_literal().getText()}")
 
     def procesarRetorno(self, returnStatement):
@@ -173,7 +75,7 @@ class DecafPrinter(decafListener):
         func = None
         if (retorno != None):
             # la funcion no tiene retorno
-            func = Funcion(tipo, parametros, retorno)
+            func = Funcion(tipo, parametros, [retorno])
         else:
             func = Funcion(tipo, parametros)
 
