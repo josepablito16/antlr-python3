@@ -11,6 +11,9 @@ import sys
 class DecafPrinter(decafListener):
     def __init__(self) -> None:
         super().__init__()
+        self.tablaVar = []
+        self.tablaFunc = []
+        self.tablaEstruct = []
 
     def procesarLiteral(self, literal):
         '''

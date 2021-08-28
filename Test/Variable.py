@@ -1,8 +1,8 @@
 class Variable:
 
-    def __init__(self, nombre, tipo):
-        self.nombre = nombre
+    def __init__(self, tipo, nombre=None):
         self.tipo = tipo
+        self.nombre = nombre
 
     def getTipo(self):
         return self.tipo
