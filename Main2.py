@@ -10,6 +10,10 @@ import sys
 pilaVariable = []
 pilaFuncion = []
 pilaEstructura = []
+funcionTemp = None
+funcionNombreTemp = None
+procesandoReturn = False
+retrunArray = []
 
 
 class DecafPrinter(decafListener):
@@ -20,12 +24,22 @@ class DecafPrinter(decafListener):
         self.tablaEstruct = []
 
     def agregarVariableATabla(self, nombre, variable):
-
         if(nombre in pilaVariable[-1].keys()):
-            print('Existe')
             return 'Esta variable ya existe'
         else:
             pilaVariable[-1][nombre] = variable
+
+        print('\n### Pila Variables')
+        print(pilaVariable)
+
+    def agregarFuncionATabla(self, nombre, funcion):
+        if(nombre in pilaFuncion[-1].keys()):
+            return 'Esta funcion ya existe'
+        else:
+            pilaFuncion[-1][nombre] = funcion
+
+        print('\n### Pila funciones')
+        print(pilaFuncion)
 
     def procesarLiteral(self, literal):
         '''
@@ -72,39 +86,103 @@ class DecafPrinter(decafListener):
         return parametrosList
 
     def enterMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
-
+        global funcionTemp
+        global funcionNombreTemp
         tipo = ctx.methodType().getText()
         nombre = ctx.id_tok().getText()
-        retorno = None
         parametros = []
-        if(ctx.block().returnStatement()):
-            # hay retorno
-            print('Hay retorno')
-            retorno = self.procesarRetorno(
-                ctx.block().returnStatement())
 
         if(len(ctx.parameter()) > 0):
             # Hay parametros
             parametros = self.procesarParametros(ctx.parameter())
 
-        func = None
-        if (retorno != None):
-            # la funcion no tiene retorno
-            func = Funcion(tipo, parametros, [retorno])
+        funcionTemp = Funcion(tipo, parametros)
+        funcionNombreTemp = nombre
+
+    def enterReturnStatement(self, ctx: decafParser.ReturnStatementContext):
+        print('return')
+        global procesandoReturn
+        procesandoReturn = True
+
+    def enterExpression(self, ctx: decafParser.ExpressionContext):
+        global funcionTemp
+        global procesandoReturn
+        global retrunArray
+
+        if (procesandoReturn):
+            print('Expression')
+            # location
+            # TODO
+            location = ctx.location()
+            if(location):
+                pass
+            # methodCall
+            # TODO
+            method = ctx.methodCall()
+            if(method):
+                pass
+            # literal
+            literal = ctx.literal()
+            if(literal):
+                if(literal.int_literal()):
+                    print('intLiteral')
+                    retrunArray.append('int')
+                elif(literal.char_literal()):
+                    pass
+                elif(literal.bool_literal()):
+                    pass
+
+    def enterOp(self, ctx: decafParser.OpContext):
+        print('Op')
+        global procesandoReturn
+        global retrunArray
+
+        if (procesandoReturn):
+            # arith_op
+            # TODO
+            if(ctx.arith_op()):
+                retrunArray.append('intOp')
+
+            # rel_op
+            # TODO
+            if(ctx.rel_op()):
+                pass
+
+            # eq_op
+            # TODO
+            if(ctx.eq_op()):
+                pass
+
+            # cond_op
+            # TODO
+            if(ctx.cond_op()):
+                pass
+
+    def exitReturnStatement(self, ctx: decafParser.ReturnStatementContext):
+        print('Fin Return')
+        global procesandoReturn
+        global retrunArray
+        global funcionTemp
+
+        funcionTemp.agregarReturn(retrunArray)
+        procesandoReturn = False
+        retrunArray = []
+
+    def exitMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
+        global funcionTemp
+        global funcionNombreTemp
+        funcionTemp.validar()
+        if (funcionTemp.err):
+            # si hay error en definicion de funcion
+            print(
+                f"Error en declaracion de funcion linea {ctx.start.line}: {funcionTemp.err}")
+            funcionNombreTemp = None
+            funcionTemp = None
         else:
-            func = Funcion(tipo, parametros)
-
-        func.validar()
-
-        if (func.err != None):
-            print(f'Error en funcion linea {ctx.start.line}: {func.err}')
-        """
-        print(f'''
-        tipo = {tipo}
-        nombre = {nombre}
-        parametros = {parametros}
-        retorno = {retorno}''')
-        """
+            # si no hay error se agrega a tabla
+            self.agregarFuncionATabla(funcionNombreTemp, funcionTemp)
+            funcionNombreTemp = None
+            funcionTemp = None
 
     def enterVarDeclaration(self, ctx: decafParser.VarDeclarationContext):
         # revisar si es array
@@ -118,11 +196,10 @@ class DecafPrinter(decafListener):
                 nombre = ctx.id_tok().getText()
                 tipo = ctx.varType().getText()
                 declaracionTemp = self.agregarVariableATabla(
-                    nombre, Variable(tipo,long=long))
+                    nombre, Variable(tipo, long=long))
                 if(declaracionTemp):
                     print(
                         f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
-                print(pilaVariable)
 
         else:
             # es la declaracion de una variable
@@ -133,7 +210,6 @@ class DecafPrinter(decafListener):
             if(declaracionTemp):
                 print(
                     f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
-            print(pilaVariable)
 
     def enterStart(self, ctx: decafParser.StartContext):
         # Se crea el ambito global

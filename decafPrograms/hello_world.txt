@@ -4,6 +4,6 @@ class Program{
         int a;
 	    int array[10000];
         print('H');
-        return 0;
+        return 0 + 'a';
     }
 }
