@@ -7,6 +7,10 @@ from Variable import *
 from Funcion import *
 import sys
 
+pilaVariable = []
+pilaFuncion = []
+pilaEstructura = []
+
 
 class DecafPrinter(decafListener):
     def __init__(self) -> None:
@@ -14,6 +18,14 @@ class DecafPrinter(decafListener):
         self.tablaVar = []
         self.tablaFunc = []
         self.tablaEstruct = []
+
+    def agregarVariableATabla(self, nombre, variable):
+
+        if(nombre in pilaVariable[-1].keys()):
+            print('Existe')
+            return 'Esta variable ya existe'
+        else:
+            pilaVariable[-1][nombre] = variable
 
     def procesarLiteral(self, literal):
         '''
@@ -95,11 +107,29 @@ class DecafPrinter(decafListener):
         """
 
     def enterVarDeclaration(self, ctx: decafParser.VarDeclarationContext):
+        # revisar si es array
         if(len(ctx.children) == 6):
             # es la declaracion de un array
             if(int(ctx.children[3].getText()) < 0):
                 print(
                     f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser positiva")
+
+        else:
+            # es la declaracion de una variable
+            nombre = ctx.id_tok().getText()
+            tipo = ctx.varType().getText()
+            declaracionTemp = self.agregarVariableATabla(
+                nombre, Variable(tipo))
+            if(declaracionTemp):
+                print(
+                    f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
+            print(pilaVariable)
+
+    def enterStart(self, ctx: decafParser.StartContext):
+        # Se crea el ambito global
+        pilaVariable.append({})
+        pilaFuncion.append({})
+        pilaEstructura.append({})
 
 
 def traverse(tree, rule_names, indent=0):
@@ -113,7 +143,7 @@ def traverse(tree, rule_names, indent=0):
 
         if (rule_names[tree.getRuleIndex()] == 'methodDeclaration'):
             print('funct')
-            procesarFuncion(tree.children, rule_names)
+            #procesarFuncion(tree.children, rule_names)
         if (tree.children != None):
             for child in tree.children:
                 traverse(child, rule_names, indent + 1)

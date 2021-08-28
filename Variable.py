@@ -1,8 +1,9 @@
 class Variable:
 
-    def __init__(self, nombre, tipo):
-        self.nombre = nombre
+    def __init__(self, tipo, nombre=None, long=None):
         self.tipo = tipo
+        self.nombre = nombre
+        self.arrayLong = long
 
     def getTipo(self):
         return self.tipo
