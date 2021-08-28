@@ -1,9 +1,9 @@
 class Program{
-    int main(void)
+    boolean main(void)
     {
         int a;
 	    int array[10000];
         print('H');
-        return 0 + 'a';
+        return (1 == 1) && ('a' == 'a');
     }
 }

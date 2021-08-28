@@ -110,7 +110,6 @@ class DecafPrinter(decafListener):
         global retrunArray
 
         if (procesandoReturn):
-            print('Expression')
             # location
             # TODO
             location = ctx.location()
@@ -125,12 +124,14 @@ class DecafPrinter(decafListener):
             literal = ctx.literal()
             if(literal):
                 if(literal.int_literal()):
-                    print('intLiteral')
                     retrunArray.append('int')
                 elif(literal.char_literal()):
-                    pass
+                    retrunArray.append('char')
                 elif(literal.bool_literal()):
-                    pass
+                    retrunArray.append('boolean')
+
+    def exitExpression(self, ctx: decafParser.ExpressionContext):
+        print(f'exit Expression {ctx.getText()}')
 
     def enterOp(self, ctx: decafParser.OpContext):
         print('Op')
@@ -139,27 +140,22 @@ class DecafPrinter(decafListener):
 
         if (procesandoReturn):
             # arith_op
-            # TODO
             if(ctx.arith_op()):
                 retrunArray.append('intOp')
 
             # rel_op
-            # TODO
             if(ctx.rel_op()):
-                pass
+                retrunArray.append('relOp')
 
             # eq_op
-            # TODO
             if(ctx.eq_op()):
-                pass
+                retrunArray.append('eqOp')
 
             # cond_op
-            # TODO
             if(ctx.cond_op()):
-                pass
+                retrunArray.append('boolOp')
 
     def exitReturnStatement(self, ctx: decafParser.ReturnStatementContext):
-        print('Fin Return')
         global procesandoReturn
         global retrunArray
         global funcionTemp

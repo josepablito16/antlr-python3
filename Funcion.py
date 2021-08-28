@@ -21,11 +21,33 @@ class Funcion:
                 # valor
                 if (operadorTemp):
                     # hay operador
+                    '''
+                    intOp
+                    relOp
+                    eqOp
+                    boolOp
+                    '''
+
+                    # regla int
                     if (valorTemp == 'int' and operadorTemp == 'intOp' and retornoArray[i] == 'int'):
                         valorTemp = 'int'
                         operadorTemp = None
 
-                    # TODO aplicar reglas para todos los tipos de datos
+                    # regla mayor, menor
+                    elif (valorTemp == 'int' and operadorTemp == 'relOp' and retornoArray[i] == 'int'):
+                        valorTemp = 'boolean'
+                        operadorTemp = None
+
+                    # regla ==, !=
+                    elif ((valorTemp == retornoArray[i] != 'err') and operadorTemp == 'eqOp'):
+                        valorTemp = 'boolean'
+                        operadorTemp = None
+
+                    # regla &&, ||
+                    elif (valorTemp == 'boolean' and operadorTemp == 'boolOp' and retornoArray[i] == 'boolean'):
+                        valorTemp = 'boolean'
+                        operadorTemp = None
+
                     else:
                         valorTemp = 'err'
                 else:
@@ -39,6 +61,10 @@ class Funcion:
         print(valorTemp)
 
     def validar(self):
+        print(f'''
+        {self.tipo}
+        {self.retornoTipos}
+        ''')
         if (self.tipo == 'void'):
             if(len(self.retornoTipos) > 0):
                 self.err = 'Funcion void no retorna nada'
