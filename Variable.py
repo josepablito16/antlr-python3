@@ -9,4 +9,4 @@ class Variable:
         return self.tipo
 
     def __repr__(self):
-        return f"<Variable>{self.tipo}:{self.nombre}"
+        return f"<Variable>{self.tipo}:{self.arrayLong}"

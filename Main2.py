@@ -110,9 +110,19 @@ class DecafPrinter(decafListener):
         # revisar si es array
         if(len(ctx.children) == 6):
             # es la declaracion de un array
-            if(int(ctx.children[3].getText()) < 0):
+            long = int(ctx.children[3].getText())
+            if(long < 0):
                 print(
                     f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser positiva")
+            else:
+                nombre = ctx.id_tok().getText()
+                tipo = ctx.varType().getText()
+                declaracionTemp = self.agregarVariableATabla(
+                    nombre, Variable(tipo,long=long))
+                if(declaracionTemp):
+                    print(
+                        f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
+                print(pilaVariable)
 
         else:
             # es la declaracion de una variable
