@@ -39,6 +39,14 @@ class DecafPrinter(decafListener):
                 {pilaVariable}
                 ''')
 
+    def validarReglaMain(self):
+        try:
+            if not(len(pilaFuncion[-1]['main'].argumentosTipos) == 0):
+                return 'La funcion main contiene parametros'
+        except:
+            # no existe main
+            return 'Programa sin funcion main'
+
     def agregarFuncionATabla(self, nombre, funcion):
         '''
         Funcion que valida si una funcion ya existe en la tabla actual
@@ -211,9 +219,9 @@ class DecafPrinter(decafListener):
         if(len(ctx.children) == 6):
             # es la declaracion de un array
             long = int(ctx.children[3].getText())
-            if(long < 0):
+            if(long <= 0):
                 print(
-                    f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser positiva")
+                    f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser mayor a 0")
             else:
                 nombre = ctx.id_tok().getText()
                 tipo = ctx.varType().getText()
@@ -238,6 +246,14 @@ class DecafPrinter(decafListener):
         pilaVariable.append({})
         pilaFuncion.append({})
         pilaEstructura.append({})
+
+    def exitStart(self, ctx: decafParser.StartContext):
+        # este metodo se ejecuta al salir del ultimo nodo del arbol
+        reglaMain = self.validarReglaMain()
+        if (reglaMain):
+            print(
+                f"Error en linea {ctx.start.line}: {reglaMain}")
+
 
 
 def main():
