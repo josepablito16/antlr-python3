@@ -29,8 +29,10 @@ class DecafPrinter(decafListener):
         else:
             pilaVariable[-1][nombre] = variable
 
-        print('\n### Pila Variables')
-        print(pilaVariable)
+        print(f'''
+                ### Pila Variables
+                {pilaVariable}
+                ''')
 
     def agregarFuncionATabla(self, nombre, funcion):
         if(nombre in pilaFuncion[-1].keys()):
@@ -38,39 +40,10 @@ class DecafPrinter(decafListener):
         else:
             pilaFuncion[-1][nombre] = funcion
 
-        print('\n### Pila funciones')
-        print(pilaFuncion)
-
-    def procesarLiteral(self, literal):
-        '''
-        literal
-        int_literal
-        char_literal
-        bool_literal
-        '''
-
-        if (literal.int_literal()):
-            # int_literal
-            return 'int'
-            print(f"literal int {literal.int_literal().getText()}")
-
-        elif (literal.char_literal()):
-            # int_literal
-            return 'char'
-            print(f"literal char {literal.char_literal().getText()}")
-
-        elif (literal.bool_literal()):
-            # int_literal
-            return 'boolean'
-            print(f"literal bool {literal.bool_literal().getText()}")
-
-    def procesarRetorno(self, returnStatement):
-
-        if (returnStatement.expression().literal()):
-            # es literal
-            return self.procesarLiteral(returnStatement.expression().literal())
-
-        return 1
+        print(f'''
+                ### Pila funciones
+                {pilaFuncion}
+                ''')
 
     def procesarParametros(self, parametros):
         parametrosList = []
@@ -100,7 +73,6 @@ class DecafPrinter(decafListener):
         funcionNombreTemp = nombre
 
     def enterReturnStatement(self, ctx: decafParser.ReturnStatementContext):
-        print('return')
         global procesandoReturn
         procesandoReturn = True
 
@@ -135,15 +107,11 @@ class DecafPrinter(decafListener):
         global retrunArray
         global funcionTemp
 
-        print(retrunArray)
-        print(len(retrunArray))
-
         if(len(retrunArray) > 2):
             funcionTemp.procesarReturn(retrunArray)
             retrunArray = []
 
     def enterOp(self, ctx: decafParser.OpContext):
-        print('Op')
         global procesandoReturn
         global retrunArray
 
@@ -168,8 +136,14 @@ class DecafPrinter(decafListener):
         global procesandoReturn
         global retrunArray
         global funcionTemp
+        print(f'''
+        -----
+        exitReturnStatement
+        -----
+        retrunArray {retrunArray}
+        ''')
 
-        if(len(retrunArray) > 2):
+        if(len(retrunArray) >= 2):
             funcionTemp.procesarReturn(retrunArray)
             procesandoReturn = False
             retrunArray = []
@@ -182,18 +156,21 @@ class DecafPrinter(decafListener):
     def exitMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
         global funcionTemp
         global funcionNombreTemp
+        global procesandoReturn
+        global retrunArray
         funcionTemp.validar()
         if (funcionTemp.err):
             # si hay error en definicion de funcion
             print(
                 f"Error en declaracion de funcion linea {ctx.start.line}: {funcionTemp.err}")
-            funcionNombreTemp = None
-            funcionTemp = None
         else:
             # si no hay error se agrega a tabla
             self.agregarFuncionATabla(funcionNombreTemp, funcionTemp)
-            funcionNombreTemp = None
-            funcionTemp = None
+
+        funcionTemp = None
+        funcionNombreTemp = None
+        procesandoReturn = False
+        retrunArray = []
 
     def enterVarDeclaration(self, ctx: decafParser.VarDeclarationContext):
         # revisar si es array
@@ -227,23 +204,6 @@ class DecafPrinter(decafListener):
         pilaVariable.append({})
         pilaFuncion.append({})
         pilaEstructura.append({})
-
-
-def traverse(tree, rule_names, indent=0):
-    if tree.getText() == "<EOF>":
-        return
-    elif isinstance(tree, TerminalNode):
-        #print("{0}T='{1}'".format("  " * indent, tree.getText()))
-        pass
-    else:
-        #print("{0}R='{1}'".format("  " * indent,rule_names[tree.getRuleIndex()]))
-
-        if (rule_names[tree.getRuleIndex()] == 'methodDeclaration'):
-            print('funct')
-            #procesarFuncion(tree.children, rule_names)
-        if (tree.children != None):
-            for child in tree.children:
-                traverse(child, rule_names, indent + 1)
 
 
 def main():

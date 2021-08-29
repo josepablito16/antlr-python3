@@ -1,9 +1,10 @@
 class Program{
+
     int main(void)
     {
         int a;
 	    int array[10000];
         print('H');
-        return 1 + 1 + 2 / 'a';
+        return 1 + 1;
     }
 }

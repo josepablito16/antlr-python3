@@ -14,23 +14,32 @@ class Funcion:
         return control
 
     def agregarReturn(self, tipo=None):
-        print(f'tipo {tipo}')
         if(tipo):
-            print('agregarReturn con tipo')
+            #print('agregarReturn con tipo')
             self.retornoTipos.append(tipo)
         else:
-            print('agregarReturn sin tipo')
+            #print('agregarReturn sin tipo')
             self.retornoTipos.append(self.retornoTemp.pop())
 
     def procesarReturn(self, retornoArray):
-        print(f'retornoArray {retornoArray}')
-        print(f'retornoTemp {self.retornoTemp}')
+
         valorTemp = None
         operadorTemp = None
 
         condicionRepetir = len(retornoArray) == 4
         if (condicionRepetir):
             self.retornoTemp.append(retornoArray.pop(0))
+        elif(len(retornoArray) == 2 and len(self.retornoTemp) > 0):
+            retornoArray = self.retornoTemp + retornoArray
+            self.retornoTemp.clear()
+
+        print(f'''
+        -----
+        procesarReturn
+        -----
+        retornoArray {retornoArray}
+        retornoTemp {self.retornoTemp}
+        ''')
 
         for i in range(len(retornoArray)):
             if (i % 2 == 0):
@@ -85,6 +94,9 @@ class Funcion:
 
     def validar(self):
         print(f'''
+        -----
+        validar
+        -----
         {self.tipo}
         {self.retornoTipos}
         ''')
