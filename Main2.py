@@ -64,15 +64,15 @@ class DecafPrinter(decafListener):
 
     def procesarParametros(self, parametros):
         '''
-        Funcion que valida si una funcion ya existe en la tabla actual
-        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
+        Funcion para procesar parametros, valida si tiene de parametro void
+        no puede ir acompañado de mas tipos.
 
         Parametros
-        - nombre: string con el nombre de la funcion
-        - funcion: objeto Funcion con la informacion de la funcion a ingresar.
+        - parametros: lista de nodos tipo parameter
         '''
         parametrosList = []
 
+        # revisa si contiene de parametros void, no puede ir acompañado de más tipos
         if (parametros[0].getText() == 'void'):
             if (len(parametros) == 1):
                 return parametrosList
