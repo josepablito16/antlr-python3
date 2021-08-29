@@ -3,6 +3,7 @@ class Funcion:
         self.tipo = tipo
         self.argumentosTipos = argumentos  # array solo tipos
         self.retornoTipos = retorno  # array solo tipos
+        self.retornoTemp = []
         self.err = None
 
     def validarRetorno(self):
@@ -12,10 +13,25 @@ class Funcion:
                 return None
         return control
 
-    def agregarReturn(self, retornoArray):
-        print(retornoArray)
+    def agregarReturn(self, tipo=None):
+        print(f'tipo {tipo}')
+        if(tipo):
+            print('agregarReturn con tipo')
+            self.retornoTipos.append(tipo)
+        else:
+            print('agregarReturn sin tipo')
+            self.retornoTipos.append(self.retornoTemp.pop())
+
+    def procesarReturn(self, retornoArray):
+        print(f'retornoArray {retornoArray}')
+        print(f'retornoTemp {self.retornoTemp}')
         valorTemp = None
         operadorTemp = None
+
+        condicionRepetir = len(retornoArray) == 4
+        if (condicionRepetir):
+            self.retornoTemp.append(retornoArray.pop(0))
+
         for i in range(len(retornoArray)):
             if (i % 2 == 0):
                 # valor
@@ -57,8 +73,15 @@ class Funcion:
                 # operador
                 operadorTemp = retornoArray[i]
 
-        self.retornoTipos.append(valorTemp)
-        print(valorTemp)
+        if condicionRepetir:
+            retornoArrayNuevo = []
+            retornoArrayNuevo += self.retornoTemp
+            retornoArrayNuevo.append(valorTemp)
+            self.retornoTemp = []
+            self.procesarReturn(retornoArrayNuevo)
+        else:
+            self.retornoTemp.append(valorTemp)
+            print(f'valorTemp {valorTemp}')
 
     def validar(self):
         print(f'''

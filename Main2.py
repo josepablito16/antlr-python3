@@ -131,7 +131,16 @@ class DecafPrinter(decafListener):
                     retrunArray.append('boolean')
 
     def exitExpression(self, ctx: decafParser.ExpressionContext):
-        print(f'exit Expression {ctx.getText()}')
+        global procesandoReturn
+        global retrunArray
+        global funcionTemp
+
+        print(retrunArray)
+        print(len(retrunArray))
+
+        if(len(retrunArray) > 2):
+            funcionTemp.procesarReturn(retrunArray)
+            retrunArray = []
 
     def enterOp(self, ctx: decafParser.OpContext):
         print('Op')
@@ -160,9 +169,15 @@ class DecafPrinter(decafListener):
         global retrunArray
         global funcionTemp
 
-        funcionTemp.agregarReturn(retrunArray)
-        procesandoReturn = False
-        retrunArray = []
+        if(len(retrunArray) > 2):
+            funcionTemp.procesarReturn(retrunArray)
+            procesandoReturn = False
+            retrunArray = []
+            funcionTemp.agregarReturn()
+        elif(len(retrunArray) == 1):
+            funcionTemp.agregarReturn(retrunArray.pop())
+        else:
+            funcionTemp.agregarReturn()
 
     def exitMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
         global funcionTemp
