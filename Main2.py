@@ -19,42 +19,71 @@ retrunArray = []
 class DecafPrinter(decafListener):
     def __init__(self) -> None:
         super().__init__()
-        self.tablaVar = []
-        self.tablaFunc = []
-        self.tablaEstruct = []
 
     def agregarVariableATabla(self, nombre, variable):
+        '''
+        Funcion que valida si una variable ya existe en la tabla actual
+        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
+
+        Parametros
+        - nombre: string con el nombre de la variable
+        - variable: objeto Variable con la informacion de la variable a ingresar.
+        '''
         if(nombre in pilaVariable[-1].keys()):
             return 'Esta variable ya existe'
         else:
             pilaVariable[-1][nombre] = variable
 
         print(f'''
-                ### Pila Variables
+                # Pila Variables
                 {pilaVariable}
                 ''')
 
     def agregarFuncionATabla(self, nombre, funcion):
-        if(nombre in pilaFuncion[-1].keys()):
-            return 'Esta funcion ya existe'
-        else:
-            pilaFuncion[-1][nombre] = funcion
+        '''
+        Funcion que valida si una funcion ya existe en la tabla actual
+        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
 
-        print(f'''
-                ### Pila funciones
-                {pilaFuncion}
-                ''')
+        Solo se agrega a la tabla si no tiene errores en los argumentos
+
+        Parametros
+        - nombre: string con el nombre de la funcion
+        - funcion: objeto Funcion con la informacion de la funcion a ingresar.
+        '''
+        # si no tiene error en los  argumentos se agrega a talba
+        if not(isinstance(funcion.argumentosTipos, str)):
+            if(nombre in pilaFuncion[-1].keys()):
+                return 'Esta funcion ya existe'
+            else:
+                pilaFuncion[-1][nombre] = funcion
+
+            print(f'''
+                    # Pila funciones
+                    {pilaFuncion}
+                    ''')
 
     def procesarParametros(self, parametros):
+        '''
+        Funcion que valida si una funcion ya existe en la tabla actual
+        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
+
+        Parametros
+        - nombre: string con el nombre de la funcion
+        - funcion: objeto Funcion con la informacion de la funcion a ingresar.
+        '''
         parametrosList = []
 
-        if (parametros[0].getText() == 'void' and len(parametros) == 1):
-            return parametrosList
+        if (parametros[0].getText() == 'void'):
+            if (len(parametros) == 1):
+                return parametrosList
+            else:
+                return 'parametro void no puede ir acompañado de mas parametros'
 
         for i in parametros:
             nombre = i.id_tok().getText()
             tipo = i.parameterType().getText()
-            parametrosList.append(Variable(nombre, tipo))
+            # TODO: agregar estos parametros a la tabla del ambito de esta funcion
+            parametrosList.append(tipo)
 
         return parametrosList
 
@@ -68,6 +97,11 @@ class DecafPrinter(decafListener):
         if(len(ctx.parameter()) > 0):
             # Hay parametros
             parametros = self.procesarParametros(ctx.parameter())
+
+            if (isinstance(parametros, str)):
+                # hay error
+                print(
+                    f"Error en declaracion de funcion linea {ctx.start.line}: {parametros}")
 
         funcionTemp = Funcion(tipo, parametros)
         funcionNombreTemp = nombre
@@ -218,7 +252,7 @@ def main():
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
 
-    #traverse(tree, parser.ruleNames)
+    # traverse(tree, parser.ruleNames)
 
     # print(tree.getText())
     # print(tree.getRuleIndex())
@@ -226,7 +260,7 @@ def main():
 
     # print(tree.getChild(1))
 
-    #print(tree.getToken(3, 0))
+    # print(tree.getToken(3, 0))
     # print(tree.getTokens(3))
 
     print()
