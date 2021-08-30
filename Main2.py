@@ -15,6 +15,13 @@ funcionNombreTemp = None
 procesandoReturn = False
 retrunArray = []
 
+'''
+Aqui se guardan los parametros de la funcion
+para luego al entrar al ambito de la funcion
+ingresar esas variables
+'''
+ambitoVariableTemp = {}
+
 
 class DecafPrinter(decafListener):
     def __init__(self) -> None:
@@ -39,6 +46,43 @@ class DecafPrinter(decafListener):
                 {pilaVariable}
                 ''')
 
+    def agregarVariableAmbitoTemp(self, nombre, variable):
+        '''
+        Funcion que valida si una variable ya existe en el ambito temporal
+        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
+
+        El ambito temporal se crea para registrar los parametros de una funcion, antes
+        de ingresar al block donde se crea el verdadero ambito.
+
+        Parametros
+        - nombre: string con el nombre de la variable
+        - variable: objeto Variable con la informacion de la variable a ingresar.
+        '''
+        if(nombre in ambitoVariableTemp.keys()):
+            return f'La variable "{nombre}" ya existe dentro de los parametros de la funcion'
+        else:
+            ambitoVariableTemp[nombre] = variable
+
+        print(f'''
+                # Pila Variables [temp]
+                {ambitoVariableTemp}
+                ''')
+
+    def agregarAmbitoTempATabla(self):
+        '''
+        Pasa el ambitoTemp al ambito de la funcion y limpia
+        el ambitoTemp.
+        No retorna nada
+        '''
+        global ambitoVariableTemp
+        pilaVariable[-1].update(ambitoVariableTemp)
+        ambitoVariableTemp = {}
+
+        print(f'''
+                # Pila Variables
+                {pilaVariable}
+                ''')
+
     def validarReglaMain(self):
         try:
             if not(len(pilaFuncion[-1]['main'].argumentosTipos) == 0):
@@ -46,6 +90,14 @@ class DecafPrinter(decafListener):
         except:
             # no existe main
             return 'Programa sin funcion main'
+
+    def agregarAmbito(self):
+        pilaVariable.append({})
+        pilaEstructura.append({})
+
+    def quitarAmbito(self):
+        pilaVariable.pop()
+        pilaEstructura.pop()
 
     def agregarFuncionATabla(self, nombre, funcion):
         '''
@@ -90,7 +142,13 @@ class DecafPrinter(decafListener):
         for i in parametros:
             nombre = i.id_tok().getText()
             tipo = i.parameterType().getText()
-            # TODO: agregar estos parametros a la tabla del ambito de esta funcion
+
+            # Se agregan parametros a la tabla del ambito de esta funcion
+            declaracionTemp = self.agregarVariableAmbitoTemp(
+                nombre, Variable(tipo))
+            if (declaracionTemp):
+                return declaracionTemp
+
             parametrosList.append(tipo)
 
         return parametrosList
@@ -241,11 +299,38 @@ class DecafPrinter(decafListener):
                 print(
                     f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
 
+    def enterMethodCall(self, ctx: decafParser.MethodCallContext):
+        pass
+        '''
+        print(ctx.id_tok().getText())
+        for i in ctx.arg():
+            # arg es expression
+            # puede ser location
+            # puede ser methodCall
+            # puede ser literal
+            # puede ser expression op expression
+            # etc
+            print(i.getText())
+            '''
+
     def enterStart(self, ctx: decafParser.StartContext):
         # Se crea el ambito global
-        pilaVariable.append({})
+        self.agregarAmbito()
         pilaFuncion.append({})
-        pilaEstructura.append({})
+
+    def enterStructDeclaration(self, ctx: decafParser.StructDeclarationContext):
+        self.agregarAmbito()
+
+    def exitStructDeclaration(self, ctx: decafParser.StructDeclarationContext):
+        self.quitarAmbito()
+
+    def enterBlock(self, ctx: decafParser.BlockContext):
+        self.agregarAmbito()
+        if (len(ambitoVariableTemp) > 0):
+            self.agregarAmbitoTempATabla()
+
+    def exitBlock(self, ctx: decafParser.BlockContext):
+        self.quitarAmbito()
 
     def exitStart(self, ctx: decafParser.StartContext):
         # este metodo se ejecuta al salir del ultimo nodo del arbol
@@ -253,7 +338,6 @@ class DecafPrinter(decafListener):
         if (reglaMain):
             print(
                 f"Error en linea {ctx.start.line}: {reglaMain}")
-
 
 
 def main():
