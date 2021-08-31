@@ -134,6 +134,15 @@ class decafListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by decafParser#uni_op.
+    def enterUni_op(self, ctx:decafParser.Uni_opContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#uni_op.
+    def exitUni_op(self, ctx:decafParser.Uni_opContext):
+        pass
+
+
     # Enter a parse tree produced by decafParser#expression.
     def enterExpression(self, ctx:decafParser.ExpressionContext):
         pass

@@ -73,12 +73,16 @@ returnStatement : 'return' (expression)? ';';
 
 location : (id_tok | id_tok '[' expression ']') ( '.' location)? ;
 
+uni_op  : '-' 
+        | '!'
+        ;
+
 expression  : location
             | methodCall
             | literal
             | expression op expression
-            | '-' expression
-            | '!' expression
+            | uni_op expression
+            | uni_op expression
             | '(' expression ')'
             ;
 

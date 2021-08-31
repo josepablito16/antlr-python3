@@ -5,6 +5,8 @@ from decafListener import decafListener
 from decafParser import decafParser
 from Variable import *
 from Funcion import *
+from Tipos import *
+import copy
 import sys
 
 pilaVariable = []
@@ -12,8 +14,8 @@ pilaFuncion = []
 pilaEstructura = []
 funcionTemp = None
 funcionNombreTemp = None
-procesandoReturn = False
-retrunArray = []
+procesandoExp = False
+expressionTemp = []
 
 '''
 Aqui se guardan los parametros de la funcion
@@ -173,15 +175,17 @@ class DecafPrinter(decafListener):
         funcionNombreTemp = nombre
 
     def enterReturnStatement(self, ctx: decafParser.ReturnStatementContext):
-        global procesandoReturn
-        procesandoReturn = True
+        global procesandoExp
+        procesandoExp = True
 
     def enterExpression(self, ctx: decafParser.ExpressionContext):
         global funcionTemp
-        global procesandoReturn
-        global retrunArray
+        global procesandoExp
+        global expressionTemp
 
-        if (procesandoReturn):
+        print(ctx.getText())
+
+        if (procesandoExp):
             # location
             # TODO
             location = ctx.location()
@@ -196,68 +200,58 @@ class DecafPrinter(decafListener):
             literal = ctx.literal()
             if(literal):
                 if(literal.int_literal()):
-                    retrunArray.append('int')
+                    expressionTemp.append('int')
                 elif(literal.char_literal()):
-                    retrunArray.append('char')
+                    expressionTemp.append('char')
                 elif(literal.bool_literal()):
-                    retrunArray.append('boolean')
+                    expressionTemp.append('boolean')
+
+            # TODO - y !
 
     def exitExpression(self, ctx: decafParser.ExpressionContext):
-        global procesandoReturn
-        global retrunArray
-        global funcionTemp
-
-        if(len(retrunArray) > 2):
-            funcionTemp.procesarReturn(retrunArray)
-            retrunArray = []
+        pass
 
     def enterOp(self, ctx: decafParser.OpContext):
-        global procesandoReturn
-        global retrunArray
+        global procesandoExp
+        global expressionTemp
 
-        if (procesandoReturn):
+        if (procesandoExp):
             # arith_op
             if(ctx.arith_op()):
-                retrunArray.append('intOp')
+                expressionTemp.append('intOp')
 
             # rel_op
             if(ctx.rel_op()):
-                retrunArray.append('relOp')
+                expressionTemp.append('relOp')
 
             # eq_op
             if(ctx.eq_op()):
-                retrunArray.append('eqOp')
+                expressionTemp.append('eqOp')
 
             # cond_op
             if(ctx.cond_op()):
-                retrunArray.append('boolOp')
+                expressionTemp.append('boolOp')
 
     def exitReturnStatement(self, ctx: decafParser.ReturnStatementContext):
-        global procesandoReturn
-        global retrunArray
+        global procesandoExp
         global funcionTemp
+        global expressionTemp
         print(f'''
         -----
-        exitReturnStatement
+        exitReturnStatement {ctx.start.line}
         -----
-        retrunArray {retrunArray}
+        expressionTemp {expressionTemp}
         ''')
-
-        if(len(retrunArray) >= 2):
-            funcionTemp.procesarReturn(retrunArray)
-            procesandoReturn = False
-            retrunArray = []
-            funcionTemp.agregarReturn()
-        elif(len(retrunArray) == 1):
-            funcionTemp.agregarReturn(retrunArray.pop())
-        else:
-            funcionTemp.agregarReturn()
+        funcionTemp.agregarReturn(procesarExp(expressionTemp))
+        expressionTemp = []
+        procesandoExp = False
 
     def exitMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
         global funcionTemp
         global funcionNombreTemp
-        global procesandoReturn
-        global retrunArray
+        global procesandoExp
+        global expressionTemp
+
         funcionTemp.validar()
         if (funcionTemp.err):
             # si hay error en definicion de funcion
@@ -269,8 +263,6 @@ class DecafPrinter(decafListener):
 
         funcionTemp = None
         funcionNombreTemp = None
-        procesandoReturn = False
-        retrunArray = []
 
     def enterVarDeclaration(self, ctx: decafParser.VarDeclarationContext):
         # revisar si es array

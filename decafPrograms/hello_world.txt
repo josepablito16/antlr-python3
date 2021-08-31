@@ -1,14 +1,25 @@
 class Program{
 
-    int getIntTest(int a, int b, int c)
+    boolean test()
     {
-        int d;
-        if (true)
+        if(true)
         {
-            int a;
-            int a;
+            return true || false;
+
         }
-        return 1;
+        else
+        {return true;}
+    }
+
+    boolean test()
+    {
+        if(true)
+        {
+            return true || false;
+
+        }
+        else
+        {return true;}
     }
 
     int main(void)
@@ -19,7 +30,7 @@ class Program{
         getIntTest(1, 1, 1);
         if (true)
         {
-            return 1 + 1;
+            return 1 + (1 * 2);
         }
         else
         {
