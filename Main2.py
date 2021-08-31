@@ -117,7 +117,7 @@ class DecafPrinter(decafListener):
             if(nombre in pilaFuncion[-1].keys()):
                 return 'Esta funcion ya existe'
             else:
-                pilaFuncion[-1][nombre] = funcion
+                pilaFuncion[-1][nombre] = copy.deepcopy(funcion)
 
             print(f'''
                     # Pila funciones
@@ -171,7 +171,7 @@ class DecafPrinter(decafListener):
                 print(
                     f"Error en declaracion de funcion linea {ctx.start.line}: {parametros}")
 
-        funcionTemp = Funcion(tipo, parametros)
+        funcionTemp = copy.deepcopy(Funcion(tipo, parametros))
         funcionNombreTemp = nombre
 
     def enterReturnStatement(self, ctx: decafParser.ReturnStatementContext):
