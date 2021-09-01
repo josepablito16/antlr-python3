@@ -155,7 +155,7 @@ class DecafPrinter(decafListener):
 
         return parametrosList
 
-    def enterMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
+    def enterMethodDec(self, ctx: decafParser.MethodDecContext):
         global funcionTemp
         global funcionNombreTemp
         tipo = ctx.methodType().getText()
@@ -174,65 +174,79 @@ class DecafPrinter(decafListener):
         funcionTemp = copy.deepcopy(Funcion(tipo, parametros))
         funcionNombreTemp = nombre
 
-    def enterReturnStatement(self, ctx: decafParser.ReturnStatementContext):
+    def enterReturnStmt(self, ctx: decafParser.ReturnStmtContext):
         global procesandoExp
         procesandoExp = True
 
-    def enterExpression(self, ctx: decafParser.ExpressionContext):
-        global funcionTemp
+    def enterIntLiteral(self, ctx: decafParser.IntLiteralContext):
         global procesandoExp
         global expressionTemp
 
-        print(ctx.getText())
+        if (procesandoExp):
+            expressionTemp.append('int')
+
+    def enterCharLiteral(self, ctx: decafParser.CharLiteralContext):
+        global procesandoExp
+        global expressionTemp
 
         if (procesandoExp):
-            # location
-            # TODO
-            location = ctx.location()
-            if(location):
-                pass
-            # methodCall
-            # TODO
-            method = ctx.methodCall()
-            if(method):
-                pass
-            # literal
-            literal = ctx.literal()
-            if(literal):
-                if(literal.int_literal()):
-                    expressionTemp.append('int')
-                elif(literal.char_literal()):
-                    expressionTemp.append('char')
-                elif(literal.bool_literal()):
-                    expressionTemp.append('boolean')
+            expressionTemp.append('char')
 
-            # TODO - y !
+    def enterBoolLiteral(self, ctx: decafParser.BoolLiteralContext):
+        global procesandoExp
+        global expressionTemp
 
-    def exitExpression(self, ctx: decafParser.ExpressionContext):
-        pass
+        if (procesandoExp):
+            expressionTemp.append('boolean')
 
-    def enterOp(self, ctx: decafParser.OpContext):
+    # TODO expression con location, methodCall, -, !
+
+    def enterFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
         global procesandoExp
         global expressionTemp
 
         if (procesandoExp):
             # arith_op
-            if(ctx.arith_op()):
-                expressionTemp.append('intOp')
+            # if(ctx.op()):
+            expressionTemp.append('intOp')
 
+    def enterSecondArithExpr(self, ctx: decafParser.SecondArithExprContext):
+        global procesandoExp
+        global expressionTemp
+
+        if (procesandoExp):
+            # arith_op
+            # if(ctx.op()):
+            expressionTemp.append('intOp')
+
+    def enterRelExpr(self, ctx: decafParser.RelExprContext):
+        global procesandoExp
+        global expressionTemp
+
+        if (procesandoExp):
             # rel_op
-            if(ctx.rel_op()):
-                expressionTemp.append('relOp')
+            # if(ctx.op()):
+            expressionTemp.append('relOp')
 
+    def enterEqExpr(self, ctx: decafParser.EqExprContext):
+        global procesandoExp
+        global expressionTemp
+
+        if (procesandoExp):
             # eq_op
-            if(ctx.eq_op()):
-                expressionTemp.append('eqOp')
+            # if(ctx.op()):
+            expressionTemp.append('eqOp')
 
+    def enterCondExpr(self, ctx: decafParser.CondExprContext):
+        global procesandoExp
+        global expressionTemp
+
+        if (procesandoExp):
             # cond_op
-            if(ctx.cond_op()):
-                expressionTemp.append('boolOp')
+            # if(ctx.op()):
+            expressionTemp.append('boolOp')
 
-    def exitReturnStatement(self, ctx: decafParser.ReturnStatementContext):
+    def exitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
         global procesandoExp
         global funcionTemp
         global expressionTemp
@@ -246,7 +260,7 @@ class DecafPrinter(decafListener):
         expressionTemp = []
         procesandoExp = False
 
-    def exitMethodDeclaration(self, ctx: decafParser.MethodDeclarationContext):
+    def exitMethodDec(self, ctx: decafParser.MethodDecContext):
         global funcionTemp
         global funcionNombreTemp
         global procesandoExp
@@ -264,67 +278,51 @@ class DecafPrinter(decafListener):
         funcionTemp = None
         funcionNombreTemp = None
 
-    def enterVarDeclaration(self, ctx: decafParser.VarDeclarationContext):
-        # revisar si es array
-        if(len(ctx.children) == 6):
-            # es la declaracion de un array
-            long = int(ctx.children[3].getText())
-            if(long <= 0):
-                print(
-                    f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser mayor a 0")
-            else:
-                nombre = ctx.id_tok().getText()
-                tipo = ctx.varType().getText()
-                declaracionTemp = self.agregarVariableATabla(
-                    nombre, Variable(tipo, long=long))
-                if(declaracionTemp):
-                    print(
-                        f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
+    def enterVarDec(self, ctx: decafParser.VarDecContext):
+        # es la declaracion de una variable
+        nombre = ctx.id_tok().getText()
+        tipo = ctx.varType().getText()
+        declaracionTemp = self.agregarVariableATabla(
+            nombre, Variable(tipo))
+        if(declaracionTemp):
+            print(
+                f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
 
+    def enterArrayDec(self, ctx: decafParser.ArrayDecContext):
+        # es la declaracion de un array
+        long = int(ctx.children[3].getText())
+        if(long <= 0):
+            print(
+                f"Error en declaracion de array linea {ctx.start.line}: la dimension debe ser mayor a 0")
         else:
-            # es la declaracion de una variable
             nombre = ctx.id_tok().getText()
             tipo = ctx.varType().getText()
             declaracionTemp = self.agregarVariableATabla(
-                nombre, Variable(tipo))
+                nombre, Variable(tipo, long=long))
             if(declaracionTemp):
                 print(
                     f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
 
-    def enterMethodCall(self, ctx: decafParser.MethodCallContext):
-        pass
-        '''
-        print(ctx.id_tok().getText())
-        for i in ctx.arg():
-            # arg es expression
-            # puede ser location
-            # puede ser methodCall
-            # puede ser literal
-            # puede ser expression op expression
-            # etc
-            print(i.getText())
-            '''
-
-    def enterStart(self, ctx: decafParser.StartContext):
+    def enterProgramStart(self, ctx: decafParser.ProgramStartContext):
         # Se crea el ambito global
         self.agregarAmbito()
         pilaFuncion.append({})
 
-    def enterStructDeclaration(self, ctx: decafParser.StructDeclarationContext):
+    def enterStructDec(self, ctx: decafParser.StructDecContext):
         self.agregarAmbito()
 
-    def exitStructDeclaration(self, ctx: decafParser.StructDeclarationContext):
+    def exitStructDec(self, ctx: decafParser.StructDecContext):
         self.quitarAmbito()
 
-    def enterBlock(self, ctx: decafParser.BlockContext):
+    def enterBlockDec(self, ctx: decafParser.BlockDecContext):
         self.agregarAmbito()
         if (len(ambitoVariableTemp) > 0):
             self.agregarAmbitoTempATabla()
 
-    def exitBlock(self, ctx: decafParser.BlockContext):
+    def exitBlockDec(self, ctx: decafParser.BlockDecContext):
         self.quitarAmbito()
 
-    def exitStart(self, ctx: decafParser.StartContext):
+    def exitProgramStart(self, ctx: decafParser.ProgramStartContext):
         # este metodo se ejecuta al salir del ultimo nodo del arbol
         reglaMain = self.validarReglaMain()
         if (reglaMain):

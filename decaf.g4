@@ -1,133 +1,108 @@
 grammar decaf;  
 
-// Tokens inician con mayuscula
-
-//A fragment will never be counted as a token, it only serves to simplify a grammar.
-
-fragment DIGIT: [0-9] ; 
-
-LETTER: ('a'..'z'|'A'..'Z')+ ;
-
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
-
-NUM : '-'? DIGIT (DIGIT)*;
-
-
 
 //Parse Rules 
 // inician con minuscula
 
-start : 'class' 'Program' '{' (declaration)* '}';
+start : 'class' 'Program' '{' (declaration)* '}'                # programStart ;
 
-id_tok : LETTER (LETTER|DIGIT)*;
-
-declaration : structDeclaration
-            | varDeclaration
-            | methodDeclaration
+declaration : structDeclaration                                 # declarationStruct
+            | varDeclaration                                    # declarationVar
+            | methodDeclaration                                 # declarationMethod
             ;
 
-varDeclaration  : varType id_tok ';'
-                | varType id_tok '[' NUM ']' ';'
+varDeclaration  : varType id_tok ';'                            # varDec
+                | varType id_tok '[' num ']' ';'                # arrayDec
                 ;
 
-structDeclaration : 'struct' id_tok '{' (varDeclaration)* '}' (';')?;
+structDeclaration : 'struct' id_tok '{' (varDeclaration)* '}' (';')? # structDec ;
 
-varType : 'int'
-        | 'char'
-        | 'boolean'
-        | 'struct' id_tok
-        | structDeclaration
-        | 'void'
+varType : 'int'                                                 # intVarType
+        | 'char'                                                # charVarType
+        | 'boolean'                                             # booleanVarType
+        | 'struct' id_tok                                       # structVarType
+        | structDeclaration                                     # structDecVarType
+        | 'void'                                                # voidVarType
         ;
 
-methodDeclaration : methodType id_tok '(' (parameter (',' parameter)*)* ')' block ;
+methodDeclaration : methodType id_tok '(' (parameter (',' parameter)*)* ')' block # methodDec ;
 
-methodType  : 'int'
-            | 'char'
-            | 'boolean'
-            | 'void'
+methodType  : 'int'                                             # intMethod
+            | 'char'                                            # charMethod
+            | 'boolean'                                         # booleanMethod
+            | 'void'                                            # voidMethod
             ;
 
-parameter   : parameterType id_tok
-            | parameterType id_tok '[' ']'
-            | 'void'
+parameter   : parameterType id_tok                              # idParam
+            | parameterType id_tok '[' ']'                      # arrayParam
+            | 'void'                                            # voidParam
             ;
 
 
-parameterType   : 'int'
-                | 'char'
-                | 'boolean'
+parameterType   : 'int'                                         # intParam
+                | 'char'                                        # charParam
+                | 'boolean'                                     # booleanParam
                 ;
 
-block : '{' (varDeclaration)* (statement)* returnStatement? '}' ;
+block : '{' (varDeclaration)* (statement)* '}'                  # blockDec ;
 
-statement   : 'if' '(' expression ')' block ('else' block)?
-            | 'while' '(' expression ')' block
-            | methodCall ';'
-            | block
-            | location '=' expression
-            | (expression)? ';'
+statement   : 'if' '(' expression ')' block ('else' block)?     # ifStmt
+            | 'while' '(' expression ')' block                  # whileStmt
+            | 'return' (expression)? ';'                        # returnStmt
+            | methodCall ';'                                    # methodStmt
+            | block                                             # blockStmt
+            | location '=' expression ';'                       # assignmentStmt
+            | expression ';'                                    # expressionStmt
             ;
 
-returnStatement : 'return' (expression)? ';';
+location : id_tok                                               # idLocation
+         | id_tok '.' location                                  # idLocationDot
+         | id_tok '[' expression ']'                            # arrayLocation
+         | id_tok '[' expression ']' '.' location               # arrayLocationDot
+         ;
 
-location : (id_tok | id_tok '[' expression ']') ( '.' location)? ;
-
-uni_op  : '-' 
-        | '!'
-        ;
-
-expression  : location
-            | methodCall
-            | literal
-            | expression op expression
-            | uni_op expression
-            | uni_op expression
-            | '(' expression ')'
+expression  : location                                          # locationExpr
+            | methodCall                                        # methodCallExpr
+            | literal                                           # literalExpr
+            | expression op=('*'|'/'|'%') expression            # firstArithExpr
+            | expression op=('+'|'-') expression                # secondArithExpr
+            | expression op=('<'|'>'|'<='|'>=') expression      # relExpr
+            | expression op=('=='|'!=') expression              # eqExpr
+            | expression op=('&&'|'||') expression              # condExpr
+            | '-' expression                                    # negativeExpr
+            | '!' expression                                    # notExpr
+            | '(' expression ')'                                # parExpr
             ;
 
-methodCall : id_tok '(' arg? (',' arg)* ')';
+methodCall : id_tok '(' arg? (',' arg)* ')'                     # methodCallDec;                    
 
-arg : expression ;
+arg : expression                                                # argDec ;
 
-op  : arith_op 
-    | rel_op 
-    | eq_op 
-    | cond_op
-    ;
-
-arith_op    : '+' 
-            | '-' 
-            | '*' 
-            | '/' 
-            | '%'
-            ;
-
-rel_op  : '<' 
-        | '>' 
-        | '<=' 
-        | '>='
+literal : int_literal                                           # intLiteral 
+        | CHAR_LITERAL                                          # charLiteral
+        | bool_literal                                          # boolLiteral
         ;
 
-eq_op   : '==' 
-        | '!='
-        ;
+int_literal : num                                               # numLiteral ;
 
-
-cond_op : '&&' 
-        | '||'
-        ;
-
-literal : int_literal 
-        | char_literal
-        | bool_literal
-        ;
-
-int_literal : NUM ;
-
-char_literal : '\'' LETTER '\'' ;
-
-bool_literal    : 'true' 
-                | 'false'
+bool_literal    : 'true'                                        # trueLiteral 
+                | 'false'                                       # falseLiteral
                 ;
 
+id_tok : ID                                                     # idDec ;
+
+num : DIGIT+                                                    # numDec ;
+
+// Tokens inician con mayuscula
+
+CHAR_LITERAL : '\'' LETTER '\'' ;
+
+ID : LETTER ALPHA_num* ;
+
+DIGIT: [0-9]+ ; 
+
+LETTER: [a-zA-Z] | '_' ;
+
+ALPHA_num : LETTER | DIGIT ;
+
+WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines

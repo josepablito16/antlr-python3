@@ -6,6 +6,8 @@ def procesarExp(expresion):
     Parametros
     - expresion: lista de tipos de datos Ej: ['int']
     '''
+    if (len(expresion) == 1):
+        return expresion.pop()
     i = 0
     print('###########################')
     while (i < len(expresion)):
