@@ -1,3 +1,4 @@
+from Estructura import Estructura
 from antlr4 import *
 from antlr4.tree.Trees import TerminalNode
 from decafLexer import decafLexer
@@ -47,6 +48,25 @@ class DecafPrinter(decafListener):
         print(f'''
                 # Pila Variables
                 {pilaVariable}
+                ''')
+
+    def agregarStructATabla(self, nombre, estructura):
+        '''
+        Funcion que valida si una estructura ya existe en la tabla actual
+        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
+
+        Parametros
+        - nombre: string con el nombre de la estructura
+        - estructura: objeto estructura con la informacion de la estructura a ingresar.
+        '''
+        if(nombre in pilaEstructura[-1].keys()):
+            return 'Esta estructura ya existe'
+        else:
+            pilaEstructura[-1][nombre] = estructura
+
+        print(f'''
+                # Pila Estructura
+                {pilaEstructura}
                 ''')
 
     def agregarVariableAmbitoTemp(self, nombre, variable):
@@ -200,9 +220,8 @@ class DecafPrinter(decafListener):
         if (procesandoReturnExp):
             expressionReturnTemp.append('boolean')
 
-    # TODO expression con location, methodCall
+    # TODO expression con location
     def enterMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
-        print(ctx.getText())
         global procesandoReturnExp
         global expressionReturnTemp
 
@@ -343,6 +362,10 @@ class DecafPrinter(decafListener):
         self.agregarAmbito()
 
     def exitStructDec(self, ctx: decafParser.StructDecContext):
+        # pasar este ambito a las propiedades de la estructura
+        nombre = ctx.id_tok().getText()
+        self.agregarStructATabla(nombre, Estructura(
+            copy.deepcopy(pilaVariable[-1])))
         self.quitarAmbito()
 
     def enterBlockDec(self, ctx: decafParser.BlockDecContext):

@@ -1,4 +1,9 @@
 class Program{
+    struct B
+    {
+        int b[5];
+        struct A c;
+    };
 
     boolean test()
     {
@@ -11,7 +16,7 @@ class Program{
         {return true;}
     }
 
-    boolean testInt()
+    int testInt()
     {
         if(true)
         {
