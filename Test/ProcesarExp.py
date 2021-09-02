@@ -14,7 +14,7 @@ def procesar(exp):
             ''')
     if (len(exp) == 1):
         return exp.pop()
-    operadores = ['intOp', 'relOp', 'eqOp', 'boolOp']
+    operadores = ['intOp', 'relOp', 'eqOp', 'boolOp', 'negative', 'not']
     pila = []
     for i in exp:
         if i not in operadores:
@@ -23,8 +23,20 @@ def procesar(exp):
         else:
             # es operador
 
-            # TODO relga not
-            # TODO relga minus
+            # relga not
+            if (i == 'not'):
+                if (pila.pop() == 'boolean'):
+                    pila.append('boolean')
+                else:
+                    pila.append('err')
+                continue
+            # relga negative
+            if (i == 'negative'):
+                if (pila.pop() == 'int'):
+                    pila.append('int')
+                else:
+                    pila.append('err')
+                continue
 
             # regla intOp
             if (i == 'intOp'):
@@ -58,7 +70,7 @@ def procesar(exp):
                     pila.append('err')
                 continue
 
-    print(pila)
+    return pila.pop()
 
 
 test = [
@@ -66,9 +78,11 @@ test = [
     ['relOp', 'intOp', 'int', 'int', 'intOp', 'int', 'int'],
     ['intOp', 'int', 'intOp', 'int', 'int'],
     ['boolOp', 'boolean', 'boolean'],
-    ['boolOp', 'boolean', 'int']
+    ['boolOp', 'boolean', 'int'],
+    ['negative', 'intOp', 'int', 'intOp', 'int', 'int'],
+    ['not', 'relOp', 'intOp', 'int', 'int', 'intOp', 'int', 'int']
 ]
 
 
 for j in test:
-    procesar(j)
+    print(procesar(j))
