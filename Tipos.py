@@ -91,4 +91,51 @@ def getMethodType(nombre, pilaFuncion):
         if(nombre in ambito.keys()):
             return ambito[nombre].tipo
 
-    return Error('La funcion no existe')
+    return Error(f'La funcion {nombre} no existe')
+
+
+def getidLocationType(nombre, pilaVariable):
+    '''
+    Funcion para obtener el tipo de una idLocation.
+    Valida si el idLocation ya fue declarada dentro del ambito.
+
+    Parametros
+    - nombre: nombre del idLocation
+    - pilaVariable: pila de ambitos de las variables
+
+    Retornos
+    - <Error> si el idLocation no se encuentra en los ambitos
+    - tipo en el caso de que se encuentre el idLocation
+    '''
+    for ambito in pilaVariable:
+        if(nombre in ambito.keys()):
+            return ambito[nombre].tipo
+
+    return Error(f'La variable {nombre} no existe')
+
+
+def getArrayLocationType(nombre, pilaVariable, expType):
+    '''
+    Funcion para obtener el tipo de una arrayLocation.
+    Valida si el arrayLocation ya fue declarada dentro del ambito.
+
+    Parametros
+    - nombre: nombre del arrayLocation
+    - pilaVariable: pila de ambitos de las variables
+
+    Retornos
+    - <Error> si el arrayLocation no se encuentra en los ambitos
+    - tipo en el caso de que se encuentre el arrayLocation
+    '''
+    for ambito in pilaVariable:
+        if(nombre in ambito.keys()):
+            # existe el array
+            if (ambito[nombre].arrayLong != None):
+                # confirmamos que es array
+                if (expType == 'int'):
+                    # validamos que la exp sea int
+                    return ambito[nombre].tipo
+                else:
+                    return Error(f"La <exp> del array '{nombre}' no es <int>")
+
+    return Error(f"El array '{nombre}' no existe")

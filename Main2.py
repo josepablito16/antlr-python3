@@ -16,8 +16,12 @@ pilaFuncion = []
 pilaEstructura = []
 funcionTemp = None
 funcionNombreTemp = None
+
 procesandoReturnExp = False
 expressionReturnTemp = []
+
+procesandoArrayExp = False
+expressionArrayTemp = []
 
 '''
 Aqui se guardan los parametros de la funcion
@@ -203,30 +207,113 @@ class DecafPrinter(decafListener):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('int')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('int')
 
     def enterCharLiteral(self, ctx: decafParser.CharLiteralContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('char')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('char')
 
     def enterBoolLiteral(self, ctx: decafParser.BoolLiteralContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('boolean')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('boolean')
 
-    # TODO expression con location
+    # TODO expression con idLocationDot, arrayLocationDot
+    def enterArrayLocation(self, ctx: decafParser.ArrayLocationContext):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        procesandoArrayExp = True
+
+    def exitArrayLocation(self, ctx: decafParser.ArrayLocationContext):
+        global procesandoReturnExp
+        global expressionReturnTemp
+
+        global procesandoArrayExp
+        global expressionArrayTemp
+        # se validan los tipos y se agregan en arrays correspondientes
+        nombre = ctx.id_tok().getText()
+        expType = procesarExp(expressionArrayTemp)
+        tipo = getArrayLocationType(nombre, pilaVariable, expType)
+
+        if (procesandoReturnExp):
+            if (isinstance(tipo, Error)):
+                print(
+                    f"Error en llamada de array linea {ctx.start.line}: {tipo.mensaje}")
+                expressionReturnTemp.append('err')
+            else:
+                expressionReturnTemp.append(tipo)
+
+        procesandoArrayExp = False
+        expressionArrayTemp = []
+
+    def enterIdLocation(self, ctx: decafParser.IdLocationContext):
+        global procesandoReturnExp
+        global expressionReturnTemp
+
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        tipo = getidLocationType(ctx.id_tok().getText(), pilaVariable)
+
+        if (procesandoArrayExp):
+            if (isinstance(tipo, Error)):
+                print(
+                    f"Error en llamada de variable linea {ctx.start.line}: {tipo.mensaje}")
+                expressionArrayTemp.append('err')
+            else:
+                expressionArrayTemp.append(tipo)
+
+        elif (procesandoReturnExp):
+            if (isinstance(tipo, Error)):
+                print(
+                    f"Error en llamada de variable linea {ctx.start.line}: {tipo.mensaje}")
+                expressionReturnTemp.append('err')
+            else:
+                expressionReturnTemp.append(tipo)
+
     def enterMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
-            tipo = getMethodType(ctx.id_tok().getText(), pilaFuncion)
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        tipo = getMethodType(ctx.id_tok().getText(), pilaFuncion)
+
+        if (procesandoArrayExp):
+            if (isinstance(tipo, Error)):
+                print(
+                    f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
+                expressionArrayTemp.append('err')
+            else:
+                expressionArrayTemp.append(tipo)
+
+        elif (procesandoReturnExp):
             if (isinstance(tipo, Error)):
                 print(
                     f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
@@ -238,59 +325,91 @@ class DecafPrinter(decafListener):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('negative')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('negative')
 
     def enterNotExpr(self, ctx: decafParser.NotExprContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('not')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('not')
 
     def enterFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
-            # arith_op
-            # if(ctx.op()):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('intOp')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('intOp')
 
     def enterSecondArithExpr(self, ctx: decafParser.SecondArithExprContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
-            # arith_op
-            # if(ctx.op()):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('intOp')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('intOp')
 
     def enterRelExpr(self, ctx: decafParser.RelExprContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
-            # rel_op
-            # if(ctx.op()):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('relOp')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('relOp')
 
     def enterEqExpr(self, ctx: decafParser.EqExprContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
-            # eq_op
-            # if(ctx.op()):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('eqOp')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('eqOp')
 
     def enterCondExpr(self, ctx: decafParser.CondExprContext):
         global procesandoReturnExp
         global expressionReturnTemp
 
-        if (procesandoReturnExp):
-            # cond_op
-            # if(ctx.op()):
+        global procesandoArrayExp
+        global expressionArrayTemp
+
+        if (procesandoArrayExp):
+            expressionArrayTemp.append('boolOp')
+
+        elif (procesandoReturnExp):
             expressionReturnTemp.append('boolOp')
 
     def exitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
