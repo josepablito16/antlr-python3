@@ -41,7 +41,7 @@ class DecafPrinter(decafListener):
         - variable: objeto Variable con la informacion de la variable a ingresar.
         '''
         if(nombre in pilaVariable[-1].keys()):
-            return 'Esta variable ya existe'
+            return Error('Esta variable ya existe')
         else:
             pilaVariable[-1][nombre] = variable
 
@@ -109,10 +109,10 @@ class DecafPrinter(decafListener):
     def validarReglaMain(self):
         try:
             if not(len(pilaFuncion[-1]['main'].argumentosTipos) == 0):
-                return 'La funcion main contiene parametros'
+                return Error('La funcion main contiene parametros')
         except:
             # no existe main
-            return 'Programa sin funcion main'
+            return Error('Programa sin funcion main')
 
     def agregarAmbito(self):
         pilaVariable.append({})
@@ -136,7 +136,7 @@ class DecafPrinter(decafListener):
         # si no tiene error en los  argumentos se agrega a talba
         if not(isinstance(funcion.argumentosTipos, str)):
             if(nombre in pilaFuncion[-1].keys()):
-                return 'Esta funcion ya existe'
+                return Error('Esta funcion ya existe')
             else:
                 pilaFuncion[-1][nombre] = copy.deepcopy(funcion)
 
@@ -160,7 +160,7 @@ class DecafPrinter(decafListener):
             if (len(parametros) == 1):
                 return parametrosList
             else:
-                return 'parametro void no puede ir acompañado de mas parametros'
+                return Error('parametro void no puede ir acompañado de mas parametros')
 
         for i in parametros:
             nombre = i.id_tok().getText()
@@ -187,10 +187,10 @@ class DecafPrinter(decafListener):
             # Hay parametros
             parametros = self.procesarParametros(ctx.parameter())
 
-            if (isinstance(parametros, str)):
+            if (isinstance(parametros, Error)):
                 # hay error
                 print(
-                    f"Error en declaracion de funcion linea {ctx.start.line}: {parametros}")
+                    f"Error en declaracion de funcion linea {ctx.start.line}: {parametros.mensaje}")
 
         funcionTemp = copy.deepcopy(Funcion(tipo, parametros))
         funcionNombreTemp = nombre
@@ -314,16 +314,16 @@ class DecafPrinter(decafListener):
         global expressionReturnTemp
 
         funcionTemp.validar()
-        if (funcionTemp.err):
+        if (isinstance(funcionTemp.err, Error)):
             # si hay error en definicion de funcion
             print(
-                f"Error en declaracion de funcion linea {ctx.start.line}: {funcionTemp.err}")
+                f"Error en declaracion de funcion linea {ctx.start.line}: {funcionTemp.err.mensaje}")
         else:
             # si no hay error se agrega a tabla
             err = self.agregarFuncionATabla(funcionNombreTemp, funcionTemp)
-            if (isinstance(err, str)):
+            if (isinstance(err, Error)):
                 print(
-                    f"Error en declaracion de funcion linea {ctx.start.line}: {err}")
+                    f"Error en declaracion de funcion linea {ctx.start.line}: {err.mensaje}")
 
         funcionTemp = None
         funcionNombreTemp = None
@@ -334,9 +334,9 @@ class DecafPrinter(decafListener):
         tipo = ctx.varType().getText()
         declaracionTemp = self.agregarVariableATabla(
             nombre, Variable(tipo))
-        if(declaracionTemp):
+        if(isinstance(declaracionTemp, Error)):
             print(
-                f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
+                f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp.mensaje}")
 
     def enterArrayDec(self, ctx: decafParser.ArrayDecContext):
         # es la declaracion de un array
@@ -349,9 +349,9 @@ class DecafPrinter(decafListener):
             tipo = ctx.varType().getText()
             declaracionTemp = self.agregarVariableATabla(
                 nombre, Variable(tipo, long=long))
-            if(declaracionTemp):
+            if(isinstance(declaracionTemp, Error)):
                 print(
-                    f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp}")
+                    f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp.mensaje}")
 
     def enterProgramStart(self, ctx: decafParser.ProgramStartContext):
         # Se crea el ambito global
@@ -379,9 +379,9 @@ class DecafPrinter(decafListener):
     def exitProgramStart(self, ctx: decafParser.ProgramStartContext):
         # este metodo se ejecuta al salir del ultimo nodo del arbol
         reglaMain = self.validarReglaMain()
-        if (reglaMain):
+        if (isinstance(reglaMain, Error)):
             print(
-                f"Error en linea {ctx.start.line}: {reglaMain}")
+                f"Error en linea {ctx.start.line}: {reglaMain.mensaje}")
 
 
 def main():

@@ -1,3 +1,6 @@
+from Error import *
+
+
 class Funcion:
     def __init__(self, tipo, argumentos=[], retorno=[]):
         self.tipo = tipo
@@ -30,13 +33,14 @@ class Funcion:
         ''')
         if (self.tipo == 'void'):
             if(len(self.retornoTipos) > 0):
-                self.err = 'Funcion void no retorna nada'
+                self.err = Error('Funcion void no retorna nada')
         else:
             if(len(self.retornoTipos) == 0):
-                self.err = 'Falta retorno de funcion'
+                self.err = Error('Falta retorno de funcion')
             else:
                 if(self.tipo != self.validarRetorno()):
-                    self.err = 'El tipo de la funcion y el tipo de retorno no coinciden'
+                    self.err = Error(
+                        'El tipo de la funcion y el tipo de retorno no coinciden')
 
     def __repr__(self):
         return f"<Funcion>{self.tipo}({self.argumentosTipos}): {self.retornoTipos}"
