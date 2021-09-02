@@ -1,6 +1,6 @@
 
 
-def procesar(exp):
+def procesarExp(exp):
     '''
     Funcion para validar los tipos de una expresion.
 

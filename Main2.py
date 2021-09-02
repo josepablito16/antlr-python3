@@ -200,6 +200,19 @@ class DecafPrinter(decafListener):
             expressionTemp.append('boolean')
 
     # TODO expression con location, methodCall, -, !
+    def enterNegativeExpr(self, ctx: decafParser.NegativeExprContext):
+        global procesandoExp
+        global expressionTemp
+
+        if (procesandoExp):
+            expressionTemp.append('negative')
+
+    def enterNotExpr(self, ctx: decafParser.NotExprContext):
+        global procesandoExp
+        global expressionTemp
+
+        if (procesandoExp):
+            expressionTemp.append('not')
 
     def enterFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
         global procesandoExp
