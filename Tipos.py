@@ -1,3 +1,6 @@
+from Error import *
+
+
 def procesarExp(exp):
     '''
     Funcion para validar los tipos de una expresion.
@@ -69,3 +72,23 @@ def procesarExp(exp):
                 continue
 
     return pila.pop()
+
+
+def getMethodType(nombre, pilaFuncion):
+    '''
+    Funcion para obtener el tipo de una funcion.
+    Valida si la funcion ya fue declarada dentro del ambito.
+
+    Parametros
+    - nombre: nombre de la funcion
+    - pilaFuncion: pila de ambitos de las funciones
+
+    Retornos
+    - <Error> si la funcion no se encuentra en los ambitos
+    - tipo en el caso de que se encuentre la funcion
+    '''
+    for ambito in pilaFuncion:
+        if(nombre in ambito.keys()):
+            return ambito[nombre].tipo
+
+    return Error('La funcion no existe')

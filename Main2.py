@@ -6,6 +6,7 @@ from decafParser import decafParser
 from Variable import *
 from Funcion import *
 from Tipos import *
+from Error import *
 import copy
 import sys
 
@@ -14,8 +15,8 @@ pilaFuncion = []
 pilaEstructura = []
 funcionTemp = None
 funcionNombreTemp = None
-procesandoExp = False
-expressionTemp = []
+procesandoReturnExp = False
+expressionReturnTemp = []
 
 '''
 Aqui se guardan los parametros de la funcion
@@ -175,109 +176,123 @@ class DecafPrinter(decafListener):
         funcionNombreTemp = nombre
 
     def enterReturnStmt(self, ctx: decafParser.ReturnStmtContext):
-        global procesandoExp
-        procesandoExp = True
+        global procesandoReturnExp
+        procesandoReturnExp = True
 
     def enterIntLiteral(self, ctx: decafParser.IntLiteralContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
-            expressionTemp.append('int')
+        if (procesandoReturnExp):
+            expressionReturnTemp.append('int')
 
     def enterCharLiteral(self, ctx: decafParser.CharLiteralContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
-            expressionTemp.append('char')
+        if (procesandoReturnExp):
+            expressionReturnTemp.append('char')
 
     def enterBoolLiteral(self, ctx: decafParser.BoolLiteralContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
-            expressionTemp.append('boolean')
+        if (procesandoReturnExp):
+            expressionReturnTemp.append('boolean')
 
-    # TODO expression con location, methodCall, -, !
+    # TODO expression con location, methodCall
+    def enterMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
+        print(ctx.getText())
+        global procesandoReturnExp
+        global expressionReturnTemp
+
+        if (procesandoReturnExp):
+            tipo = getMethodType(ctx.id_tok().getText(), pilaFuncion)
+            if (isinstance(tipo, Error)):
+                print(
+                    f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
+                expressionReturnTemp.append('err')
+            else:
+                expressionReturnTemp.append(tipo)
+
     def enterNegativeExpr(self, ctx: decafParser.NegativeExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
-            expressionTemp.append('negative')
+        if (procesandoReturnExp):
+            expressionReturnTemp.append('negative')
 
     def enterNotExpr(self, ctx: decafParser.NotExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
-            expressionTemp.append('not')
+        if (procesandoReturnExp):
+            expressionReturnTemp.append('not')
 
     def enterFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
+        if (procesandoReturnExp):
             # arith_op
             # if(ctx.op()):
-            expressionTemp.append('intOp')
+            expressionReturnTemp.append('intOp')
 
     def enterSecondArithExpr(self, ctx: decafParser.SecondArithExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
+        if (procesandoReturnExp):
             # arith_op
             # if(ctx.op()):
-            expressionTemp.append('intOp')
+            expressionReturnTemp.append('intOp')
 
     def enterRelExpr(self, ctx: decafParser.RelExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
+        if (procesandoReturnExp):
             # rel_op
             # if(ctx.op()):
-            expressionTemp.append('relOp')
+            expressionReturnTemp.append('relOp')
 
     def enterEqExpr(self, ctx: decafParser.EqExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
+        if (procesandoReturnExp):
             # eq_op
             # if(ctx.op()):
-            expressionTemp.append('eqOp')
+            expressionReturnTemp.append('eqOp')
 
     def enterCondExpr(self, ctx: decafParser.CondExprContext):
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
-        if (procesandoExp):
+        if (procesandoReturnExp):
             # cond_op
             # if(ctx.op()):
-            expressionTemp.append('boolOp')
+            expressionReturnTemp.append('boolOp')
 
     def exitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
-        global procesandoExp
+        global procesandoReturnExp
         global funcionTemp
-        global expressionTemp
+        global expressionReturnTemp
         print(f'''
         -----
         exitReturnStatement {ctx.start.line}
         -----
-        expressionTemp {expressionTemp}
+        expressionReturnTemp {expressionReturnTemp}
         ''')
-        funcionTemp.agregarReturn(procesarExp(expressionTemp))
-        expressionTemp = []
-        procesandoExp = False
+        funcionTemp.agregarReturn(procesarExp(expressionReturnTemp))
+        expressionReturnTemp = []
+        procesandoReturnExp = False
 
     def exitMethodDec(self, ctx: decafParser.MethodDecContext):
         global funcionTemp
         global funcionNombreTemp
-        global procesandoExp
-        global expressionTemp
+        global procesandoReturnExp
+        global expressionReturnTemp
 
         funcionTemp.validar()
         if (funcionTemp.err):
@@ -286,7 +301,10 @@ class DecafPrinter(decafListener):
                 f"Error en declaracion de funcion linea {ctx.start.line}: {funcionTemp.err}")
         else:
             # si no hay error se agrega a tabla
-            self.agregarFuncionATabla(funcionNombreTemp, funcionTemp)
+            err = self.agregarFuncionATabla(funcionNombreTemp, funcionTemp)
+            if (isinstance(err, str)):
+                print(
+                    f"Error en declaracion de funcion linea {ctx.start.line}: {err}")
 
         funcionTemp = None
         funcionNombreTemp = None
