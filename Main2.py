@@ -291,6 +291,9 @@ class DecafPrinter(decafListener):
         global locationList
         global idLocationTemp
 
+        global procesandoReturnExp
+        global expressionReturnTemp
+
         print(f'''
         exitIdLocationDot
         procesandoLocation = {procesandoLocation}
@@ -299,7 +302,18 @@ class DecafPrinter(decafListener):
         ''')
 
         # validar idLocation y obtener tipo
-        getLocationDotType(pilaEstructura[-1], locationList, idLocationTemp)
+        tipoTemp = getLocationDotType(
+            pilaEstructura[-1], locationList, idLocationTemp)
+
+        if (procesandoReturnExp):
+            if (isinstance(tipoTemp, Error)):
+                # hay error
+                print(tipoTemp.mensaje)
+                expressionReturnTemp.append('err')
+            else:
+                # obtenemos el tipo
+                print('Se ' + tipoTemp)
+                expressionReturnTemp.append(tipoTemp)
 
         procesandoLocation = False
         locationList = []
@@ -341,7 +355,11 @@ class DecafPrinter(decafListener):
         global procesandoArrayExp
         global expressionArrayTemp
 
+        global procesandoLocation
+
         # TODO validar que no estemos procesando un idLocationDot o arrayLocationDot
+        if (procesandoLocation):
+            return
 
         tipo = getidLocationType(ctx.id_tok().getText(), pilaVariable)
 

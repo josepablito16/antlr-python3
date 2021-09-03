@@ -172,11 +172,7 @@ def getLocationDotType(structPila, locationList, lastPropiedad):
         tipoTemp = validarPropiedadEstructura(
             locationList[0], lastPropiedad, structPila)
 
-        if(isinstance(tipoTemp, Error)):
-            print(tipoTemp.mensaje)
-        else:
-            print(tipoTemp)
-        return
+        return tipoTemp
 
     for i in range(0, len(locationList), 2):
         print(locationList[i])
