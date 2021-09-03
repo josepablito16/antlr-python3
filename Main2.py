@@ -514,8 +514,22 @@ class DecafPrinter(decafListener):
         else:
             nombre = ctx.id_tok().getText()
             tipo = ctx.varType().getText()
+            estructura = False
+
+            if (tipo.find('struct') != -1):
+                # es de tipo estructura
+                tipo = tipo.replace('struct', '')
+
+                # validar si existe la estructura
+                estructError = self.validarEstructura(tipo)
+                if (isinstance(estructError, Error)):
+                    print(
+                        f"Error en declaracion de variable linea {ctx.start.line}: {estructError.mensaje}")
+                else:
+                    estructura = True
+
             declaracionTemp = self.agregarVariableATabla(
-                nombre, Variable(tipo, long=long))
+                nombre, Variable(tipo, long=long, isEstructura=estructura))
             if(isinstance(declaracionTemp, Error)):
                 print(
                     f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp.mensaje}")

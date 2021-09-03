@@ -12,6 +12,7 @@ class Program{
 
     boolean test()
     {
+        struct A structArray[5];
         if(true)
         {
             return true || false;
