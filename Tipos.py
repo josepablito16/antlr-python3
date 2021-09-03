@@ -91,7 +91,7 @@ def getMethodType(nombre, pilaFuncion):
         if(nombre in ambito.keys()):
             return ambito[nombre].tipo
 
-    return Error(f'La funcion {nombre} no existe')
+    return Error(f"La funcion '{nombre}' no existe")
 
 
 def getidLocationType(nombre, pilaVariable):
@@ -111,7 +111,7 @@ def getidLocationType(nombre, pilaVariable):
         if(nombre in ambito.keys()):
             return ambito[nombre].tipo
 
-    return Error(f'La variable {nombre} no existe')
+    return Error(f"La variable '{nombre}' no existe")
 
 
 def getArrayLocationType(nombre, pilaVariable, expType):
@@ -139,3 +139,72 @@ def getArrayLocationType(nombre, pilaVariable, expType):
                     return Error(f"La <exp> del array '{nombre}' no es <int>")
 
     return Error(f"El array '{nombre}' no existe")
+
+
+def getLocationDotType(structPila, locationList, lastPropiedad):
+    '''
+    Funcion para validar conjuntos de locationDot y si todo esta
+    bien obtener el tipo de la ultima propiedad
+
+    Parametros:
+    - structPila: pila con todas las estructuras declaradas.
+    - locationList: todos los nombres de LocationDot.
+    - lastPropiedad: ultima propiedad de la serie locationDot
+
+    Ej:
+    carro.llanta.color
+    locationList = ['carro', 'llanta']
+    lastPropiedad = 'color'
+    '''
+    if ('err' in locationList):
+        return
+    print(f'''
+    getLocationDotType
+    structPila = {structPila}
+
+    locationList = {locationList}
+
+    lastPropiedad = {lastPropiedad}
+    ''')
+
+    # Caso location.propiedad
+    if (len(locationList) == 1):
+        tipoTemp = validarPropiedadEstructura(
+            locationList[0], lastPropiedad, structPila)
+
+        if(isinstance(tipoTemp, Error)):
+            print(tipoTemp.mensaje)
+        else:
+            print(tipoTemp)
+        return
+
+    for i in range(0, len(locationList), 2):
+        print(locationList[i])
+
+
+def validarPropiedadEstructura(estructuraNombre, propiedad, structPila):
+    '''
+    Funcion para validar la existencia de una estructura con x propiedad y
+    retornar el tipo de la propiedad.
+
+    Parametros:
+    - estructuraNombre: nombre de la estructura con posible x propiedad.
+    - propiedad: nombre de la propiedad a evaluar.
+    - structPila: todas las estructuras declaradas hasta el momento.
+
+    Retornos:
+    - <Error> si algo sale mal
+    - Tipo si todo sale bien
+    '''
+    if(estructuraNombre in structPila.keys()):
+        # Existe la estructura
+
+        if(propiedad in structPila[estructuraNombre].propiedades.keys()):
+            # Si existe la propiedad retornar el tipo
+            return structPila[estructuraNombre].propiedades[propiedad].tipo
+        else:
+            # No existe la propiedad
+            return Error(f"La estructura '{estructuraNombre}' no tiene la propiedad '{propiedad}'")
+    else:
+        # No existe la estructura
+        return Error(f"La estructura '{estructuraNombre}' no existe")

@@ -2,6 +2,7 @@ class Program{
     struct A
     {
         int b[5];
+        int test;
     };
 
     struct B
@@ -37,11 +38,12 @@ class Program{
     {
         int a;
 	    int array[1];
+        struct A c;
         print('H');
         getIntTest(1, 1, 1);
         if (true)
         {
-            return 1 + a.b.c.d.e.f - array[1 + testInt()];
+            return 1 + c.test - array[1 + testInt()];
         }
         else
         {

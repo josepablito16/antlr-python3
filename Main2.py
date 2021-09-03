@@ -23,6 +23,10 @@ expressionReturnTemp = []
 procesandoArrayExp = False
 expressionArrayTemp = []
 
+procesandoLocation = False
+locationList = []
+idLocationTemp = None
+
 '''
 Aqui se guardan los parametros de la funcion
 para luego al entrar al ambito de la funcion
@@ -264,15 +268,42 @@ class DecafPrinter(decafListener):
 
     # TODO expression con idLocationDot, arrayLocationDot
     def enterIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
-        print('enterIdLocationDot')
-        idLocationTemp = None
+        global procesandoLocation
+        global locationList
+        global idLocationTemp
+
+        procesandoLocation = True
+
         for i in ctx.getChildren():
             if (isinstance(i, decafParser.IdDecContext)):
-                print(f"{i.getText()} = {type(i)}")
+                tipoTemp = getidLocationType(i.getText(), pilaVariable)
+                if (isinstance(tipoTemp, Error)):
+                    print(
+                        f"Error en llamada de variable linea {ctx.start.line}: {tipoTemp.mensaje}")
+                    locationList.append('err')
+                else:
+                    locationList.append(tipoTemp)
             elif (isinstance(i, decafParser.IdLocationContext)):
                 idLocationTemp = i.getText()
 
-        print(idLocationTemp)
+    def exitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
+        global procesandoLocation
+        global locationList
+        global idLocationTemp
+
+        print(f'''
+        exitIdLocationDot
+        procesandoLocation = {procesandoLocation}
+        locationList = {locationList}
+        idLocationTemp = {idLocationTemp}
+        ''')
+
+        # validar idLocation y obtener tipo
+        getLocationDotType(pilaEstructura[-1], locationList, idLocationTemp)
+
+        procesandoLocation = False
+        locationList = []
+        idLocationTemp = None
 
     def enterArrayLocation(self, ctx: decafParser.ArrayLocationContext):
         global procesandoArrayExp
