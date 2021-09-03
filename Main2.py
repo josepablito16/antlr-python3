@@ -277,12 +277,15 @@ class DecafPrinter(decafListener):
         for i in ctx.getChildren():
             if (isinstance(i, decafParser.IdDecContext)):
                 tipoTemp = getidLocationType(i.getText(), pilaVariable)
-                if (isinstance(tipoTemp, Error)):
-                    print(
-                        f"Error en llamada de variable linea {ctx.start.line}: {tipoTemp.mensaje}")
-                    locationList.append('err')
+                if (len(locationList) == 0):
+                    if (isinstance(tipoTemp, Error)):
+                        print(
+                            f"Error en llamada de variable linea {ctx.start.line}: {tipoTemp.mensaje}")
+                        locationList.append('err')
+                    else:
+                        locationList.append(tipoTemp)
                 else:
-                    locationList.append(tipoTemp)
+                    locationList.append(i.getText())
             elif (isinstance(i, decafParser.IdLocationContext)):
                 idLocationTemp = i.getText()
 
@@ -312,8 +315,9 @@ class DecafPrinter(decafListener):
                 expressionReturnTemp.append('err')
             else:
                 # obtenemos el tipo
-                print('Se ' + tipoTemp)
-                expressionReturnTemp.append(tipoTemp)
+                print('Se ' + str(tipoTemp))
+                if (tipoTemp):
+                    expressionReturnTemp.append(tipoTemp)
 
         procesandoLocation = False
         locationList = []

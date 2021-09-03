@@ -38,12 +38,12 @@ class Program{
     {
         int a;
 	    int array[1];
-        struct A c;
+        struct B miB;
         print('H');
         getIntTest(1, 1, 1);
         if (true)
         {
-            return 1 + c.test - array[1 + testInt()];
+            return 1 + miB.c.test - array[1 + testInt()];
         }
         else
         {
