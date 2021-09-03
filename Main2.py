@@ -44,6 +44,9 @@ class DecafPrinter(decafListener):
         - nombre: string con el nombre de la variable
         - variable: objeto Variable con la informacion de la variable a ingresar.
         '''
+
+        print()
+
         if(nombre in pilaVariable[-1].keys()):
             return Error('Esta variable ya existe')
         else:
@@ -63,8 +66,13 @@ class DecafPrinter(decafListener):
         - nombre: string con el nombre de la estructura
         - estructura: objeto estructura con la informacion de la estructura a ingresar.
         '''
+        print(f'''
+        agregarStructATabla
+        nombre = {nombre}
+        pila = {pilaEstructura}
+        ''')
         if(nombre in pilaEstructura[-1].keys()):
-            return 'Esta estructura ya existe'
+            return Error(f"La estructura '{nombre}' ya ha sido declarada antes.")
         else:
             pilaEstructura[-1][nombre] = estructura
 
@@ -72,6 +80,19 @@ class DecafPrinter(decafListener):
                 # Pila Estructura
                 {pilaEstructura}
                 ''')
+
+    def validarEstructura(self, nombreEstructura):
+        '''
+        Funcion que valida si una estructura ya existe en la tabla actual
+        si no existe retorna error, caso contrario True.
+
+        Parametros
+        - nombreEstructura: string con el nombre de la estructura
+        '''
+        if(nombreEstructura in pilaEstructura[-1].keys()):
+            return True
+        else:
+            return Error(f"La estructura '{nombreEstructura}' no ha sido definida.")
 
     def agregarVariableAmbitoTemp(self, nombre, variable):
         '''
@@ -120,11 +141,10 @@ class DecafPrinter(decafListener):
 
     def agregarAmbito(self):
         pilaVariable.append({})
-        pilaEstructura.append({})
 
     def quitarAmbito(self):
         pilaVariable.pop()
-        pilaEstructura.pop()
+        # pilaEstructura.pop()
 
     def agregarFuncionATabla(self, nombre, funcion):
         '''
@@ -243,6 +263,17 @@ class DecafPrinter(decafListener):
             expressionReturnTemp.append('boolean')
 
     # TODO expression con idLocationDot, arrayLocationDot
+    def enterIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
+        print('enterIdLocationDot')
+        idLocationTemp = None
+        for i in ctx.getChildren():
+            if (isinstance(i, decafParser.IdDecContext)):
+                print(f"{i.getText()} = {type(i)}")
+            elif (isinstance(i, decafParser.IdLocationContext)):
+                idLocationTemp = i.getText()
+
+        print(idLocationTemp)
+
     def enterArrayLocation(self, ctx: decafParser.ArrayLocationContext):
         global procesandoArrayExp
         global expressionArrayTemp
@@ -255,6 +286,7 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+        # TODO validar que no estemos procesando un idLocationDot o arrayLocationDot
         # se validan los tipos y se agregan en arrays correspondientes
         nombre = ctx.id_tok().getText()
         expType = procesarExp(expressionArrayTemp)
@@ -277,6 +309,8 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        # TODO validar que no estemos procesando un idLocationDot o arrayLocationDot
 
         tipo = getidLocationType(ctx.id_tok().getText(), pilaVariable)
 
@@ -451,8 +485,22 @@ class DecafPrinter(decafListener):
         # es la declaracion de una variable
         nombre = ctx.id_tok().getText()
         tipo = ctx.varType().getText()
+        estructura = False
+
+        if (tipo.find('struct') != -1):
+            # es de tipo estructura
+            tipo = tipo.replace('struct', '')
+
+            # validar si existe la estructura
+            estructError = self.validarEstructura(tipo)
+            if (isinstance(estructError, Error)):
+                print(
+                    f"Error en declaracion de variable linea {ctx.start.line}: {estructError.mensaje}")
+            else:
+                estructura = True
+
         declaracionTemp = self.agregarVariableATabla(
-            nombre, Variable(tipo))
+            nombre, Variable(tipo, isEstructura=estructura))
         if(isinstance(declaracionTemp, Error)):
             print(
                 f"Error en declaracion de variable linea {ctx.start.line}: {declaracionTemp.mensaje}")
@@ -476,6 +524,7 @@ class DecafPrinter(decafListener):
         # Se crea el ambito global
         self.agregarAmbito()
         pilaFuncion.append({})
+        pilaEstructura.append({})
 
     def enterStructDec(self, ctx: decafParser.StructDecContext):
         self.agregarAmbito()
@@ -483,8 +532,11 @@ class DecafPrinter(decafListener):
     def exitStructDec(self, ctx: decafParser.StructDecContext):
         # pasar este ambito a las propiedades de la estructura
         nombre = ctx.id_tok().getText()
-        self.agregarStructATabla(nombre, Estructura(
+        structErr = self.agregarStructATabla(nombre, Estructura(
             copy.deepcopy(pilaVariable[-1])))
+        if (isinstance(structErr, Error)):
+            print(
+                f"Error en declaracion de estructura linea {ctx.start.line}: {structErr.mensaje}")
         self.quitarAmbito()
 
     def enterBlockDec(self, ctx: decafParser.BlockDecContext):
