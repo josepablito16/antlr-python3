@@ -26,6 +26,7 @@ expressionArrayTemp = []
 procesandoArgExp = False
 expressionArgTemp = []
 listaTiposArg = []
+controlCantidadParam = False
 
 procesandoLocation = False
 locationList = []
@@ -259,6 +260,12 @@ class DecafPrinter(decafListener):
         global procesandoArrayExp
         global expressionArrayTemp
 
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('int')
+
         if (procesandoArrayExp):
             expressionArrayTemp.append('int')
 
@@ -272,6 +279,12 @@ class DecafPrinter(decafListener):
         global procesandoArrayExp
         global expressionArrayTemp
 
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('char')
+
         if (procesandoArrayExp):
             expressionArrayTemp.append('char')
 
@@ -284,6 +297,12 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('boolean')
 
         if (procesandoArrayExp):
             expressionArrayTemp.append('boolean')
@@ -347,6 +366,9 @@ class DecafPrinter(decafListener):
         global procesandoReturnExp
         global expressionReturnTemp
 
+        global procesandoArgExp
+        global expressionArgTemp
+
         print(f'''
         exitIdLocationDot
         procesandoLocation = {procesandoLocation}
@@ -360,7 +382,7 @@ class DecafPrinter(decafListener):
 
         if (procesandoReturnExp):
             if (isinstance(tipoTemp, Error)):
-                # hay error
+                # TODO hay error
                 print(tipoTemp.mensaje)
                 expressionReturnTemp.append('err')
             else:
@@ -368,6 +390,17 @@ class DecafPrinter(decafListener):
                 print('Se ' + str(tipoTemp))
                 if (tipoTemp):
                     expressionReturnTemp.append(tipoTemp)
+
+        if (procesandoArgExp):
+            if (isinstance(tipoTemp, Error)):
+                # TODO hay error
+                print(tipoTemp.mensaje)
+                expressionArgTemp.append('err')
+            else:
+                # obtenemos el tipo
+                print('Se ' + str(tipoTemp))
+                if (tipoTemp):
+                    expressionArgTemp.append(tipoTemp)
 
         procesandoLocation = False
         locationList = []
@@ -411,6 +444,9 @@ class DecafPrinter(decafListener):
 
         global procesandoLocation
 
+        global procesandoArgExp
+        global expressionArgTemp
+
         # TODO validar que no estemos procesando un idLocationDot o arrayLocationDot
         if (procesandoLocation):
             return
@@ -433,6 +469,14 @@ class DecafPrinter(decafListener):
             else:
                 expressionReturnTemp.append(tipo)
 
+        if (procesandoArgExp):
+            if (isinstance(tipo, Error)):
+                print(
+                    f"Error en llamada de variable linea {ctx.start.line}: {tipo.mensaje}")
+                expressionArgTemp.append('err')
+            else:
+                expressionArgTemp.append(tipo)
+
     def enterIfStmt(self, ctx: decafParser.IfStmtContext):
         global procesandoReturnExp
         procesandoReturnExp = True
@@ -447,6 +491,11 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        global controlCantidadParam
+        global procesandoArgExp
+        global expressionArgTemp
+        global listaTiposArg
 
         tipo = getMethodType(ctx.id_tok().getText(), pilaFuncion)
 
@@ -466,19 +515,50 @@ class DecafPrinter(decafListener):
             else:
                 expressionReturnTemp.append(tipo)
 
-        # TODO validar cantidad de parametros
+        # validar cantidad de parametros
         if (isinstance(tipo, Error)):
             print(
                 f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
             return
         else:
-            #print(f'{ctx.start.line} : Cantidad de parametros = {len(list(ctx.getChildren()))}')
             print(f'Llamada {ctx.start.line}')
             errParametros = self.validarCantidadParametrosFunc(
                 ctx.id_tok().getText(), ctx.getChildren())
             if(isinstance(errParametros, Error)):
                 print(
                     f"Error en llamada de funcion linea {ctx.start.line}: {errParametros.mensaje}")
+            else:
+                # iniciar el proceso de tipos de argumentos
+                controlCantidadParam = True
+                procesandoArgExp = True
+                listaTiposArg = []
+
+    def enterArgDec(self, ctx: decafParser.ArgDecContext):
+        global expressionArgTemp
+        expressionArgTemp = []
+
+    def exitArgDec(self, ctx: decafParser.ArgDecContext):
+        global listaTiposArg
+        global expressionArgTemp
+
+        listaTiposArg.append(procesarExp(expressionArgTemp))
+        expressionArgTemp = []
+
+    def exitMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
+        global controlCantidadParam
+        global procesandoArgExp
+        global expressionArgTemp
+        global listaTiposArg
+
+        if (controlCantidadParam):
+            # Si tienen la misma cantidad de param
+            # validar tipos
+            print(f'{ctx.start.line}: listaTiposArg = {listaTiposArg}')
+
+        controlCantidadParam = False
+        procesandoArgExp = False
+        expressionArgTemp = []
+        listaTiposArg = []
 
     def enterNegativeExpr(self, ctx: decafParser.NegativeExprContext):
         global procesandoReturnExp
@@ -486,6 +566,12 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('negative')
 
         if (procesandoArrayExp):
             expressionArrayTemp.append('negative')
@@ -500,6 +586,12 @@ class DecafPrinter(decafListener):
         global procesandoArrayExp
         global expressionArrayTemp
 
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('not')
+
         if (procesandoArrayExp):
             expressionArrayTemp.append('not')
 
@@ -512,6 +604,12 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('intOp')
 
         if (procesandoArrayExp):
             expressionArrayTemp.append('intOp')
@@ -526,6 +624,12 @@ class DecafPrinter(decafListener):
         global procesandoArrayExp
         global expressionArrayTemp
 
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('intOp')
+
         if (procesandoArrayExp):
             expressionArrayTemp.append('intOp')
 
@@ -538,6 +642,12 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('relOp')
 
         if (procesandoArrayExp):
             expressionArrayTemp.append('relOp')
@@ -552,6 +662,12 @@ class DecafPrinter(decafListener):
         global procesandoArrayExp
         global expressionArrayTemp
 
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('eqOp')
+
         if (procesandoArrayExp):
             expressionArrayTemp.append('eqOp')
 
@@ -564,6 +680,12 @@ class DecafPrinter(decafListener):
 
         global procesandoArrayExp
         global expressionArrayTemp
+
+        global procesandoArgExp
+        global expressionArgTemp
+
+        if (procesandoArgExp):
+            expressionArgTemp.append('boolOp')
 
         if (procesandoArrayExp):
             expressionArrayTemp.append('boolOp')

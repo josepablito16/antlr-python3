@@ -10,6 +10,9 @@ def procesarExp(exp):
     '''
     exp.reverse()
 
+    if (len(exp) == 0):
+        return
+
     print(f'''
             Exp {exp}
             ''')
