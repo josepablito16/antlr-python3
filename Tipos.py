@@ -241,3 +241,10 @@ def validarTiposArgumentos(nombreFuncion, tiposArgumentos, pilaFuncion):
             for arg in ambito[nombreFuncion].argumentosTipos:
                 if not(arg == tiposArgumentos.pop(0)):
                     return Error("Los tipos de los argumentos no coinciden con la definicion")
+
+
+def validarAssign(listaTipos):
+    tipoTemp = listaTipos[0]
+    for i in listaTipos:
+        if not(tipoTemp == i):
+            return Error('Los tipos de la asignacion no coinciden')

@@ -47,13 +47,13 @@ class Program{
 
     int main(void)
     {
-        int a;
 	    int array[1];
         struct B y[5];
         struct A p;
         int j;
         char testChar;
         getIntTest(1, 1 + j);
+        j = j;
         if (true || false)
         {
             return 1 + p.a - array[1 + testInt(4)];
