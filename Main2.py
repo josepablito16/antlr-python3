@@ -505,6 +505,9 @@ class DecafPrinter(decafListener):
                     f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
                 expressionArrayTemp.append('err')
             else:
+                if (tipo == 'void'):
+                    print(
+                        f"Error en llamada de funcion linea {ctx.start.line}: No se puede usar funcion void en exp")
                 expressionArrayTemp.append(tipo)
 
         elif (procesandoReturnExp):
@@ -513,6 +516,9 @@ class DecafPrinter(decafListener):
                     f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
                 expressionReturnTemp.append('err')
             else:
+                if (tipo == 'void'):
+                    print(
+                        f"Error en llamada de funcion linea {ctx.start.line}: No se puede usar funcion void en exp")
                 expressionReturnTemp.append(tipo)
 
         # validar cantidad de parametros

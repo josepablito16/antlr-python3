@@ -38,6 +38,10 @@ class Program{
         return 1;
     }
 
+    void nada()
+    {
+    }
+
     struct A y;
     struct A z;
 
