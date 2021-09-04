@@ -170,7 +170,7 @@ def getLocationDotType(structPila, locationList, lastPropiedad):
     # Caso location.propiedad
     if (len(locationList) == 1):
         tipoTemp = validarPropiedadEstructura(
-            locationList[0], lastPropiedad, structPila)
+            locationList[0].getTipo(), lastPropiedad.getTipo(), structPila)
 
         return tipoTemp
 
@@ -179,7 +179,7 @@ def getLocationDotType(structPila, locationList, lastPropiedad):
     while (i < len(locationList) - 1):
         #print(f"'{locationList[i]}' tiene propiedad '{locationList[i + 1]}'?")
         tipoTemp = validarPropiedadEstructura(
-            locationList[i], locationList[i + 1], structPila)
+            locationList[i].getTipo(), locationList[i + 1].getTipo(), structPila)
         if (isinstance(tipoTemp, Error)):
             return tipoTemp
         locationList.pop(1)

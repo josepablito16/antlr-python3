@@ -267,27 +267,52 @@ class DecafPrinter(decafListener):
             expressionReturnTemp.append('boolean')
 
     # TODO expression con idLocationDot, arrayLocationDot
+    def enterArrayLocationDot(self, ctx: decafParser.ArrayLocationDotContext):
+        print('enterArrayLocationDot')
+
+        nodosHijos = list(ctx.getChildren())
+        for i in range(len(nodosHijos)):
+            #print(f'{nodosHijos[i].getText()} = {type(nodosHijos[i])}')
+            if (isinstance(nodosHijos[i], decafParser.IdDecContext)):
+                print(nodosHijos[i].getText())
+
+            elif (isinstance(nodosHijos[i], decafParser.IdLocationContext)):
+                print('Solo')
+                print(nodosHijos[i].getText())
+
+            elif (isinstance(nodosHijos[i], decafParser.IdLocationDotContext)):
+                print('Doble')  # a.b
+                print(nodosHijos[i].getText())
+
+            try:
+                if(nodosHijos[i + 1].getText() == '['):
+                    print('Es array ^')
+            except:
+                pass
+
     def enterIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
         global procesandoLocation
         global locationList
         global idLocationTemp
 
         procesandoLocation = True
+        nodosHijos = list(ctx.getChildren())
 
-        for i in ctx.getChildren():
-            if (isinstance(i, decafParser.IdDecContext)):
-                tipoTemp = getidLocationType(i.getText(), pilaVariable)
+        for i in range(len(nodosHijos)):
+            if (isinstance(nodosHijos[i], decafParser.IdDecContext)):
+                tipoTemp = getidLocationType(
+                    nodosHijos[i].getText(), pilaVariable)
                 if (len(locationList) == 0):
                     if (isinstance(tipoTemp, Error)):
                         print(
                             f"Error en llamada de variable linea {ctx.start.line}: {tipoTemp.mensaje}")
                         locationList.append('err')
                     else:
-                        locationList.append(tipoTemp)
+                        locationList.append(Variable(tipoTemp))
                 else:
-                    locationList.append(i.getText())
-            elif (isinstance(i, decafParser.IdLocationContext)):
-                idLocationTemp = i.getText()
+                    locationList.append(Variable(nodosHijos[i].getText()))
+            elif (isinstance(nodosHijos[i], decafParser.IdLocationContext)):
+                idLocationTemp = Variable(nodosHijos[i].getText())
 
     def exitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
         global procesandoLocation
@@ -382,6 +407,14 @@ class DecafPrinter(decafListener):
                 expressionReturnTemp.append('err')
             else:
                 expressionReturnTemp.append(tipo)
+
+    def enterIfStmt(self, ctx: decafParser.IfStmtContext):
+        global procesandoReturnExp
+        procesandoReturnExp = True
+
+    def enterWhileStmt(self, ctx: decafParser.WhileStmtContext):
+        global procesandoReturnExp
+        procesandoReturnExp = True
 
     def enterMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
         global procesandoReturnExp
@@ -607,6 +640,20 @@ class DecafPrinter(decafListener):
         self.quitarAmbito()
 
     def enterBlockDec(self, ctx: decafParser.BlockDecContext):
+        global procesandoReturnExp
+        global expressionReturnTemp
+
+        if (procesandoReturnExp):
+            # sabemos que estamos procesando una Exp de if o while
+
+            # Evaluamos que el tipo de dato sea boolean
+            if not(procesarExp(expressionReturnTemp) == 'boolean'):
+                print(
+                    f"Error en exp condicional {ctx.parentCtx.start.line}: No es de tipo 'boolean'")
+
+            expressionReturnTemp = []
+            procesandoReturnExp = False
+
         self.agregarAmbito()
         if (len(ambitoVariableTemp) > 0):
             self.agregarAmbitoTempATabla()
