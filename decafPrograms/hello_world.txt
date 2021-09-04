@@ -48,6 +48,7 @@ class Program{
         struct B y[5];
         struct A p;
         int j;
+        char testChar;
         print('H');
         getIntTest(1, 1 + j);
         if (true || false)

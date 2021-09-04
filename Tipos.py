@@ -220,3 +220,20 @@ def validarPropiedadEstructura(estructuraNombre, propiedad, structPila):
     else:
         # No existe la estructura
         return Error(f"La estructura '{estructuraNombre}' no existe")
+
+
+def validarTiposArgumentos(nombreFuncion, tiposArgumentos, pilaFuncion):
+    '''
+    Funcion para validar si los tipos de una llamada de funcion son equivalentes
+    a los tipos de la declaracion de la funcion
+
+    Parametros:
+    - nombreFuncion: nombre de la funcion a evaluar
+    - tiposArgumentos: tipos de los argumentos en la llamada de la funcion
+    - pilaFuncion: pila con las funciones declaradas
+    '''
+    for ambito in pilaFuncion:
+        if(nombreFuncion in ambito.keys()):
+            for arg in ambito[nombreFuncion].argumentosTipos:
+                if not(arg == tiposArgumentos.pop(0)):
+                    return Error("Los tipos de los argumentos no coinciden con la definicion")

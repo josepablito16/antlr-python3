@@ -554,6 +554,11 @@ class DecafPrinter(decafListener):
             # Si tienen la misma cantidad de param
             # validar tipos
             print(f'{ctx.start.line}: listaTiposArg = {listaTiposArg}')
+            err = validarTiposArgumentos(
+                ctx.id_tok().getText(), listaTiposArg, pilaFuncion)
+            if (isinstance(err, Error)):
+                print(
+                    f"Error en llamada de funcion linea {ctx.start.line}: {err.mensaje}")
 
         controlCantidadParam = False
         procesandoArgExp = False
