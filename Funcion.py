@@ -16,14 +16,17 @@ class Funcion:
         return control
 
     def agregarReturn(self, tipo=None):
+        """
         print(f''' 
         agegarReturn 
         tipo {tipo}
         retornoTipos {self.retornoTipos}
         ''')
+        """
         self.retornoTipos.append(tipo)
 
     def validar(self):
+        """
         print(f'''
         -----
         validar
@@ -31,6 +34,7 @@ class Funcion:
         {self.tipo}
         {self.retornoTipos}
         ''')
+        """
         if (self.tipo == 'void'):
             if(len(self.retornoTipos) > 0):
                 self.err = Error('Funcion void no retorna nada')

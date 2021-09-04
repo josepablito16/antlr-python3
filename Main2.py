@@ -54,17 +54,18 @@ class DecafPrinter(decafListener):
         - variable: objeto Variable con la informacion de la variable a ingresar.
         '''
 
-        print()
+        # print()
 
         if(nombre in pilaVariable[-1].keys()):
             return Error('Esta variable ya existe')
         else:
             pilaVariable[-1][nombre] = variable
-
+        """
         print(f'''
                 # Pila Variables
                 {pilaVariable}
                 ''')
+        """
 
     def agregarStructATabla(self, nombre, estructura):
         '''
@@ -75,20 +76,24 @@ class DecafPrinter(decafListener):
         - nombre: string con el nombre de la estructura
         - estructura: objeto estructura con la informacion de la estructura a ingresar.
         '''
+        """
         print(f'''
         agregarStructATabla
         nombre = {nombre}
         pila = {pilaEstructura}
         ''')
+        """
         if(nombre in pilaEstructura[-1].keys()):
             return Error(f"La estructura '{nombre}' ya ha sido declarada antes.")
         else:
             pilaEstructura[-1][nombre] = estructura
 
+        """
         print(f'''
                 # Pila Estructura
                 {pilaEstructura}
                 ''')
+        """
 
     def validarEstructura(self, nombreEstructura):
         '''
@@ -141,10 +146,12 @@ class DecafPrinter(decafListener):
         else:
             ambitoVariableTemp[nombre] = variable
 
+        """
         print(f'''
                 # Pila Variables [temp]
                 {ambitoVariableTemp}
                 ''')
+        """
 
     def agregarAmbitoTempATabla(self):
         '''
@@ -156,10 +163,12 @@ class DecafPrinter(decafListener):
         pilaVariable[-1].update(ambitoVariableTemp)
         ambitoVariableTemp = {}
 
+        """
         print(f'''
                 # Pila Variables
                 {pilaVariable}
                 ''')
+        """
 
     def validarReglaMain(self):
         try:
@@ -194,10 +203,12 @@ class DecafPrinter(decafListener):
             else:
                 pilaFuncion[-1][nombre] = copy.deepcopy(funcion)
 
+            """
             print(f'''
                     # Pila funciones
                     {pilaFuncion}
                     ''')
+            """
 
     def procesarParametros(self, parametros):
         '''
@@ -310,27 +321,31 @@ class DecafPrinter(decafListener):
         elif (procesandoReturnExp):
             expressionReturnTemp.append('boolean')
 
-    # TODO expression con idLocationDot, arrayLocationDot
+    # TODO expression con arrayLocationDot
     def enterArrayLocationDot(self, ctx: decafParser.ArrayLocationDotContext):
-        print('enterArrayLocationDot')
+        # print('enterArrayLocationDot')
 
         nodosHijos = list(ctx.getChildren())
         for i in range(len(nodosHijos)):
             #print(f'{nodosHijos[i].getText()} = {type(nodosHijos[i])}')
             if (isinstance(nodosHijos[i], decafParser.IdDecContext)):
-                print(nodosHijos[i].getText())
+                # print(nodosHijos[i].getText())
+                pass
 
             elif (isinstance(nodosHijos[i], decafParser.IdLocationContext)):
-                print('Solo')
-                print(nodosHijos[i].getText())
+                # print('Solo')
+                # print(nodosHijos[i].getText())
+                pass
 
             elif (isinstance(nodosHijos[i], decafParser.IdLocationDotContext)):
-                print('Doble')  # a.b
-                print(nodosHijos[i].getText())
+                # print('Doble')  # a.b
+                # print(nodosHijos[i].getText())
+                pass
 
             try:
                 if(nodosHijos[i + 1].getText() == '['):
-                    print('Es array ^')
+                    #print('Es array ^')
+                    pass
             except:
                 pass
 
@@ -369,12 +384,14 @@ class DecafPrinter(decafListener):
         global procesandoArgExp
         global expressionArgTemp
 
+        """
         print(f'''
         exitIdLocationDot
         procesandoLocation = {procesandoLocation}
         locationList = {locationList}
         idLocationTemp = {idLocationTemp}
         ''')
+        """
 
         # validar idLocation y obtener tipo
         tipoTemp = getLocationDotType(
@@ -382,23 +399,23 @@ class DecafPrinter(decafListener):
 
         if (procesandoReturnExp):
             if (isinstance(tipoTemp, Error)):
-                # TODO hay error
-                print(tipoTemp.mensaje)
+                print(
+                    f"Error en llamada de variable linea {ctx.start.line}: {tipoTemp.mensaje}")
                 expressionReturnTemp.append('err')
             else:
                 # obtenemos el tipo
-                print('Se ' + str(tipoTemp))
+                #print('Se ' + str(tipoTemp))
                 if (tipoTemp):
                     expressionReturnTemp.append(tipoTemp)
 
         if (procesandoArgExp):
             if (isinstance(tipoTemp, Error)):
-                # TODO hay error
-                print(tipoTemp.mensaje)
+                print(
+                    f"Error en llamada de variable linea {ctx.start.line}: {tipoTemp.mensaje}")
                 expressionArgTemp.append('err')
             else:
                 # obtenemos el tipo
-                print('Se ' + str(tipoTemp))
+                #print('Se ' + str(tipoTemp))
                 if (tipoTemp):
                     expressionArgTemp.append(tipoTemp)
 
@@ -527,7 +544,7 @@ class DecafPrinter(decafListener):
                 f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
             return
         else:
-            print(f'Llamada {ctx.start.line}')
+            #print(f'Llamada {ctx.start.line}')
             errParametros = self.validarCantidadParametrosFunc(
                 ctx.id_tok().getText(), ctx.getChildren())
             if(isinstance(errParametros, Error)):
@@ -559,7 +576,7 @@ class DecafPrinter(decafListener):
         if (controlCantidadParam):
             # Si tienen la misma cantidad de param
             # validar tipos
-            print(f'{ctx.start.line}: listaTiposArg = {listaTiposArg}')
+            #print(f'{ctx.start.line}: listaTiposArg = {listaTiposArg}')
             err = validarTiposArgumentos(
                 ctx.id_tok().getText(), listaTiposArg, pilaFuncion)
             if (isinstance(err, Error)):
@@ -708,12 +725,14 @@ class DecafPrinter(decafListener):
         global procesandoReturnExp
         global funcionTemp
         global expressionReturnTemp
+        """
         print(f'''
         -----
         exitReturnStatement {ctx.start.line}
         -----
         expressionReturnTemp {expressionReturnTemp}
         ''')
+        """
         funcionTemp.agregarReturn(procesarExp(expressionReturnTemp))
         expressionReturnTemp = []
         procesandoReturnExp = False
@@ -842,7 +861,7 @@ class DecafPrinter(decafListener):
 
 
 def main():
-    print("Listo")
+    # print("Listo")
     data = open('./decafPrograms/hello_world.txt').read()
     lexer = decafLexer(InputStream(data))
     stream = CommonTokenStream(lexer)

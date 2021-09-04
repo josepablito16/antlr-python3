@@ -53,11 +53,10 @@ class Program{
         struct A p;
         int j;
         char testChar;
-        print('H');
         getIntTest(1, 1 + j);
         if (true || false)
         {
-            return 1 + p.a - array[1 + testInt()];
+            return 1 + p.a - array[1 + testInt(4)];
         }
         else
         {
@@ -69,6 +68,6 @@ class Program{
 
         }
 
-        return testInt(-1) + 3;
+        return testInt(-1) + 3 ;
     }
 }

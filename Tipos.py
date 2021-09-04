@@ -13,9 +13,11 @@ def procesarExp(exp):
     if (len(exp) == 0):
         return
 
+    """
     print(f'''
             Exp {exp}
             ''')
+    """
     if (len(exp) == 1):
         return exp.pop()
     operadores = ['intOp', 'relOp', 'eqOp', 'boolOp', 'negative', 'not']
@@ -161,6 +163,7 @@ def getLocationDotType(structPila, locationList, lastPropiedad):
     '''
     if ('err' in locationList or len(locationList) == 0):
         return
+    """
     print(f'''
     getLocationDotType
     structPila = {structPila}
@@ -169,6 +172,7 @@ def getLocationDotType(structPila, locationList, lastPropiedad):
 
     lastPropiedad = {lastPropiedad}
     ''')
+    """
 
     # Caso location.propiedad
     if (len(locationList) == 1):
