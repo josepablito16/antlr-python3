@@ -22,7 +22,7 @@ class Program{
         {return true;}
     }
 
-    int testInt()
+    int testInt(int a)
     {
         if(true)
         {
@@ -31,6 +31,11 @@ class Program{
         }
         else
         {return 1;}
+    }
+
+    int getIntTest(int a, int b)
+    {
+        return 1;
     }
 
     struct A y;
@@ -44,7 +49,7 @@ class Program{
         struct A p;
         int j;
         print('H');
-        getIntTest(1, 1, 1);
+        getIntTest(1, 1);
         if (true || false)
         {
             return 1 + p.a - array[1 + testInt()];

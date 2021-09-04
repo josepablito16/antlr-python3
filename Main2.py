@@ -23,6 +23,10 @@ expressionReturnTemp = []
 procesandoArrayExp = False
 expressionArrayTemp = []
 
+procesandoArgExp = False
+expressionArgTemp = []
+listaTiposArg = []
+
 procesandoLocation = False
 locationList = []
 idLocationTemp = None
@@ -98,6 +102,27 @@ class DecafPrinter(decafListener):
         else:
             return Error(f"La estructura '{nombreEstructura}' no ha sido definida.")
 
+    def validarCantidadParametrosFunc(self, nombreFunc, hijosNodo):
+        '''
+        Funcion para validar la cantidad de parametros en la llamada de una funcion
+
+        Parametros:
+        - nombreFunc: Nombre de la funcion a evaluar
+        - hijosNodo: todos los hijos del nodo <methodCallDec>
+
+        Retorno:
+        - Error en el caso de que la cantidad de argumentos no coincida con la definicion
+        '''
+        cantidadReal = len(pilaFuncion[-1][nombreFunc].argumentosTipos)
+
+        contador = 0
+        for i in hijosNodo:
+            if(isinstance(i, decafParser.ArgDecContext)):
+                contador += 1
+
+        if not(cantidadReal == contador):
+            return Error(f"Se esperaban {cantidadReal} argumentos en lugar de {contador}")
+
     def agregarVariableAmbitoTemp(self, nombre, variable):
         '''
         Funcion que valida si una variable ya existe en el ambito temporal
@@ -111,7 +136,7 @@ class DecafPrinter(decafListener):
         - variable: objeto Variable con la informacion de la variable a ingresar.
         '''
         if(nombre in ambitoVariableTemp.keys()):
-            return f'La variable "{nombre}" ya existe dentro de los parametros de la funcion'
+            return Error(f'La variable "{nombre}" ya existe dentro de los parametros de la funcion')
         else:
             ambitoVariableTemp[nombre] = variable
 
@@ -186,9 +211,9 @@ class DecafPrinter(decafListener):
         # revisa si contiene de parametros void, no puede ir acompañado de más tipos
         if (parametros[0].getText() == 'void'):
             if (len(parametros) == 1):
-                return parametrosList
+                return None, parametrosList
             else:
-                return Error('parametro void no puede ir acompañado de mas parametros')
+                return Error('parametro void no puede ir acompañado de mas parametros'), []
 
         for i in parametros:
             nombre = i.id_tok().getText()
@@ -197,12 +222,12 @@ class DecafPrinter(decafListener):
             # Se agregan parametros a la tabla del ambito de esta funcion
             declaracionTemp = self.agregarVariableAmbitoTemp(
                 nombre, Variable(tipo))
-            if (declaracionTemp):
-                return declaracionTemp
+            if (isinstance(declaracionTemp, Error)):
+                return declaracionTemp, parametrosList
 
             parametrosList.append(tipo)
 
-        return parametrosList
+        return None, parametrosList
 
     def enterMethodDec(self, ctx: decafParser.MethodDecContext):
         global funcionTemp
@@ -213,12 +238,12 @@ class DecafPrinter(decafListener):
 
         if(len(ctx.parameter()) > 0):
             # Hay parametros
-            parametros = self.procesarParametros(ctx.parameter())
+            errorPara, parametros = self.procesarParametros(ctx.parameter())
 
-            if (isinstance(parametros, Error)):
+            if (isinstance(errorPara, Error)):
                 # hay error
                 print(
-                    f"Error en declaracion de funcion linea {ctx.start.line}: {parametros.mensaje}")
+                    f"Error en declaracion de funcion linea {ctx.start.line}: {errorPara.mensaje}")
 
         funcionTemp = copy.deepcopy(Funcion(tipo, parametros))
         funcionNombreTemp = nombre
@@ -440,6 +465,20 @@ class DecafPrinter(decafListener):
                 expressionReturnTemp.append('err')
             else:
                 expressionReturnTemp.append(tipo)
+
+        # TODO validar cantidad de parametros
+        if (isinstance(tipo, Error)):
+            print(
+                f"Error en llamada de funcion linea {ctx.start.line}: {tipo.mensaje}")
+            return
+        else:
+            #print(f'{ctx.start.line} : Cantidad de parametros = {len(list(ctx.getChildren()))}')
+            print(f'Llamada {ctx.start.line}')
+            errParametros = self.validarCantidadParametrosFunc(
+                ctx.id_tok().getText(), ctx.getChildren())
+            if(isinstance(errParametros, Error)):
+                print(
+                    f"Error en llamada de funcion linea {ctx.start.line}: {errParametros.mensaje}")
 
     def enterNegativeExpr(self, ctx: decafParser.NegativeExprContext):
         global procesandoReturnExp
