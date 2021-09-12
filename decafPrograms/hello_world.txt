@@ -1,10 +1,18 @@
 class Program{
+	struct A
+	{
+		int b;
+	};
+	struct B
+	{
+		int b;
+		struct A c;
+	};
+	int variable;
+	struct B y;
 
-	int variable;
-	int variable;
-	
 	int main()
 	{
 	}
-	
+
 }

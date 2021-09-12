@@ -9,10 +9,15 @@ from Variable import *
 from Funcion import *
 from Error import *
 
+import copy
+
 # pilas donde se manejan los ambitos
 pilaVariable = []
 pilaFuncion = []
 pilaEstructura = []
+
+FAIL = '\033[91m'
+ENDC = '\033[0m'
 
 
 class EvalVisitor(decafVisitor):
@@ -63,6 +68,19 @@ class EvalVisitor(decafVisitor):
                 {pilaEstructura}
                 ''')
 
+    def validarEstructura(self, nombreEstructura):
+        '''
+        Funcion que valida si una estructura ya existe en la tabla actual
+        si no existe retorna error, caso contrario True.
+
+        Parametros
+        - nombreEstructura: string con el nombre de la estructura
+        '''
+        if(nombreEstructura in pilaEstructura[-1].keys()):
+            return True
+        else:
+            return Error(f"La estructura '{nombreEstructura}' no ha sido definida.")
+
     def agregarAmbito(self, variable=True, estructura=False, funcion=False):
         '''
         Funcion para agregar un ambito
@@ -72,6 +90,7 @@ class EvalVisitor(decafVisitor):
         - estructura: bool para indicar si se desea agregar un ambito de estructuras.
         - funcion: bool para indicar si se desea agregar un ambito de funciones.
         '''
+        print('agregarAmbito')
         if variable:
             pilaVariable.append({})
         if estructura:
@@ -88,12 +107,13 @@ class EvalVisitor(decafVisitor):
         - estructura: bool para indicar si se desea quitar un ambito de estructuras.
         - funcion: bool para indicar si se desea quitar un ambito de funciones.
         '''
+        print('quitarAmbito')
         if variable:
-            pilaVariable.pop({})
+            pilaVariable.pop()
         if estructura:
-            pilaEstructura.pop({})
+            pilaEstructura.pop()
         if funcion:
-            pilaFuncion.pop({})
+            pilaFuncion.pop()
 
     def visitar(self, tree):
         '''
@@ -118,17 +138,35 @@ class EvalVisitor(decafVisitor):
         # se crea el ambito global
         self.agregarAmbito(variable=True, funcion=True, estructura=True)
 
+        # visitamos todas las declaraciones del programa
+        declaraciones = self.visitar(ctx.declaration())
+
         # se elimina ambito global
         self.quitarAmbito(variable=True, funcion=True, estructura=True)
-        return self.visitar(ctx.declaration())
+        return declaraciones
+
+    '''
+    Declaracion de estructuras
+    '''
 
     def visitStructDec(self, ctx: decafParser.StructDecContext):
         # se crea ambito de variable
         self.agregarAmbito()
 
+        print('visitStructDec')
+        nombre = ctx.id_tok().getText()
+        self.visitar(ctx.varDeclaration())
+
+        errTemp = self.agregarStructATabla(
+            nombre, Estructura(copy.deepcopy(pilaVariable[-1])))
+
+        if (isinstance(errTemp, Error)):
+            print(
+                f"{FAIL}Error en declaracion de estructura linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+
         # se elimina ambito de variable
         self.quitarAmbito()
-        return super().visitStructDec(ctx)
+        return None
 
     def visitMethodDec(self, ctx: decafParser.MethodDecContext):
         # se crea ambito de variable
@@ -146,7 +184,7 @@ class EvalVisitor(decafVisitor):
 
         # se elimina ambito de variable
         self.quitarAmbito()
-        return super().visitIfStmt(ctx)
+        return None
 
     def visitWhileStmt(self, ctx: decafParser.WhileStmtContext):
         # se crea ambito de variable
@@ -154,7 +192,7 @@ class EvalVisitor(decafVisitor):
 
         # se elimina ambito de variable
         self.quitarAmbito()
-        return super().visitWhileStmt(ctx)
+        return None
 
     '''
     Declaracion de variable y arreglo
@@ -163,12 +201,28 @@ class EvalVisitor(decafVisitor):
     def visitVarDec(self, ctx: decafParser.VarDecContext):
         nombre = ctx.id_tok().getText()
         tipo = ctx.varType().getText()
+        errTemp = None
+        esEstructura = False
         print(f'visitVarDec {tipo} - {nombre}')
-        errTemp = self.agregarVariableATabla(nombre, Variable(tipo))
+
+        # Validar si es de tipo estructura
+        if (tipo.find('struct') != -1):
+            # es de tipo estructura
+            tipo = tipo.replace('struct', '')
+
+            errTemp = self.validarEstructura(tipo)
+            if (isinstance(errTemp, Error)):
+                print(
+                    f"{FAIL}Error en declaracion de variable linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+                return
+            esEstructura = True
+
+        errTemp = self.agregarVariableATabla(
+            nombre, Variable(tipo, isEstructura=esEstructura))
         if isinstance(errTemp, Error):
             print(
-                f"Error en declaracion de variable linea {ctx.start.line}: {errTemp.mensaje}")
-        return super().visitVarDec(ctx)
+                f"{FAIL}Error en declaracion de variable linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+        return None
 
 
 def main():
