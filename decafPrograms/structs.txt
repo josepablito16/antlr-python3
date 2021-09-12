@@ -1,0 +1,24 @@
+class Program
+{
+struct MyTest
+{
+	int n;
+	char b;
+	int c[10];
+};
+
+struct OtherTest
+{
+	struct MyTest T[10];
+	int n;
+};
+
+
+void main(void)
+{
+	struct OtherTest M[5];
+	int i;
+	
+}
+
+}

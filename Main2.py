@@ -862,7 +862,12 @@ class DecafPrinter(decafListener):
 
 def main():
     # print("Listo")
-    data = open('./decafPrograms/hello_world.txt').read()
+    data = open('./decafPrograms/multiple_tests.txt').read()
+    #data = open('./decafPrograms/hello_world.txt').read()
+    #data = open('./decafPrograms/param.txt').read()
+    #data = open('./decafPrograms/scope.txt').read()
+    #data = open('./decafPrograms/structs.txt').read()
+
     lexer = decafLexer(InputStream(data))
     stream = CommonTokenStream(lexer)
     parser = decafParser(stream)

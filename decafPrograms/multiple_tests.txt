@@ -1,0 +1,57 @@
+class Program
+{
+
+struct A
+{
+	int a;
+};
+
+struct B
+{
+	int b;
+	struct A c;
+};
+
+struct A z;
+
+int factorial(int n)
+{
+	if (n==0)
+	{return 1;}
+	else
+	{return n;}
+}
+
+void OutputInt(int n)
+{
+}
+
+int InputInt(void)
+{
+	return 0;
+}
+
+int ReturnNumber(void)
+{
+	return z.a;
+}
+
+void main(void)
+{
+	struct B y;
+	int i;
+	int j;
+	int k;	
+	
+
+	while(i<=10)
+	{		
+		if(y.b==5)
+		{
+			OutputInt(k);
+		}		
+
+	}
+}
+
+}

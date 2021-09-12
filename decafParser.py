@@ -282,6 +282,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitProgramStart" ):
                 listener.exitProgramStart(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitProgramStart" ):
+                return visitor.visitProgramStart(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def start(self):
@@ -354,6 +360,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitDeclarationStruct" ):
                 listener.exitDeclarationStruct(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitDeclarationStruct" ):
+                return visitor.visitDeclarationStruct(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class DeclarationMethodContext(DeclarationContext):
 
@@ -373,6 +385,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitDeclarationMethod" ):
                 listener.exitDeclarationMethod(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitDeclarationMethod" ):
+                return visitor.visitDeclarationMethod(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class DeclarationVarContext(DeclarationContext):
 
@@ -391,6 +409,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitDeclarationVar" ):
                 listener.exitDeclarationVar(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitDeclarationVar" ):
+                return visitor.visitDeclarationVar(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -474,6 +498,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitArrayDec" ):
                 listener.exitArrayDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitArrayDec" ):
+                return visitor.visitArrayDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class VarDecContext(VarDeclarationContext):
 
@@ -495,6 +525,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitVarDec" ):
                 listener.exitVarDec(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitVarDec" ):
+                return visitor.visitVarDec(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -585,6 +621,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitStructDec" ):
                 listener.exitStructDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStructDec" ):
+                return visitor.visitStructDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def structDeclaration(self):
@@ -665,6 +707,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitStructVarType" ):
                 listener.exitStructVarType(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStructVarType" ):
+                return visitor.visitStructVarType(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class BooleanVarTypeContext(VarTypeContext):
 
@@ -680,6 +728,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitBooleanVarType" ):
                 listener.exitBooleanVarType(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBooleanVarType" ):
+                return visitor.visitBooleanVarType(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class VoidVarTypeContext(VarTypeContext):
@@ -697,6 +751,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitVoidVarType" ):
                 listener.exitVoidVarType(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitVoidVarType" ):
+                return visitor.visitVoidVarType(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class IntVarTypeContext(VarTypeContext):
 
@@ -712,6 +772,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitIntVarType" ):
                 listener.exitIntVarType(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIntVarType" ):
+                return visitor.visitIntVarType(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class StructDecVarTypeContext(VarTypeContext):
@@ -732,6 +798,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitStructDecVarType" ):
                 listener.exitStructDecVarType(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStructDecVarType" ):
+                return visitor.visitStructDecVarType(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class CharVarTypeContext(VarTypeContext):
 
@@ -747,6 +819,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitCharVarType" ):
                 listener.exitCharVarType(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCharVarType" ):
+                return visitor.visitCharVarType(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -859,6 +937,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitMethodDec" ):
                 listener.exitMethodDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMethodDec" ):
+                return visitor.visitMethodDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def methodDeclaration(self):
@@ -942,6 +1026,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitIntMethod" ):
                 listener.exitIntMethod(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIntMethod" ):
+                return visitor.visitIntMethod(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class CharMethodContext(MethodTypeContext):
 
@@ -957,6 +1047,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitCharMethod" ):
                 listener.exitCharMethod(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCharMethod" ):
+                return visitor.visitCharMethod(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class BooleanMethodContext(MethodTypeContext):
@@ -974,6 +1070,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitBooleanMethod" ):
                 listener.exitBooleanMethod(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBooleanMethod" ):
+                return visitor.visitBooleanMethod(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class VoidMethodContext(MethodTypeContext):
 
@@ -989,6 +1091,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitVoidMethod" ):
                 listener.exitVoidMethod(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitVoidMethod" ):
+                return visitor.visitVoidMethod(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1074,6 +1182,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitIdParam" ):
                 listener.exitIdParam(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIdParam" ):
+                return visitor.visitIdParam(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class ArrayParamContext(ParameterContext):
 
@@ -1096,6 +1210,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitArrayParam" ):
                 listener.exitArrayParam(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitArrayParam" ):
+                return visitor.visitArrayParam(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class VoidParamContext(ParameterContext):
 
@@ -1111,6 +1231,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitVoidParam" ):
                 listener.exitVoidParam(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitVoidParam" ):
+                return visitor.visitVoidParam(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1193,6 +1319,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitBooleanParam" ):
                 listener.exitBooleanParam(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBooleanParam" ):
+                return visitor.visitBooleanParam(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class CharParamContext(ParameterTypeContext):
 
@@ -1209,6 +1341,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitCharParam" ):
                 listener.exitCharParam(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCharParam" ):
+                return visitor.visitCharParam(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class IntParamContext(ParameterTypeContext):
 
@@ -1224,6 +1362,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitIntParam" ):
                 listener.exitIntParam(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIntParam" ):
+                return visitor.visitIntParam(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1309,6 +1453,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitBlockDec" ):
                 listener.exitBlockDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBlockDec" ):
+                return visitor.visitBlockDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def block(self):
@@ -1390,6 +1540,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitWhileStmt" ):
                 listener.exitWhileStmt(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitWhileStmt" ):
+                return visitor.visitWhileStmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class IfStmtContext(StatementContext):
 
@@ -1415,6 +1571,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitIfStmt" ):
                 listener.exitIfStmt(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIfStmt" ):
+                return visitor.visitIfStmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class BlockStmtContext(StatementContext):
 
@@ -1433,6 +1595,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitBlockStmt" ):
                 listener.exitBlockStmt(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBlockStmt" ):
+                return visitor.visitBlockStmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class ExpressionStmtContext(StatementContext):
@@ -1453,6 +1621,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitExpressionStmt" ):
                 listener.exitExpressionStmt(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpressionStmt" ):
+                return visitor.visitExpressionStmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class ReturnStmtContext(StatementContext):
 
@@ -1471,6 +1645,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitReturnStmt" ):
                 listener.exitReturnStmt(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitReturnStmt" ):
+                return visitor.visitReturnStmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class AssignmentStmtContext(StatementContext):
@@ -1494,6 +1674,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitAssignmentStmt" ):
                 listener.exitAssignmentStmt(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAssignmentStmt" ):
+                return visitor.visitAssignmentStmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class MethodStmtContext(StatementContext):
 
@@ -1512,6 +1698,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitMethodStmt" ):
                 listener.exitMethodStmt(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMethodStmt" ):
+                return visitor.visitMethodStmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1667,6 +1859,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitArrayLocation" ):
                 listener.exitArrayLocation(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitArrayLocation" ):
+                return visitor.visitArrayLocation(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class IdLocationContext(LocationContext):
 
@@ -1685,6 +1883,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitIdLocation" ):
                 listener.exitIdLocation(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIdLocation" ):
+                return visitor.visitIdLocation(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class ArrayLocationDotContext(LocationContext):
@@ -1711,6 +1915,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitArrayLocationDot" ):
                 listener.exitArrayLocationDot(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitArrayLocationDot" ):
+                return visitor.visitArrayLocationDot(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class IdLocationDotContext(LocationContext):
 
@@ -1732,6 +1942,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitIdLocationDot" ):
                 listener.exitIdLocationDot(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIdLocationDot" ):
+                return visitor.visitIdLocationDot(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1835,6 +2051,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitMethodCallExpr" ):
                 listener.exitMethodCallExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMethodCallExpr" ):
+                return visitor.visitMethodCallExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class ParExprContext(ExpressionContext):
 
@@ -1853,6 +2075,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitParExpr" ):
                 listener.exitParExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitParExpr" ):
+                return visitor.visitParExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class EqExprContext(ExpressionContext):
@@ -1877,6 +2105,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitEqExpr" ):
                 listener.exitEqExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitEqExpr" ):
+                return visitor.visitEqExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class NotExprContext(ExpressionContext):
 
@@ -1895,6 +2129,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitNotExpr" ):
                 listener.exitNotExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNotExpr" ):
+                return visitor.visitNotExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class SecondArithExprContext(ExpressionContext):
@@ -1919,6 +2159,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitSecondArithExpr" ):
                 listener.exitSecondArithExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitSecondArithExpr" ):
+                return visitor.visitSecondArithExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class LocationExprContext(ExpressionContext):
 
@@ -1937,6 +2183,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitLocationExpr" ):
                 listener.exitLocationExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitLocationExpr" ):
+                return visitor.visitLocationExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class LiteralExprContext(ExpressionContext):
@@ -1957,6 +2209,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitLiteralExpr" ):
                 listener.exitLiteralExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitLiteralExpr" ):
+                return visitor.visitLiteralExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class NegativeExprContext(ExpressionContext):
 
@@ -1975,6 +2233,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitNegativeExpr" ):
                 listener.exitNegativeExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNegativeExpr" ):
+                return visitor.visitNegativeExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class CondExprContext(ExpressionContext):
@@ -1999,6 +2263,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitCondExpr" ):
                 listener.exitCondExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCondExpr" ):
+                return visitor.visitCondExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class RelExprContext(ExpressionContext):
 
@@ -2022,6 +2292,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitRelExpr" ):
                 listener.exitRelExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRelExpr" ):
+                return visitor.visitRelExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class FirstArithExprContext(ExpressionContext):
 
@@ -2044,6 +2320,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitFirstArithExpr" ):
                 listener.exitFirstArithExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFirstArithExpr" ):
+                return visitor.visitFirstArithExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2280,6 +2562,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitMethodCallDec" ):
                 listener.exitMethodCallDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMethodCallDec" ):
+                return visitor.visitMethodCallDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def methodCall(self):
@@ -2360,6 +2648,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitArgDec" ):
                 listener.exitArgDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitArgDec" ):
+                return visitor.visitArgDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def arg(self):
@@ -2415,6 +2709,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitIntLiteral" ):
                 listener.exitIntLiteral(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIntLiteral" ):
+                return visitor.visitIntLiteral(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class CharLiteralContext(LiteralContext):
 
@@ -2432,6 +2732,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitCharLiteral" ):
                 listener.exitCharLiteral(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitCharLiteral" ):
+                return visitor.visitCharLiteral(self)
+            else:
+                return visitor.visitChildren(self)
 
 
     class BoolLiteralContext(LiteralContext):
@@ -2451,6 +2757,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitBoolLiteral" ):
                 listener.exitBoolLiteral(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBoolLiteral" ):
+                return visitor.visitBoolLiteral(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2527,6 +2839,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitNumLiteral" ):
                 listener.exitNumLiteral(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNumLiteral" ):
+                return visitor.visitNumLiteral(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def int_literal(self):
@@ -2579,6 +2897,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitFalseLiteral" ):
                 listener.exitFalseLiteral(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFalseLiteral" ):
+                return visitor.visitFalseLiteral(self)
+            else:
+                return visitor.visitChildren(self)
+
 
     class TrueLiteralContext(Bool_literalContext):
 
@@ -2594,6 +2918,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitTrueLiteral" ):
                 listener.exitTrueLiteral(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTrueLiteral" ):
+                return visitor.visitTrueLiteral(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2663,6 +2993,12 @@ class decafParser ( Parser ):
             if hasattr( listener, "exitIdDec" ):
                 listener.exitIdDec(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIdDec" ):
+                return visitor.visitIdDec(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def id_tok(self):
@@ -2719,6 +3055,12 @@ class decafParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitNumDec" ):
                 listener.exitNumDec(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNumDec" ):
+                return visitor.visitNumDec(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
