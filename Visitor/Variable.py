@@ -3,7 +3,7 @@ class Variable:
     def __init__(self, tipo, nombre=None, long=None, isEstructura=False):
         self.tipo = tipo
         self.nombre = nombre
-        self.arrayLong = long
+        self.arrayLong = long  # longitud del array
         self.isEstructura = isEstructura
 
     def getTipo(self):

@@ -11,8 +11,10 @@ class Program{
 	int variable;
 	struct B y;
 
+	struct A T[10];
 	int main()
 	{
+		
 	}
 
 }

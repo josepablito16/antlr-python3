@@ -224,6 +224,39 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en declaracion de variable linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
         return None
 
+    def visitArrayDec(self, ctx: decafParser.ArrayDecContext):
+        print('visitArrayDec')
+        num = int(ctx.num().getText())
+        nombre = ctx.id_tok().getText()
+        tipo = ctx.varType().getText()
+        esEstructura = False
+
+        # validar que num sea mayor a 0
+        if not(num > 0):
+            print(
+                f"{FAIL}Error en declaracion de array linea {ctx.start.line}{ENDC}: la dimension debe ser mayor a 0")
+            return
+
+        # Validar si es de tipo estructura
+        if (tipo.find('struct') != -1):
+            # es de tipo estructura
+            tipo = tipo.replace('struct', '')
+
+            errTemp = self.validarEstructura(tipo)
+            if (isinstance(errTemp, Error)):
+                print(
+                    f"{FAIL}Error en declaracion de array linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+                return
+            esEstructura = True
+
+        errTemp = self.agregarVariableATabla(
+            nombre, Variable(tipo, isEstructura=esEstructura, long=num))
+        if isinstance(errTemp, Error):
+            print(
+                f"{FAIL}Error en declaracion de array linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+
+        return None
+
 
 def main():
     data = open('../decafPrograms/hello_world.txt').read()
