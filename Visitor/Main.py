@@ -9,6 +9,9 @@ from Variable import *
 from Funcion import *
 from Error import *
 
+from Nodo import Nodo
+import Tipos as tipos
+
 import copy
 
 # pilas donde se manejan los ambitos
@@ -168,11 +171,17 @@ class EvalVisitor(decafVisitor):
         self.quitarAmbito()
         return None
 
+    '''
+    Manejo de metodos
+    '''
+
     def visitMethodDec(self, ctx: decafParser.MethodDecContext):
         # se crea ambito de variable
         self.agregarAmbito()
 
         # TODO agregar parametros al ambito
+
+        self.visitar(ctx.block())
 
         # se elimina ambito de variable
         self.quitarAmbito()
@@ -256,6 +265,25 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en declaracion de array linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
 
         return None
+
+    '''
+    Manejo de literales
+    '''
+
+    def visitIntLiteral(self, ctx: decafParser.IntLiteralContext):
+        print('visitIntLiteral')
+        print(ctx.getText())
+        return Nodo(tipos.INT, tipos.LITERAL)
+
+    def visitCharLiteral(self, ctx: decafParser.CharLiteralContext):
+        print('visitCharLiteral')
+        print(ctx.getText())
+        return Nodo(tipos.CHAR, tipos.LITERAL)
+
+    def visitBoolLiteral(self, ctx: decafParser.BoolLiteralContext):
+        print('visitBoolLiteral')
+        print(ctx.getText())
+        return Nodo(tipos.BOOLEAN, tipos.LITERAL)
 
 
 def main():
