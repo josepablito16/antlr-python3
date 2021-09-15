@@ -14,7 +14,9 @@ class Program{
 	struct A T[10];
 	int main()
 	{
-		
+		variable = 5;
+		variable = 'a';
+		variable = true;
 	}
 
 }

@@ -5,4 +5,4 @@ class Nodo:
         self.nombre = nombre  # Nombre del nodo donde retornamos el valor
 
     def __repr__(self):
-        return f"<Estructura>{self.propiedades}"
+        return f"<Nodo>{self.tipo} {self.nombre}"

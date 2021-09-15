@@ -9,6 +9,7 @@ from Variable import *
 from Funcion import *
 from Error import *
 
+
 from Nodo import Nodo
 import Tipos as tipos
 
@@ -181,7 +182,9 @@ class EvalVisitor(decafVisitor):
 
         # TODO agregar parametros al ambito
 
-        self.visitar(ctx.block())
+        resultados = self.visitar(ctx.block())
+        print('resultados')
+        print(resultados)
 
         # se elimina ambito de variable
         self.quitarAmbito()
@@ -271,19 +274,53 @@ class EvalVisitor(decafVisitor):
     '''
 
     def visitIntLiteral(self, ctx: decafParser.IntLiteralContext):
-        print('visitIntLiteral')
-        print(ctx.getText())
+        # print('visitIntLiteral')
+        # print(ctx.getText())
         return Nodo(tipos.INT, tipos.LITERAL)
 
     def visitCharLiteral(self, ctx: decafParser.CharLiteralContext):
-        print('visitCharLiteral')
-        print(ctx.getText())
+        # print('visitCharLiteral')
+        # print(ctx.getText())
         return Nodo(tipos.CHAR, tipos.LITERAL)
 
     def visitBoolLiteral(self, ctx: decafParser.BoolLiteralContext):
-        print('visitBoolLiteral')
-        print(ctx.getText())
+        # print('visitBoolLiteral')
+        # print(ctx.getText())
         return Nodo(tipos.BOOLEAN, tipos.LITERAL)
+
+    '''
+    Manejo de llamada de variables
+    '''
+
+    def visitIdLocation(self, ctx: decafParser.IdLocationContext):
+        nombre = ctx.id_tok().getText()
+        tipo = tipos.getidLocationType(nombre, pilaVariable)
+
+        if (isinstance(tipo, Error)):
+            print(
+                f"{FAIL}Error en llamada de variable linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
+            return Nodo(tipos.ERROR, tipos.IDLOCATION)
+        return Nodo(tipo, tipos.IDLOCATION)
+
+    # TODO manejar idLocationDot
+    # TODO manejar arrayLocation
+    # TODO manejar arrayLocationDot
+
+    '''
+    Manejo de statement
+    '''
+
+    def visitAssignmentStmt(self, ctx: decafParser.AssignmentStmtContext):
+        location = self.visitar(ctx.location())
+        expression = self.visitar(ctx.expression())
+        tipo = tipos.validarTiposAsignacion(expression, location)
+
+        if (isinstance(tipo, Error)):
+            print(
+                f"{FAIL}Error en asignacion linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
+            return Nodo(tipos.ERROR, tipos.ASSIGNMENT)
+        else:
+            return Nodo(tipo, tipos.ASSIGNMENT)
 
 
 def main():
