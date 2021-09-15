@@ -10,6 +10,7 @@ ERROR = 'error'
 LITERAL = 'literal'
 IDLOCATION = 'idLocation'
 ASSIGNMENT = 'assignment'
+ARRAYLOCATION = 'arrayLocation'
 
 
 def getidLocationType(nombre, pilaVariable):
@@ -30,6 +31,32 @@ def getidLocationType(nombre, pilaVariable):
             return ambito[nombre].tipo
 
     return Error(f"La variable '{nombre}' no existe")
+
+
+def getArrayLocationType(nombre, pilaVariable):
+    '''
+    Funcion para obtener el tipo de una arrayLocation.
+    Valida si el arrayLocation ya fue declarada dentro del ambito
+    y si es un array.
+
+    Parametros
+    - nombre: nombre del arrayLocation
+    - pilaVariable: pila de ambitos de las variables
+
+    Retornos
+    - <Error> si el arrayLocation no se encuentra en los ambitos
+    - tipo en el caso de que se encuentre el arrayLocation
+    '''
+    for ambito in pilaVariable:
+        if(nombre in ambito.keys()):
+            # si existe la variable
+            if(ambito[nombre].arrayLong != None):
+                # si es array
+                return ambito[nombre].tipo
+            else:
+                return Error(f"La variable '{nombre}' no es un array")
+
+    return Error(f"El array '{nombre}' no existe")
 
 
 def validarTiposAsignacion(derecho, izquierdo):

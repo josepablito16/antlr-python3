@@ -304,6 +304,25 @@ class EvalVisitor(decafVisitor):
 
     # TODO manejar idLocationDot
     # TODO manejar arrayLocation
+    def visitArrayLocation(self, ctx: decafParser.ArrayLocationContext):
+        nombre = ctx.id_tok().getText()
+        expression = self.visitar(ctx.expression())
+
+        # se valida que la variable exista y sea array
+        tipo = tipos.getArrayLocationType(nombre, pilaVariable)
+        if(isinstance(tipo, Error)):
+            print(
+                f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
+            return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
+
+        # Se valida que expression sea de tipo int
+        if (expression.tipo == tipos.INT):
+            return Nodo(tipo, tipos.ARRAYLOCATION)
+        else:
+            print(
+                f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: exp no es de tipo 'int'")
+            return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
+
     # TODO manejar arrayLocationDot
 
     '''
