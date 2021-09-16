@@ -128,7 +128,7 @@ class EvalVisitor(decafVisitor):
 
         Retorno:
         * Si la raiz tiene mas de un hijo retorna una lista con los resultados,
-        caso contrario solo un resultado. 
+        caso contrario solo un resultado.
         '''
         if(isinstance(tree, list)):
             resultados = []
@@ -189,22 +189,7 @@ class EvalVisitor(decafVisitor):
         # se elimina ambito de variable
         self.quitarAmbito()
         return ctx.id_tok().getText()
-
-    def visitIfStmt(self, ctx: decafParser.IfStmtContext):
-        # se crea ambito de variable
-        self.agregarAmbito()
-
-        # se elimina ambito de variable
-        self.quitarAmbito()
-        return None
-
-    def visitWhileStmt(self, ctx: decafParser.WhileStmtContext):
-        # se crea ambito de variable
-        self.agregarAmbito()
-
-        # se elimina ambito de variable
-        self.quitarAmbito()
-        return None
+    # TODO implementar methodCall
 
     '''
     Declaracion de variable y arreglo
@@ -302,8 +287,6 @@ class EvalVisitor(decafVisitor):
             return Nodo(tipos.ERROR, tipos.IDLOCATION)
         return Nodo(tipo, tipos.IDLOCATION)
 
-    # TODO manejar idLocationDot
-    # TODO manejar arrayLocation
     def visitArrayLocation(self, ctx: decafParser.ArrayLocationContext):
         nombre = ctx.id_tok().getText()
         expression = self.visitar(ctx.expression())
@@ -323,6 +306,7 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: exp no es de tipo 'int'")
             return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
 
+    # TODO manejar idLocationDot
     # TODO manejar arrayLocationDot
 
     '''
@@ -340,6 +324,91 @@ class EvalVisitor(decafVisitor):
             return Nodo(tipos.ERROR, tipos.ASSIGNMENT)
         else:
             return Nodo(tipo, tipos.ASSIGNMENT)
+
+    def visitIfStmt(self, ctx: decafParser.IfStmtContext):
+        # se crea ambito de variable
+        self.agregarAmbito()
+
+        # se elimina ambito de variable
+        self.quitarAmbito()
+        return None
+
+    def visitWhileStmt(self, ctx: decafParser.WhileStmtContext):
+        # se crea ambito de variable
+        self.agregarAmbito()
+
+        # se elimina ambito de variable
+        self.quitarAmbito()
+        return None
+
+    '''
+    Manejo de expresiones
+    '''
+
+    def manejarOperaciones(self, expres, ctx, tipoResultado, tipoOperandos):
+        '''
+        Funcion para manejar operaciones de tipo Arith '*'|'/'|'%'|'+'|'-'
+        y tambien de tipo Rel '<'|'>'|'<='|'>='
+
+        Parametros:
+        - expres: lista de <Nodos>
+        - ctx: contexto de la funcion donde se llama el metodo
+        - tipoResultado: si la operacion sale bien, que tipo es el resultado
+
+        Return:
+        - objeto tipo <Nodo> con el resultado
+        '''
+        tipo = tipos.validarTiposOperacion(expres)
+
+        if (isinstance(tipo, Error)):
+            print(
+                f"{FAIL}Error en expresion linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
+            return Nodo(tipos.ERROR, tipos.OPERACION)
+
+        else:
+            if(tipo != tipoOperandos):
+                print(
+                    f"{FAIL}Error en expresion linea {ctx.start.line}{ENDC}: No se puede usar el operador '{ctx.op.text}' con tipos de dato '{tipo}'")
+                return Nodo(tipos.ERROR, tipos.OPERACION)
+        return Nodo(tipoResultado, tipos.OPERACION)
+
+    def visitFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
+        expres = self.visitar(ctx.expression())
+        return self.manejarOperaciones(expres, ctx, tipoResultado=tipos.INT, tipoOperandos=tipos.INT)
+
+    def visitSecondArithExpr(self, ctx: decafParser.SecondArithExprContext):
+        expres = self.visitar(ctx.expression())
+        return self.manejarOperaciones(expres, ctx, tipoResultado=tipos.INT, tipoOperandos=tipos.INT)
+
+    def visitRelExpr(self, ctx: decafParser.RelExprContext):
+        expres = self.visitar(ctx.expression())
+        return self.manejarOperaciones(expres, ctx, tipoResultado=tipos.BOOLEAN, tipoOperandos=tipos.INT)
+
+    def visitEqExpr(self, ctx: decafParser.EqExprContext):
+        expres = self.visitar(ctx.expression())
+        tipo = tipos.validarTiposOperacion(expres)
+
+        if (isinstance(tipo, Error)):
+            print(
+                f"{FAIL}Error en expresion linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
+            return Nodo(tipos.ERROR, tipos.OPERACION)
+
+        return Nodo(tipos.BOOLEAN, tipos.OPERACION)
+
+    def visitCondExpr(self, ctx: decafParser.CondExprContext):
+        expres = self.visitar(ctx.expression())
+        return self.manejarOperaciones(expres, ctx, tipoResultado=tipos.BOOLEAN, tipoOperandos=tipos.BOOLEAN)
+
+    def visitNegativeExpr(self, ctx: decafParser.NegativeExprContext):
+        expres = self.visitar(ctx.expression())
+        return self.manejarOperaciones(expres, ctx, tipoResultado=tipos.INT, tipoOperandos=tipos.INT)
+
+    def visitNotExpr(self, ctx: decafParser.NotExprContext):
+        expres = self.visitar(ctx.expression())
+        return self.manejarOperaciones(expres, ctx, tipoResultado=tipos.BOOLEAN, tipoOperandos=tipos.BOOLEAN)
+
+    def visitParExpr(self, ctx: decafParser.ParExprContext):
+        return self.visitar(ctx.expression())
 
 
 def main():

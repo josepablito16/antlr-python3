@@ -1,3 +1,4 @@
+from Nodo import Nodo
 from Error import *
 INT = 'int'
 CHAR = 'char'
@@ -11,6 +12,7 @@ LITERAL = 'literal'
 IDLOCATION = 'idLocation'
 ASSIGNMENT = 'assignment'
 ARRAYLOCATION = 'arrayLocation'
+OPERACION = 'operacion'
 
 
 def getidLocationType(nombre, pilaVariable):
@@ -76,3 +78,26 @@ def validarTiposAsignacion(derecho, izquierdo):
         return derecho.tipo
     else:
         return Error(f"expresion de tipo '{derecho.tipo}' no se puede asignar a variable de tipo '{izquierdo.tipo}'")
+
+
+def validarTiposOperacion(nodos):
+    '''
+    Funcion para validar una lista de nodos que se estan operando
+
+    Parametros:
+    - nodos: lista de tipo <Nodo>
+
+    Return:
+    - si todos los tipos son iguales, retornamos el tipo
+    - caso contrario Error
+    '''
+    if not isinstance(nodos, list):
+        return nodos.tipo
+
+    control = nodos[0].tipo
+
+    for i in nodos:
+        if (control != i.tipo):
+            return Error('Se esta intentando operar distintos tipos de datos')
+
+    return control

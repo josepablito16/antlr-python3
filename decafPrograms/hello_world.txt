@@ -15,10 +15,20 @@ class Program{
 	struct A T[10];
 	int main()
 	{
-		variable = 5;
-		variable = 'a';
-		variable = true;
-		arreglo[5] = 4;
+		int variableInt;
+		boolean variableBool;
+		char variableChar;
+
+		variableInt = 5;
+		variable = variableInt * 3;
+		variable = variableInt - 3;
+
+		variableChar = 'a';
+		variableBool = true;
+		arreglo[5] = (4/3) - (1+2);
+
+		variableBool = (1<variableInt) || (variableChar == 'a')
+
 	}
 
 }

@@ -69,8 +69,8 @@ expression  : location                                          # locationExpr
             | expression op=('<'|'>'|'<='|'>=') expression      # relExpr
             | expression op=('=='|'!=') expression              # eqExpr
             | expression op=('&&'|'||') expression              # condExpr
-            | '-' expression                                    # negativeExpr
-            | '!' expression                                    # notExpr
+            | op='-' expression                                 # negativeExpr
+            | op='!' expression                                 # notExpr
             | '(' expression ')'                                # parExpr
             ;
 

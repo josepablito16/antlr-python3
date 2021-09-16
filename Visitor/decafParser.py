@@ -2116,6 +2116,7 @@ class decafParser ( Parser ):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a decafParser.ExpressionContext
             super().__init__(parser)
+            self.op = None # Token
             self.copyFrom(ctx)
 
         def expression(self):
@@ -2220,6 +2221,7 @@ class decafParser ( Parser ):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a decafParser.ExpressionContext
             super().__init__(parser)
+            self.op = None # Token
             self.copyFrom(ctx)
 
         def expression(self):
@@ -2372,7 +2374,7 @@ class decafParser ( Parser ):
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 204
-                self.match(decafParser.T__25)
+                localctx.op = self.match(decafParser.T__25)
                 self.state = 205
                 self.expression(3)
                 pass
@@ -2382,7 +2384,7 @@ class decafParser ( Parser ):
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 206
-                self.match(decafParser.T__34)
+                localctx.op = self.match(decafParser.T__34)
                 self.state = 207
                 self.expression(2)
                 pass
