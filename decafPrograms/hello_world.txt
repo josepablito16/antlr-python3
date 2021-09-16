@@ -13,7 +13,7 @@ class Program{
 	int arreglo[5];
 
 	struct A T[10];
-	int main()
+	int main(int a, int b, void)
 	{
 		int variableInt;
 		boolean variableBool;
@@ -28,7 +28,7 @@ class Program{
 		arreglo[5] = (4/3) - (1+2);
 
 		variableBool = (1<variableInt) || (variableChar == 'a')
-
+		return 1 + variableInt;
 	}
 
 }

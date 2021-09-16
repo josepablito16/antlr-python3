@@ -23,6 +23,8 @@ pilaEstructura = []
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 
+nombreFuncionTemp = ""
+
 
 class EvalVisitor(decafVisitor):
 
@@ -71,6 +73,29 @@ class EvalVisitor(decafVisitor):
                 # Pila Estructura
                 {pilaEstructura}
                 ''')
+
+    def agregarFuncionATabla(self, nombre, funcion):
+        '''
+        Funcion que valida si una funcion ya existe en la tabla actual
+        si ya existe retorna error, caso contrario agrega a tabla (no retorna nada).
+
+        Solo se agrega a la tabla si no tiene errores en los argumentos
+
+        Parametros
+        - nombre: string con el nombre de la funcion
+        - funcion: objeto Funcion con la informacion de la funcion a ingresar.
+        '''
+        # si no tiene error en los  argumentos se agrega a talba
+        if not(isinstance(funcion.argumentosTipos, str)):
+            if(nombre in pilaFuncion[-1].keys()):
+                return Error('Esta funcion ya existe')
+            else:
+                pilaFuncion[-1][nombre] = copy.deepcopy(funcion)
+
+            print(f'''
+                    # Pila funciones
+                    {pilaFuncion}
+                    ''')
 
     def validarEstructura(self, nombreEstructura):
         '''
@@ -176,19 +201,86 @@ class EvalVisitor(decafVisitor):
     Manejo de metodos
     '''
 
+    def procesarParametros(self, parametros):
+        '''
+        Funcion para procesar parametros y agregarlos al nuevo ambito
+
+        Parametros:
+        - parametros: lista de objeto <Nodo> con la informacion de cada parametro
+
+        Return
+        - <Error> si hay dos parametros iguales,
+        - <Lista> de tipos de parametros caso contrario
+        '''
+        parametrosList = []
+        for i in parametros:
+            nombre = i.nombre
+            try:
+                long = int(i.isArray)**0
+            except:
+                long = None
+            if (i.tipo != tipos.VOID):
+                parametrosList.append(i.tipo)
+                variable = Variable(i.tipo, i.nombre, long)
+                errTemp = self.agregarVariableATabla(nombre, variable)
+                if isinstance(errTemp, Error):
+                    return Error(f"Parametro '{i.nombre}' ya existe")
+        return parametrosList
+
+    def agregarReturn(self, tipo):
+        global nombreFuncionTemp
+        pilaFuncion[-1][nombreFuncionTemp].retornoTipos.append(tipo)
+
     def visitMethodDec(self, ctx: decafParser.MethodDecContext):
         # se crea ambito de variable
+        global nombreFuncionTemp
         self.agregarAmbito()
 
-        # TODO agregar parametros al ambito
+        nombre = ctx.id_tok().getText()
+        tipo = ctx.methodType().getText()
+        parametros = self.visitar(ctx.parameter())
+
+        print('visitMethodDec')
+        print(parametros)
+
+        # agregar parametros al ambito
+        paramErr = self.procesarParametros(parametros)
+        if(isinstance(paramErr, Error)):
+            print(
+                f"{FAIL}Error en declaracion de funcion linea {ctx.start.line}{ENDC}: {paramErr.mensaje}")
+            return
+
+        nombreFuncionTemp = nombre
+        # guardar la funcion en tabla
+        self.agregarFuncionATabla(nombre, Funcion(tipo, paramErr))
 
         resultados = self.visitar(ctx.block())
-        print('resultados')
-        print(resultados)
+
+        # validar declaracion de funcion
+        pilaFuncion[-1][nombreFuncionTemp].validar()
+
+        errTemp = pilaFuncion[-1][nombreFuncionTemp].err
+        if(isinstance(errTemp, Error)):
+            print(
+                f"{FAIL}Error en declaracion de funcion linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
 
         # se elimina ambito de variable
         self.quitarAmbito()
         return ctx.id_tok().getText()
+
+    def visitIdParam(self, ctx: decafParser.IdParamContext):
+        tipo = ctx.parameterType().getText()
+        nombre = ctx.id_tok().getText()
+        return Nodo(tipo, nombre)
+
+    def visitVoidParam(self, ctx: decafParser.VoidParamContext):
+        return Nodo(tipos.VOID)
+
+    def visitArrayParam(self, ctx: decafParser.ArrayParamContext):
+        tipo = ctx.parameterType().getText()
+        nombre = ctx.id_tok().getText()
+        return Nodo(tipo, nombre, True)
+
     # TODO implementar methodCall
 
     '''
@@ -341,6 +433,15 @@ class EvalVisitor(decafVisitor):
         self.quitarAmbito()
         return None
 
+    def visitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
+        print('visitReturnStmt')
+
+        try:
+            returnNodo = self.visitar(ctx.expression())
+            self.agregarReturn(returnNodo.tipo)
+        except:
+            print('err')
+            pass
     '''
     Manejo de expresiones
     '''
