@@ -421,6 +421,12 @@ class EvalVisitor(decafVisitor):
         # se crea ambito de variable
         self.agregarAmbito()
 
+        exp = self.visitar(ctx.expression())
+
+        if (exp.tipo != tipos.BOOLEAN):
+            print(
+                f"{FAIL}Error en expresion de if linea {ctx.start.line}{ENDC}: no es de tipo boolean")
+        self.visitar(ctx.block())
         # se elimina ambito de variable
         self.quitarAmbito()
         return None
@@ -428,6 +434,13 @@ class EvalVisitor(decafVisitor):
     def visitWhileStmt(self, ctx: decafParser.WhileStmtContext):
         # se crea ambito de variable
         self.agregarAmbito()
+
+        exp = self.visitar(ctx.expression())
+
+        if (exp.tipo != tipos.BOOLEAN):
+            print(
+                f"{FAIL}Error en expresion de while linea {ctx.start.line}{ENDC}: no es de tipo boolean")
+        self.visitar(ctx.block())
 
         # se elimina ambito de variable
         self.quitarAmbito()
