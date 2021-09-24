@@ -282,6 +282,27 @@ class EvalVisitor(decafVisitor):
         return Nodo(tipo, nombre, True)
 
     # TODO implementar methodCall
+    def visitMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
+        print('visitMethodCallDec')
+        nombre = ctx.id_tok().getText()
+        tipo = tipos.getMethodType(nombre, pilaFuncion)
+
+        # Se valida que exista la funcion
+        if (isinstance(tipo, Error)):
+            print(
+                f"{FAIL}Error en llamada de funcion linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
+            return Nodo(tipos.ERROR, tipos.METHOD)
+
+        # Se valida que los argumentos coincidan con la firma
+        argumentos = self.visitar(ctx.arg())
+
+        errTemp = tipos.validarTiposArgumentos(nombre, argumentos, pilaFuncion)
+        if (isinstance(errTemp, Error)):
+            print(
+                f"{FAIL}Error en llamada de funcion linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+            return Nodo(tipos.ERROR, tipos.METHOD)
+
+        return Nodo(tipo, tipos.METHOD)
 
     '''
     Declaracion de variable y arreglo

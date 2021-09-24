@@ -13,6 +13,7 @@ IDLOCATION = 'idLocation'
 ASSIGNMENT = 'assignment'
 ARRAYLOCATION = 'arrayLocation'
 OPERACION = 'operacion'
+METHOD = 'method'
 
 
 def getidLocationType(nombre, pilaVariable):
@@ -59,6 +60,50 @@ def getArrayLocationType(nombre, pilaVariable):
                 return Error(f"La variable '{nombre}' no es un array")
 
     return Error(f"El array '{nombre}' no existe")
+
+
+def getMethodType(nombre, pilaFuncion):
+    '''
+    Funcion para obtener el tipo de una funcion.
+    Valida si la funcion ya fue declarada dentro del ambito.
+
+    Parametros
+    - nombre: nombre de la funcion
+    - pilaFuncion: pila de ambitos de las funciones
+
+    Retornos
+    - <Error> si la funcion no se encuentra en los ambitos
+    - tipo en el caso de que se encuentre la funcion
+    '''
+    for ambito in pilaFuncion:
+        if(nombre in ambito.keys()):
+            return ambito[nombre].tipo
+
+    return Error(f"La funcion '{nombre}' no existe")
+
+
+def validarTiposArgumentos(nombre, tiposArgumentos, pilaFuncion):
+    '''
+    Funcion para validar si los tipos de una llamada de funcion son equivalentes
+    a los tipos de la declaracion de la funcion
+
+    Parametros:
+    - nombre: nombre de la funcion a evaluar
+    - tiposArgumentos: lista de <Nodo> con la informacion de los argumentos en la llamada de la funcion
+    - pilaFuncion: pila con las funciones declaradas
+
+    Retorno:
+    - <Error> si en dado caso la cantidad o tipo de argumentos no coinciden
+    '''
+    for ambito in pilaFuncion:
+        if(nombre in ambito.keys()):
+
+            if len(tiposArgumentos) != len(ambito[nombre].argumentosTipos):
+                return Error("La cantidad de los argumentos no coinciden con la definicion")
+
+            for arg in ambito[nombre].argumentosTipos:
+                if not(arg == tiposArgumentos.pop(0).tipo):
+                    return Error("Los tipos de los argumentos no coinciden con la definicion")
 
 
 def validarTiposAsignacion(derecho, izquierdo):
