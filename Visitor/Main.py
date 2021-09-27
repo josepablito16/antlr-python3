@@ -42,11 +42,12 @@ class EvalVisitor(decafVisitor):
             return Error('Esta variable ya existe')
         else:
             pilaVariable[-1][nombre] = variable
-
+        """
         print(f'''
                 # Pila Variables
                 {pilaVariable}
                 ''')
+        """
 
     def agregarStructATabla(self, nombre, estructura):
         '''
@@ -69,10 +70,12 @@ class EvalVisitor(decafVisitor):
         else:
             pilaEstructura[-1][nombre] = estructura
 
+        """
         print(f'''
                 # Pila Estructura
                 {pilaEstructura}
                 ''')
+        """
 
     def agregarFuncionATabla(self, nombre, funcion):
         '''
@@ -92,10 +95,12 @@ class EvalVisitor(decafVisitor):
             else:
                 pilaFuncion[-1][nombre] = copy.deepcopy(funcion)
 
+            """
             print(f'''
                     # Pila funciones
                     {pilaFuncion}
                     ''')
+            """
 
     def validarEstructura(self, nombreEstructura):
         '''
@@ -119,7 +124,6 @@ class EvalVisitor(decafVisitor):
         - estructura: bool para indicar si se desea agregar un ambito de estructuras.
         - funcion: bool para indicar si se desea agregar un ambito de funciones.
         '''
-        print('agregarAmbito')
         if variable:
             pilaVariable.append({})
         if estructura:
@@ -136,7 +140,6 @@ class EvalVisitor(decafVisitor):
         - estructura: bool para indicar si se desea quitar un ambito de estructuras.
         - funcion: bool para indicar si se desea quitar un ambito de funciones.
         '''
-        print('quitarAmbito')
         if variable:
             pilaVariable.pop()
         if estructura:
@@ -155,6 +158,14 @@ class EvalVisitor(decafVisitor):
         self.agregarAmbito(variable=True, estructura=False, funcion=False)
 
         pilaVariable[-1].update(pilaEstructura[-1][nombre].propiedades)
+
+    def validarReglaMain(self):
+        try:
+            if not(len(pilaFuncion[-1]['main'].argumentosTipos) == 0):
+                return Error('La funcion main contiene parametros')
+        except:
+            # no existe main
+            return Error('Programa sin funcion main')
 
     def visitar(self, tree):
         '''
@@ -182,6 +193,12 @@ class EvalVisitor(decafVisitor):
         # visitamos todas las declaraciones del programa
         declaraciones = self.visitar(ctx.declaration())
 
+        # validar Regla main
+        err = self.validarReglaMain()
+        if (isinstance(err, Error)):
+            print(
+                f"{FAIL}Error en linea {ctx.start.line}{ENDC}: {err.mensaje}")
+
         # se elimina ambito global
         self.quitarAmbito(variable=True, funcion=True, estructura=True)
         return declaraciones
@@ -194,7 +211,6 @@ class EvalVisitor(decafVisitor):
         # se crea ambito de variable
         self.agregarAmbito()
 
-        print('visitStructDec')
         nombre = ctx.id_tok().getText()
         self.visitar(ctx.varDeclaration())
 
@@ -252,9 +268,6 @@ class EvalVisitor(decafVisitor):
         tipo = ctx.methodType().getText()
         parametros = self.visitar(ctx.parameter())
 
-        print('visitMethodDec')
-        print(parametros)
-
         # agregar parametros al ambito
         paramErr = self.procesarParametros(parametros)
         if(isinstance(paramErr, Error)):
@@ -294,7 +307,6 @@ class EvalVisitor(decafVisitor):
         return Nodo(tipo, nombre, True)
 
     def visitMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
-        print('visitMethodCallDec')
         nombre = ctx.id_tok().getText()
         tipo = tipos.getMethodType(nombre, pilaFuncion)
 
@@ -324,7 +336,6 @@ class EvalVisitor(decafVisitor):
         tipo = ctx.varType().getText()
         errTemp = None
         esEstructura = False
-        print(f'visitVarDec {tipo} - {nombre}')
 
         # Validar si es de tipo estructura
         if (tipo.find('struct') != -1):
@@ -346,7 +357,6 @@ class EvalVisitor(decafVisitor):
         return None
 
     def visitArrayDec(self, ctx: decafParser.ArrayDecContext):
-        print('visitArrayDec')
         num = int(ctx.num().getText())
         nombre = ctx.id_tok().getText()
         tipo = ctx.varType().getText()
@@ -523,7 +533,6 @@ class EvalVisitor(decafVisitor):
         return None
 
     def visitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
-        print('visitReturnStmt')
 
         try:
             returnNodo = self.visitar(ctx.expression())

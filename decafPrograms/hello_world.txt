@@ -15,9 +15,10 @@ class Program{
 	struct B T[10];
 	boolean test(int a )
 	{
+		return true;
 
 	}
-	int main(int a, int b, void)
+	int main(void)
 	{
 		int variableInt;
 		boolean variableBool;
@@ -35,13 +36,14 @@ class Program{
 
 		while (true)
 		{
+			int variableChar;
 			variableChar = 'a';
 			variableBool = test(variableInt);
-			arreglo[5] = (4/3) - (1+2);
+			arreglo[1] = (4/3) - (1+2);
 		}
 
 
-		variableBool = (1<variableInt) || (variableChar == 'a')
+		variableBool = (1<variableInt) || (variableChar == 'a');
 		return 1 + variableInt;
 	}
 
