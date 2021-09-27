@@ -430,7 +430,6 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: exp no es de tipo 'int'")
             return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
 
-    # TODO manejar idLocationDot
     def visitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
         nombre = ctx.id_tok().getText()
 
@@ -451,7 +450,32 @@ class EvalVisitor(decafVisitor):
 
         return tipo
 
-    # TODO manejar arrayLocationDot
+    def visitArrayLocationDot(self, ctx: decafParser.ArrayLocationDotContext):
+        nombre = ctx.id_tok().getText()
+
+        # se valida que la variable sea de tipo estructura y sea un array
+        tipoEstructura = tipos.validarEstructuraArray(nombre, pilaVariable)
+        if(isinstance(tipoEstructura, Error)):
+            print(
+                f"{FAIL}Error en llamada de variable linea {ctx.start.line}{ENDC}: {tipoEstructura.mensaje}")
+            return Nodo(tipos.ERROR, tipos.ARRAYLOCATIONDOT)
+
+        # validar que exp sea de tipo int
+        tipoExp = self.visitar(ctx.expression())
+        if (tipoExp.tipo != tipos.INT):
+            print(
+                f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: exp no es de tipo 'int'")
+            return Nodo(tipos.ERROR, tipos.ARRAYLOCATIONDOT)
+
+        # se hace push a la pila de variables con las propiedades de la struct
+        self.agregarPropiedadesAPila(tipoEstructura)
+
+        tipo = self.visitar(ctx.location())
+
+        # se hace pop a la pila de variables con las propiedades de la struct
+        self.quitarAmbito(variable=True, estructura=False, funcion=False)
+
+        return tipo
 
     '''
     Manejo de statement

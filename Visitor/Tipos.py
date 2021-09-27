@@ -13,6 +13,7 @@ IDLOCATION = 'idLocation'
 IDLOCATIONDOT = 'idLocationDot'
 ASSIGNMENT = 'assignment'
 ARRAYLOCATION = 'arrayLocation'
+ARRAYLOCATIONDOT = 'arrayLocationDot'
 OPERACION = 'operacion'
 METHOD = 'method'
 
@@ -164,6 +165,33 @@ def validarEstructura(nombre, pilaVariable):
     '''
     for ambito in pilaVariable:
         if(nombre in ambito.keys()):
+            if (not ambito[nombre].isEstructura):
+                return Error(f"La variable '{nombre}' no es una estructura")
+            else:
+                return ambito[nombre].tipo
+
+    return Error(f"La variable '{nombre}' no existe")
+
+
+def validarEstructuraArray(nombre, pilaVariable):
+    '''
+    Funcion que valida si una variable es una estructura decalarada y tambien
+    que sea un array
+
+    Parametros:
+    - nombre: nombre de la variable a evaluar
+    - pilaVariable: pila con la informacion de todos los ambitos
+
+    Retorno:
+    - tipo de estructura
+    - <Error> en dado caso no exista una variable con ese nombre, o no sea de tipo
+    estructura
+    '''
+    for ambito in pilaVariable:
+        if(nombre in ambito.keys()):
+            if (ambito[nombre].arrayLong == None):
+                return Error(f"La variable '{nombre}' no es un array")
+
             if (not ambito[nombre].isEstructura):
                 return Error(f"La variable '{nombre}' no es una estructura")
             else:

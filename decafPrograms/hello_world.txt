@@ -12,7 +12,7 @@ class Program{
 	struct B y;
 	int arreglo[5];
 
-	struct A T[10];
+	struct B T[10];
 	boolean test(int a )
 	{
 
@@ -29,6 +29,8 @@ class Program{
 		variable = variableInt - 3;
 
 		y.c.a = 1 + y.c.a;
+
+		T[1].c.a = 5;
 
 
 		while (true)
