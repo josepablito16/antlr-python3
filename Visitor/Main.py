@@ -144,6 +144,18 @@ class EvalVisitor(decafVisitor):
         if funcion:
             pilaFuncion.pop()
 
+    def agregarPropiedadesAPila(self, nombre):
+        '''
+        Funcion para crear un nuevo ambito y agregar las propiedades
+        de una estructura al ultimo ambito
+
+        Parametros:
+        - nombre: nombre de la estructura
+        '''
+        self.agregarAmbito(variable=True, estructura=False, funcion=False)
+
+        pilaVariable[-1].update(pilaEstructura[-1][nombre].propiedades)
+
     def visitar(self, tree):
         '''
         Funcion para visitar un arbol de antlr.
@@ -281,7 +293,6 @@ class EvalVisitor(decafVisitor):
         nombre = ctx.id_tok().getText()
         return Nodo(tipo, nombre, True)
 
-    # TODO implementar methodCall
     def visitMethodCallDec(self, ctx: decafParser.MethodCallDecContext):
         print('visitMethodCallDec')
         nombre = ctx.id_tok().getText()
@@ -420,6 +431,26 @@ class EvalVisitor(decafVisitor):
             return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
 
     # TODO manejar idLocationDot
+    def visitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
+        nombre = ctx.id_tok().getText()
+
+        # se valida que la variable sea de tipo estructura
+        tipoEstructura = tipos.validarEstructura(nombre, pilaVariable)
+        if(isinstance(tipoEstructura, Error)):
+            print(
+                f"{FAIL}Error en llamada de variable linea {ctx.start.line}{ENDC}: {tipoEstructura.mensaje}")
+            return Nodo(tipos.ERROR, tipos.IDLOCATIONDOT)
+
+        # se hace push a la pila de variables con las propiedades de la struct
+        self.agregarPropiedadesAPila(tipoEstructura)
+
+        tipo = self.visitar(ctx.location())
+
+        # se hace pop a la pila de variables con las propiedades de la struct
+        self.quitarAmbito(variable=True, estructura=False, funcion=False)
+
+        return tipo
+
     # TODO manejar arrayLocationDot
 
     '''

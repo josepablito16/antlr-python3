@@ -1,7 +1,7 @@
 class Program{
 	struct A
 	{
-		int b;
+		int a;
 	};
 	struct B
 	{
@@ -22,10 +22,13 @@ class Program{
 		int variableInt;
 		boolean variableBool;
 		char variableChar;
+		struct B y;
 
 		variableInt = 5;
 		variable = variableInt * 3;
 		variable = variableInt - 3;
+
+		y.c.a = 1 + y.c.a;
 
 
 		while (true)

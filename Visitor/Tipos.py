@@ -10,6 +10,7 @@ ERROR = 'error'
 
 LITERAL = 'literal'
 IDLOCATION = 'idLocation'
+IDLOCATIONDOT = 'idLocationDot'
 ASSIGNMENT = 'assignment'
 ARRAYLOCATION = 'arrayLocation'
 OPERACION = 'operacion'
@@ -146,3 +147,26 @@ def validarTiposOperacion(nodos):
             return Error('Se esta intentando operar distintos tipos de datos')
 
     return control
+
+
+def validarEstructura(nombre, pilaVariable):
+    '''
+    Funcion que valida si una variable es una estructura decalarada.
+
+    Parametros:
+    - nombre: nombre de la variable a evaluar
+    - pilaVariable: pila con la informacion de todos los ambitos
+
+    Retorno:
+    - tipo de estructura
+    - <Error> en dado caso no exista una variable con ese nombre, o no sea de tipo
+    estructura
+    '''
+    for ambito in pilaVariable:
+        if(nombre in ambito.keys()):
+            if (not ambito[nombre].isEstructura):
+                return Error(f"La variable '{nombre}' no es una estructura")
+            else:
+                return ambito[nombre].tipo
+
+    return Error(f"La variable '{nombre}' no existe")
