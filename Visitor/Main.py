@@ -20,6 +20,15 @@ pilaVariable = []
 pilaFuncion = []
 pilaEstructura = []
 
+# ancho de cada tipo de dato
+ancho = {'int': 4,
+         'char': 2,
+         'boolean': 1
+         }
+
+offsetGlobal = 0
+offsetLocal = 0
+
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 
@@ -27,6 +36,37 @@ nombreFuncionTemp = ""
 
 
 class EvalVisitor(decafVisitor):
+
+    def calcularOffset(self, tipo):
+        '''
+            Funcion para calcular el offset de una
+            variable segun el tipo.
+
+            Parametros:
+            - tipo: tipo de variable
+
+            Retorno:
+            - <int>, <bool> : offset, si es local o no
+        '''
+        global offsetLocal
+        global offsetGlobal
+        isLocal = None
+        offset = None
+        try:  # TODO calcular ancho para estructuras y arrays
+            if (len(pilaVariable) > 1):
+                # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
+                isLocal = True
+                offsetLocal += ancho[tipo]
+                offset = offsetLocal
+            else:
+                # sino es offsetGlobal
+                isLocal = False
+                offsetGlobal += ancho[tipo]
+                offset = offsetGlobal
+        except:
+            pass
+
+        return offset, isLocal
 
     def agregarVariableATabla(self, nombre, variable):
         '''
@@ -42,12 +82,11 @@ class EvalVisitor(decafVisitor):
             return Error('Esta variable ya existe')
         else:
             pilaVariable[-1][nombre] = variable
-        """
+
         print(f'''
                 # Pila Variables
                 {pilaVariable}
                 ''')
-        """
 
     def agregarStructATabla(self, nombre, estructura):
         '''
@@ -349,8 +388,11 @@ class EvalVisitor(decafVisitor):
                 return
             esEstructura = True
 
+        # Calculo de offset y isLocal
+        offset, isLocal = self.calcularOffset(tipo)
+
         errTemp = self.agregarVariableATabla(
-            nombre, Variable(tipo, isEstructura=esEstructura))
+            nombre, Variable(tipo, isEstructura=esEstructura, offset=offset, local=isLocal))
         if isinstance(errTemp, Error):
             print(
                 f"{FAIL}Error en declaracion de variable linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")

@@ -9,6 +9,7 @@ class Program{
 		struct A c;
 	};
 	int variable;
+	int variable2;
 	struct B y;
 	int arreglo[5];
 
