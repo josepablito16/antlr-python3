@@ -27,7 +27,7 @@ ancho = {'int': 4,
          }
 
 offsetGlobal = 0
-offsetLocal = 0
+offsetLocal = []
 
 FAIL = '\033[91m'
 ENDC = '\033[0m'
@@ -56,8 +56,8 @@ class EvalVisitor(decafVisitor):
             if (len(pilaVariable) > 1):
                 # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
                 isLocal = True
-                offsetLocal += ancho[tipo]
-                offset = offsetLocal
+                offsetLocal[-1] += ancho[tipo]
+                offset = offsetLocal[-1]
             else:
                 # sino es offsetGlobal
                 isLocal = False
@@ -164,6 +164,7 @@ class EvalVisitor(decafVisitor):
         - funcion: bool para indicar si se desea agregar un ambito de funciones.
         '''
         if variable:
+            offsetLocal.append(0)
             pilaVariable.append({})
         if estructura:
             pilaEstructura.append({})
@@ -180,6 +181,7 @@ class EvalVisitor(decafVisitor):
         - funcion: bool para indicar si se desea quitar un ambito de funciones.
         '''
         if variable:
+            offsetLocal.pop()
             pilaVariable.pop()
         if estructura:
             pilaEstructura.pop()
