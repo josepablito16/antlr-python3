@@ -1,5 +1,6 @@
 from typing import List
 from antlr4 import *
+from Cuadrupla import Cuadrupla
 from decafLexer import decafLexer
 from decafVisitor import decafVisitor
 from decafParser import decafParser
@@ -26,8 +27,15 @@ ancho = {'int': 4,
          'boolean': 1
          }
 
+# offsets de variables
 offsetGlobal = 0
 offsetLocal = []
+
+# codigo intermedio
+codigoIntermedio = []
+
+# contador de temporales
+contadorTemporales = 0
 
 FAIL = '\033[91m'
 ENDC = '\033[0m'
@@ -56,17 +64,47 @@ class EvalVisitor(decafVisitor):
             if (len(pilaVariable) > 1):
                 # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
                 isLocal = True
-                offsetLocal[-1] += ancho[tipo]
                 offset = offsetLocal[-1]
+                offsetLocal[-1] += ancho[tipo]
             else:
                 # sino es offsetGlobal
                 isLocal = False
-                offsetGlobal += ancho[tipo]
                 offset = offsetGlobal
+                offsetGlobal += ancho[tipo]
         except:
             pass
 
         return offset, isLocal
+
+    def generarTemporal(self, nombre):
+        """
+            Funcion para calcular la temporal dada un
+            nombre de variable
+
+            Parametros:
+            - nombre: nombre de la variable
+
+            Retorno:
+            - <str> fp para variables locales, G para variables globales
+            con su offset
+        """
+        # TODO manejar arreglos, estructuras
+        for i in range(len(pilaVariable) - 1, -1, -1):
+            ambito = pilaVariable[i]
+            if(nombre in ambito.keys()):
+
+                offset = ambito[nombre].offset
+
+                if (ambito[nombre].isLocal):
+                    return f"fp[{offset}]"
+                else:
+                    return f"G[{offset}]"
+
+    def nuevaTemporal(self):
+        global contadorTemporales
+        temporal = f"t{contadorTemporales}"
+        contadorTemporales += 1
+        return temporal
 
     def agregarVariableATabla(self, nombre, variable):
         '''
@@ -242,7 +280,7 @@ class EvalVisitor(decafVisitor):
 
         # se elimina ambito global
         self.quitarAmbito(variable=True, funcion=True, estructura=True)
-        return declaraciones
+        return codigoIntermedio
 
     '''
     Declaracion de estructuras
@@ -463,7 +501,9 @@ class EvalVisitor(decafVisitor):
             print(
                 f"{FAIL}Error en llamada de variable linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
             return Nodo(tipos.ERROR, tipos.IDLOCATION)
-        return Nodo(tipo, tipos.IDLOCATION)
+
+        tempDir = self.generarTemporal(nombre)
+        return Nodo(tipo, tipos.IDLOCATION, direccion=tempDir)
 
     def visitArrayLocation(self, ctx: decafParser.ArrayLocationContext):
         nombre = ctx.id_tok().getText()
@@ -545,6 +585,15 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en asignacion linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
             return Nodo(tipos.ERROR, tipos.ASSIGNMENT)
         else:
+            '''
+                CODIGO INTERMEDIO
+            '''
+            resultadoTemp = self.generarTemporal(ctx.location().getText())
+            codigoIntermedio.append(
+                Cuadrupla(op='=',
+                          resultado=resultadoTemp,
+                          arg1=expression.direccion
+                          ))
             return Nodo(tipo, tipos.ASSIGNMENT)
 
     def visitIfStmt(self, ctx: decafParser.IfStmtContext):
@@ -613,7 +662,28 @@ class EvalVisitor(decafVisitor):
                 print(
                     f"{FAIL}Error en expresion linea {ctx.start.line}{ENDC}: No se puede usar el operador '{ctx.op.text}' con tipos de dato '{tipo}'")
                 return Nodo(tipos.ERROR, tipos.OPERACION)
-        return Nodo(tipoResultado, tipos.OPERACION)
+        '''
+        CODIGO INTERMEDIO
+        '''
+        dirTemp = self.nuevaTemporal()
+
+        if (isinstance(expres, list)):
+            # si es operacion con dos expresiones
+            codigoIntermedio.append(
+                Cuadrupla(resultado=dirTemp,
+                          arg1=expres[0].direccion,
+                          arg2=expres[1].direccion,
+                          op=ctx.op.text)
+            )
+        else:
+            # si es operacion con una expresion
+            codigoIntermedio.append(
+                Cuadrupla(resultado=dirTemp,
+                          arg1=0,
+                          arg2=expres.direccion,
+                          op=ctx.op.text)
+            )
+        return Nodo(tipoResultado, tipos.OPERACION, direccion=dirTemp)
 
     def visitFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
         expres = self.visitar(ctx.expression())
@@ -660,8 +730,10 @@ def main():
     stream = CommonTokenStream(lexer)
     parser = decafParser(stream)
     tree = parser.start()
-    answer = EvalVisitor().visit(tree)
-    print(answer)
+    codigoIntermedio = EvalVisitor().visit(tree)
+
+    for linea in codigoIntermedio:
+        print(linea)
 
 
 if __name__ == '__main__':
