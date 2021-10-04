@@ -367,6 +367,11 @@ class EvalVisitor(decafVisitor):
 
         # se elimina ambito de variable
         self.quitarAmbito()
+
+        # Codigo intermedio
+        # Se agrega cuadruplas con etiquetas de funcion
+        resultados[0].codigo.insert(0, Cuadrupla(op='FUNCTION', arg1=nombre))
+        resultados[-1].codigo.append(Cuadrupla(op='END FUNCTION', arg1=nombre))
         return resultados
 
     def visitIdParam(self, ctx: decafParser.IdParamContext):
@@ -591,7 +596,8 @@ class EvalVisitor(decafVisitor):
             retorno.codigo.append(
                 Cuadrupla(op='=',
                           resultado=resultadoTemp,
-                          arg1=expression.direccion
+                          arg1=expression.direccion,
+                          tab=len(pilaVariable)-1
                           ))
             return retorno
 
@@ -673,7 +679,8 @@ class EvalVisitor(decafVisitor):
                 Cuadrupla(resultado=dirTemp,
                           arg1=expres[0].direccion,
                           arg2=expres[1].direccion,
-                          op=ctx.op.text)
+                          op=ctx.op.text,
+                          tab=len(pilaVariable)-1)
             )
         else:
             # si es operacion con una expresion
@@ -681,7 +688,8 @@ class EvalVisitor(decafVisitor):
                 Cuadrupla(resultado=dirTemp,
                           arg1=0,
                           arg2=expres.direccion,
-                          op=ctx.op.text)
+                          op=ctx.op.text,
+                          tab=len(pilaVariable)-1)
             )
         # print(retorno)
         return retorno
