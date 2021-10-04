@@ -1,51 +1,14 @@
 class Program{
-	struct A
+	int d;
+
+	void main(void)
 	{
 		int a;
-	};
-	struct B
-	{
 		int b;
-		struct A c;
-	};
-	int variable;
-	int variable2;
-	struct B y;
-	int arreglo[5];
-
-	struct B T[10];
-	boolean test(int a )
-	{
-		return true;
-
-	}
-	int main(void)
-	{
-		int variableInt;
-		boolean variableBool;
-		char variableChar;
-		struct B y;
-
-		variableInt = 5;
-		variable = variableInt * 3;
-		variable = variableInt - 3;
-
-		y.c.a = 1 + y.c.a;
-
-		T[1].c.a = 5;
-
-
-		while (true)
-		{
-			int variableChar;
-			variableChar = 'a';
-			variableBool = test(variableInt);
-			arreglo[1] = (4/3) - (1+2);
-		}
-
-
-		variableBool = (1<variableInt) || (variableChar == 'a');
-		return 1 + variableInt;
+		int c;
+		
+		c = a + b;
+		d = a + b;
 	}
 
 }

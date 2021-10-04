@@ -31,9 +31,6 @@ ancho = {'int': 4,
 offsetGlobal = 0
 offsetLocal = []
 
-# codigo intermedio
-codigoIntermedio = []
-
 # contador de temporales
 contadorTemporales = 0
 
@@ -280,7 +277,7 @@ class EvalVisitor(decafVisitor):
 
         # se elimina ambito global
         self.quitarAmbito(variable=True, funcion=True, estructura=True)
-        return codigoIntermedio
+        return declaraciones
 
     '''
     Declaracion de estructuras
@@ -370,7 +367,7 @@ class EvalVisitor(decafVisitor):
 
         # se elimina ambito de variable
         self.quitarAmbito()
-        return ctx.id_tok().getText()
+        return resultados
 
     def visitIdParam(self, ctx: decafParser.IdParamContext):
         tipo = ctx.parameterType().getText()
@@ -588,13 +585,15 @@ class EvalVisitor(decafVisitor):
             '''
                 CODIGO INTERMEDIO
             '''
+            retorno = Nodo(tipo, tipos.ASSIGNMENT)
             resultadoTemp = self.generarTemporal(ctx.location().getText())
-            codigoIntermedio.append(
+            retorno.codigo += expression.codigo
+            retorno.codigo.append(
                 Cuadrupla(op='=',
                           resultado=resultadoTemp,
                           arg1=expression.direccion
                           ))
-            return Nodo(tipo, tipos.ASSIGNMENT)
+            return retorno
 
     def visitIfStmt(self, ctx: decafParser.IfStmtContext):
         # se crea ambito de variable
@@ -666,10 +665,11 @@ class EvalVisitor(decafVisitor):
         CODIGO INTERMEDIO
         '''
         dirTemp = self.nuevaTemporal()
+        retorno = Nodo(tipoResultado, tipos.OPERACION, direccion=dirTemp)
 
         if (isinstance(expres, list)):
             # si es operacion con dos expresiones
-            codigoIntermedio.append(
+            retorno.codigo.append(
                 Cuadrupla(resultado=dirTemp,
                           arg1=expres[0].direccion,
                           arg2=expres[1].direccion,
@@ -677,13 +677,14 @@ class EvalVisitor(decafVisitor):
             )
         else:
             # si es operacion con una expresion
-            codigoIntermedio.append(
+            retorno.codigo.append(
                 Cuadrupla(resultado=dirTemp,
                           arg1=0,
                           arg2=expres.direccion,
                           op=ctx.op.text)
             )
-        return Nodo(tipoResultado, tipos.OPERACION, direccion=dirTemp)
+        # print(retorno)
+        return retorno
 
     def visitFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
         expres = self.visitar(ctx.expression())
@@ -723,6 +724,30 @@ class EvalVisitor(decafVisitor):
     def visitParExpr(self, ctx: decafParser.ParExprContext):
         return self.visitar(ctx.expression())
 
+    '''
+        Manejo de bloque
+    '''
+
+    def visitBlockDec(self, ctx: decafParser.BlockDecContext):
+        self.visitar(ctx.varDeclaration())
+        return self.visitar(ctx.statement())
+
+
+def aprocesarCodigo(nodo):
+    if (isinstance(nodo, list)):
+        for i in nodo:
+            aprocesarCodigo(i)
+    else:
+        print(nodo)
+
+
+def procesarNodo(nodo):
+    if (isinstance(nodo, list)):
+        for i in nodo:
+            procesarNodo(i)
+    else:
+        aprocesarCodigo(nodo.codigo)
+
 
 def main():
     data = open('../decafPrograms/hello_world.txt').read()
@@ -730,10 +755,15 @@ def main():
     stream = CommonTokenStream(lexer)
     parser = decafParser(stream)
     tree = parser.start()
-    codigoIntermedio = EvalVisitor().visit(tree)
+    nodos = EvalVisitor().visit(tree)
+
+    codigoIntermedio = []
+    for nodo in nodos:
+        if nodo != None:
+            codigoIntermedio.append(nodo)
 
     for linea in codigoIntermedio:
-        print(linea)
+        procesarNodo(linea)
 
 
 if __name__ == '__main__':
