@@ -242,6 +242,15 @@ class decafListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by decafParser#ifElseStmt.
+    def enterIfElseStmt(self, ctx:decafParser.IfElseStmtContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#ifElseStmt.
+    def exitIfElseStmt(self, ctx:decafParser.IfElseStmtContext):
+        pass
+
+
     # Enter a parse tree produced by decafParser#whileStmt.
     def enterWhileStmt(self, ctx:decafParser.WhileStmtContext):
         pass

@@ -46,7 +46,8 @@ parameterType   : 'int'                                         # intParam
 
 block : '{' (varDeclaration)* (statement)* '}'                  # blockDec ;
 
-statement   : 'if' '(' expression ')' block ('else' block)?     # ifStmt
+statement   : 'if' '(' expression ')' block                     # ifStmt
+            |'if' '(' expression ')' block 'else' block         # ifElseStmt
             | 'while' '(' expression ')' block                  # whileStmt
             | 'return' (expression)? ';'                        # returnStmt
             | methodCall ';'                                    # methodStmt
@@ -106,3 +107,5 @@ LETTER: [a-zA-Z] | '_' ;
 ALPHA_num : LETTER | DIGIT ;
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+
+COMMENTS: '//' ~('\r' | '\n')* -> channel(HIDDEN);

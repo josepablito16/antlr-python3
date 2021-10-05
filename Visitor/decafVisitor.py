@@ -139,6 +139,11 @@ class decafVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by decafParser#ifElseStmt.
+    def visitIfElseStmt(self, ctx:decafParser.IfElseStmtContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by decafParser#whileStmt.
     def visitWhileStmt(self, ctx:decafParser.WhileStmtContext):
         return self.visitChildren(ctx)

@@ -41,6 +41,7 @@ DIGIT=40
 LETTER=41
 ALPHA_num=42
 WS=43
+COMMENTS=44
 'class'=1
 'Program'=2
 '{'=3

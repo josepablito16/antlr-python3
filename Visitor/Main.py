@@ -601,7 +601,7 @@ class EvalVisitor(decafVisitor):
                           ))
             return retorno
 
-    def visitIfStmt(self, ctx: decafParser.IfStmtContext):
+    def visitIfElseStmt(self, ctx: decafParser.IfElseStmtContext):
         # se crea ambito de variable
         self.agregarAmbito()
 
