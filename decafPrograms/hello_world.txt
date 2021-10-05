@@ -3,12 +3,16 @@ class Program{
 
 	void main(void)
 	{
-
 		int a;
-		int b;
-		int c;
-		c = a + b;
-		d = a + b;
+		if(a==1)
+		{
+			a = 3;
+		}
+		else
+		{
+			a = 5;
+		}
+
 	}
 
 }

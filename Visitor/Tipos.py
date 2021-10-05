@@ -16,6 +16,8 @@ ARRAYLOCATION = 'arrayLocation'
 ARRAYLOCATIONDOT = 'arrayLocationDot'
 OPERACION = 'operacion'
 METHOD = 'method'
+IFBLOCK = 'ifBlock'
+BLOQUE = 'bloque'
 
 
 def getidLocationType(nombre, pilaVariable):

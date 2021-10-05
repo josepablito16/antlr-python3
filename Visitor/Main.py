@@ -34,6 +34,11 @@ offsetLocal = []
 # contador de temporales
 contadorTemporales = 0
 
+# contadores de etiquetas
+contadorEtiquetasTrue = 0
+contadorEtiquetasFalse = 0
+contadorEtiquetasEndIf = 0
+
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 
@@ -41,6 +46,36 @@ nombreFuncionTemp = ""
 
 
 class EvalVisitor(decafVisitor):
+
+    def nuevaEtiqueta(self, tipoEtiqueta):
+        '''
+            Metodo que genera una etiqueta nueva.
+
+            Parametros:
+            - tipoEtiqueta: tipo de etiqueta, puede ser:
+                true, false, endIf
+
+            Retorno:
+            - nombre de la etiqueta
+        '''
+        global contadorEtiquetasTrue
+        global contadorEtiquetasFalse
+        global contadorEtiquetasEndIf
+
+        if (tipoEtiqueta == 'true'):
+            retorno = f'LABEL_TRUE_{contadorEtiquetasTrue}'
+            contadorEtiquetasTrue += 1
+            return retorno
+
+        if (tipoEtiqueta == 'false'):
+            retorno = f'LABEL_FALSE_{contadorEtiquetasFalse}'
+            contadorEtiquetasFalse += 1
+            return retorno
+
+        if (tipoEtiqueta == 'endIf'):
+            retorno = f'LABEL_ENDIF_{contadorEtiquetasEndIf}'
+            contadorEtiquetasEndIf += 1
+            return retorno
 
     def calcularOffset(self, tipo):
         '''
@@ -370,8 +405,12 @@ class EvalVisitor(decafVisitor):
 
         # Codigo intermedio
         # Se agrega cuadruplas con etiquetas de funcion
-        resultados[0].codigo.insert(0, Cuadrupla(op='FUNCTION', arg1=nombre))
-        resultados[-1].codigo.append(Cuadrupla(op='END FUNCTION', arg1=nombre))
+        if(isinstance(resultados, list)):
+            print('revisame')
+            print(resultados)
+        else:
+            resultados.codigo.insert(0, Cuadrupla(op='FUNCTION', arg1=nombre))
+            resultados.codigo.append(Cuadrupla(op='END FUNCTION', arg1=nombre))
         return resultados
 
     def visitIdParam(self, ctx: decafParser.IdParamContext):
@@ -479,17 +518,17 @@ class EvalVisitor(decafVisitor):
     def visitIntLiteral(self, ctx: decafParser.IntLiteralContext):
         # print('visitIntLiteral')
         # print(ctx.getText())
-        return Nodo(tipos.INT, tipos.LITERAL)
+        return Nodo(tipos.INT, tipos.LITERAL, direccion=ctx.getText())
 
     def visitCharLiteral(self, ctx: decafParser.CharLiteralContext):
         # print('visitCharLiteral')
         # print(ctx.getText())
-        return Nodo(tipos.CHAR, tipos.LITERAL)
+        return Nodo(tipos.CHAR, tipos.LITERAL, direccion=ctx.getText())
 
     def visitBoolLiteral(self, ctx: decafParser.BoolLiteralContext):
         # print('visitBoolLiteral')
         # print(ctx.getText())
-        return Nodo(tipos.BOOLEAN, tipos.LITERAL)
+        return Nodo(tipos.BOOLEAN, tipos.LITERAL, direccion=ctx.getText())
 
     '''
     Manejo de llamada de variables
@@ -597,23 +636,58 @@ class EvalVisitor(decafVisitor):
                 Cuadrupla(op='=',
                           resultado=resultadoTemp,
                           arg1=expression.direccion,
-                          tab=len(pilaVariable)-1
+                          tab=1
                           ))
             return retorno
 
     def visitIfElseStmt(self, ctx: decafParser.IfElseStmtContext):
         # se crea ambito de variable
         self.agregarAmbito()
+        resultado = Nodo(tipos.VOID, tipos.IFBLOCK)
 
         exp = self.visitar(ctx.expression())
 
         if (exp.tipo != tipos.BOOLEAN):
             print(
                 f"{FAIL}Error en expresion de if linea {ctx.start.line}{ENDC}: no es de tipo boolean")
-        self.visitar(ctx.block())
+        bloques = self.visitar(ctx.block())
+
         # se elimina ambito de variable
         self.quitarAmbito()
-        return None
+
+        '''
+        Codigo intermedio
+        '''
+        #print(f'bloques {bloques}')
+
+        resultado.etiquetaTrue = self.nuevaEtiqueta('true')
+        resultado.etiquetaFalse = self.nuevaEtiqueta('false')
+        endIf = self.nuevaEtiqueta('endIf')
+
+        resultado.codigo += exp.codigo
+
+        resultado.codigo.append(Cuadrupla(op='IF', arg1=f'{exp.direccion}>0', arg2='GOTO',
+                                          resultado=resultado.etiquetaTrue, tab=1))
+
+        resultado.codigo.append(
+            Cuadrupla(op='GOTO', arg1=resultado.etiquetaFalse, tab=1))
+
+        resultado.codigo.append(
+            Cuadrupla(op=resultado.etiquetaTrue, tab=0))
+
+        resultado.codigo += bloques[0].codigo
+
+        resultado.codigo.append(
+            Cuadrupla(op='GOTO', arg1=endIf, tab=1))
+
+        resultado.codigo.append(
+            Cuadrupla(op=resultado.etiquetaFalse, tab=0))
+
+        resultado.codigo += bloques[1].codigo
+
+        resultado.codigo.append(Cuadrupla(op=endIf, tab=0))
+
+        return resultado
 
     def visitWhileStmt(self, ctx: decafParser.WhileStmtContext):
         # se crea ambito de variable
@@ -680,7 +754,7 @@ class EvalVisitor(decafVisitor):
                           arg1=expres[0].direccion,
                           arg2=expres[1].direccion,
                           op=ctx.op.text,
-                          tab=len(pilaVariable)-1)
+                          tab=1)
             )
         else:
             # si es operacion con una expresion
@@ -689,7 +763,7 @@ class EvalVisitor(decafVisitor):
                           arg1=0,
                           arg2=expres.direccion,
                           op=ctx.op.text,
-                          tab=len(pilaVariable)-1)
+                          tab=1)
             )
         # print(retorno)
         return retorno
@@ -715,7 +789,22 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en expresion linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
             return Nodo(tipos.ERROR, tipos.OPERACION)
 
-        return Nodo(tipos.BOOLEAN, tipos.OPERACION)
+        '''
+        CODIGO INTERMEDIO
+        '''
+        dirTemp = self.nuevaTemporal()
+        retorno = Nodo(tipos.BOOLEAN, tipos.OPERACION, direccion=dirTemp)
+
+        # si es operacion con dos expresiones
+        retorno.codigo.append(
+            Cuadrupla(resultado=dirTemp,
+                      arg1=expres[0].direccion,
+                      arg2=expres[1].direccion,
+                      op=ctx.op.text,
+                      tab=1)
+        )
+
+        return retorno
 
     def visitCondExpr(self, ctx: decafParser.CondExprContext):
         expres = self.visitar(ctx.expression())
@@ -737,8 +826,15 @@ class EvalVisitor(decafVisitor):
     '''
 
     def visitBlockDec(self, ctx: decafParser.BlockDecContext):
+        resultado = Nodo(tipos.VOID, tipos.BLOQUE)
         self.visitar(ctx.varDeclaration())
-        return self.visitar(ctx.statement())
+
+        statements = self.visitar(ctx.statement())
+        #print(f'statements {statements}')
+        for statement in statements:
+            resultado.codigo += statement.codigo
+        #print(f'resultado {resultado}')
+        return resultado
 
 
 def aprocesarCodigo(nodo):

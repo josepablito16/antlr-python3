@@ -11,8 +11,16 @@ class Cuadrupla:
         tab = '    '
         if(self.op == '='):
             return f"{tab*self.tab}{self.resultado} = {self.arg1}"
-        elif(self.op == 'FUNCTION' or self.op == 'END FUNCTION'):
+        elif(self.op == 'FUNCTION'):
             return f"{tab*self.tab}{self.op} {self.arg1}:"
+        elif(self.op == 'END FUNCTION'):
+            return f"{tab*self.tab}{self.op} {self.arg1}"
+        elif(self.op.find('LABEL') != -1):
+            return f"{tab*self.tab}{self.op}:"
+        elif(self.op == 'GOTO'):
+            return f"{tab*self.tab}{self.op} {self.arg1}"
+        elif(self.op == 'IF'):
+            return f"{tab*self.tab}{self.op} {self.arg1} {self.arg2} {self.resultado}"
 
         return f"{tab*self.tab}{self.resultado} = {self.arg1} {self.op} {self.arg2}"
 
@@ -25,3 +33,7 @@ if __name__ == '__main__':
     print(Cuadrupla(op='+', arg1='fp[0]', arg2='fp[4]', resultado='t0', tab=1))
     print(Cuadrupla(op='=', arg1='t1', resultado='G[0]', tab=1))
     print(Cuadrupla(op='END FUNCTION', arg1='main'))
+    print(Cuadrupla(op='LABEL_TRUE_0'))
+    print(Cuadrupla(op='GOTO', arg1='LABEL_TRUE_0'))
+    print(Cuadrupla(op='IF', arg1='t0>0', arg2='GOTO',
+                    resultado='LABEL_TRUE_0', tab=1))
