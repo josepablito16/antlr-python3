@@ -640,6 +640,45 @@ class EvalVisitor(decafVisitor):
                           ))
             return retorno
 
+    def visitIfStmt(self, ctx: decafParser.IfStmtContext):
+        # se crea ambito de variable
+        self.agregarAmbito()
+        resultado = Nodo(tipos.VOID, tipos.IFBLOCK)
+
+        exp = self.visitar(ctx.expression())
+
+        if (exp.tipo != tipos.BOOLEAN):
+            print(
+                f"{FAIL}Error en expresion de if linea {ctx.start.line}{ENDC}: no es de tipo boolean")
+        bloque = self.visitar(ctx.block())
+
+        # se elimina ambito de variable
+        self.quitarAmbito()
+
+        '''
+        Codigo intermedio
+        '''
+
+        resultado.etiquetaTrue = self.nuevaEtiqueta('true')
+        endIf = self.nuevaEtiqueta('endIf')
+
+        resultado.codigo += exp.codigo
+
+        resultado.codigo.append(Cuadrupla(op='IF', arg1=f'{exp.direccion}>0', arg2='GOTO',
+                                          resultado=resultado.etiquetaTrue, tab=1))
+
+        resultado.codigo.append(
+            Cuadrupla(op='GOTO', arg1=endIf, tab=1))
+
+        resultado.codigo.append(
+            Cuadrupla(op=resultado.etiquetaTrue, tab=0))
+
+        resultado.codigo += bloque.codigo
+
+        resultado.codigo.append(Cuadrupla(op=endIf, tab=0))
+
+        return resultado
+
     def visitIfElseStmt(self, ctx: decafParser.IfElseStmtContext):
         # se crea ambito de variable
         self.agregarAmbito()

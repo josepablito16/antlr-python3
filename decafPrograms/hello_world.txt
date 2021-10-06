@@ -3,13 +3,9 @@ class Program{
 	{
 		int x;
 		int y;
-		if (x!=1 || x!=y && x<=y) 
+		if (x!=1 || x!=y && x<=y)
 		{
-			x=3; 
-		}
-		else
-		{
-			x=5;
+			x=3;
 		}
 
 	}
