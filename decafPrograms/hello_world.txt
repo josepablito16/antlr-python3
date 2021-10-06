@@ -1,16 +1,15 @@
 class Program{
-	int d;
-
 	void main(void)
 	{
-		int a;
-		if(a==1)
+		int x;
+		int y;
+		if (x!=1 || x!=y && x<=y) 
 		{
-			a = 3;
+			x=3; 
 		}
 		else
 		{
-			a = 5;
+			x=5;
 		}
 
 	}

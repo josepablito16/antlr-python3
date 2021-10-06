@@ -746,9 +746,11 @@ class EvalVisitor(decafVisitor):
         '''
         dirTemp = self.nuevaTemporal()
         retorno = Nodo(tipoResultado, tipos.OPERACION, direccion=dirTemp)
-
         if (isinstance(expres, list)):
             # si es operacion con dos expresiones
+            retorno.codigo += expres[0].codigo
+            retorno.codigo += expres[1].codigo
+
             retorno.codigo.append(
                 Cuadrupla(resultado=dirTemp,
                           arg1=expres[0].direccion,
@@ -758,6 +760,7 @@ class EvalVisitor(decafVisitor):
             )
         else:
             # si es operacion con una expresion
+            retorno.codigo.append(expres.codigo)
             retorno.codigo.append(
                 Cuadrupla(resultado=dirTemp,
                           arg1=0,
@@ -765,7 +768,6 @@ class EvalVisitor(decafVisitor):
                           op=ctx.op.text,
                           tab=1)
             )
-        # print(retorno)
         return retorno
 
     def visitFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
@@ -795,7 +797,8 @@ class EvalVisitor(decafVisitor):
         dirTemp = self.nuevaTemporal()
         retorno = Nodo(tipos.BOOLEAN, tipos.OPERACION, direccion=dirTemp)
 
-        # si es operacion con dos expresiones
+        retorno.codigo += expres[0].codigo
+        retorno.codigo += expres[1].codigo
         retorno.codigo.append(
             Cuadrupla(resultado=dirTemp,
                       arg1=expres[0].direccion,
@@ -803,7 +806,6 @@ class EvalVisitor(decafVisitor):
                       op=ctx.op.text,
                       tab=1)
         )
-
         return retorno
 
     def visitCondExpr(self, ctx: decafParser.CondExprContext):
