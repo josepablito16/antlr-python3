@@ -38,6 +38,8 @@ contadorTemporales = 0
 contadorEtiquetasTrue = 0
 contadorEtiquetasFalse = 0
 contadorEtiquetasEndIf = 0
+contadorEtiquetasStartWhile = 0
+contadorEtiquetasEndWhile = 0
 
 FAIL = '\033[91m'
 ENDC = '\033[0m'
@@ -53,7 +55,7 @@ class EvalVisitor(decafVisitor):
 
             Parametros:
             - tipoEtiqueta: tipo de etiqueta, puede ser:
-                true, false, endIf
+                true, false, endIf, startWhile, endWhile
 
             Retorno:
             - nombre de la etiqueta
@@ -61,6 +63,8 @@ class EvalVisitor(decafVisitor):
         global contadorEtiquetasTrue
         global contadorEtiquetasFalse
         global contadorEtiquetasEndIf
+        global contadorEtiquetasStartWhile
+        global contadorEtiquetasEndWhile
 
         if (tipoEtiqueta == 'true'):
             retorno = f'LABEL_TRUE_{contadorEtiquetasTrue}'
@@ -75,6 +79,16 @@ class EvalVisitor(decafVisitor):
         if (tipoEtiqueta == 'endIf'):
             retorno = f'LABEL_ENDIF_{contadorEtiquetasEndIf}'
             contadorEtiquetasEndIf += 1
+            return retorno
+
+        if (tipoEtiqueta == 'startWhile'):
+            retorno = f'LABEL_STARTWHILE_{contadorEtiquetasStartWhile}'
+            contadorEtiquetasStartWhile += 1
+            return retorno
+
+        if (tipoEtiqueta == 'endWhile'):
+            retorno = f'LABEL_ENDTWHILE_{contadorEtiquetasEndWhile}'
+            contadorEtiquetasEndWhile += 1
             return retorno
 
     def calcularOffset(self, tipo):
@@ -737,11 +751,37 @@ class EvalVisitor(decafVisitor):
         if (exp.tipo != tipos.BOOLEAN):
             print(
                 f"{FAIL}Error en expresion de while linea {ctx.start.line}{ENDC}: no es de tipo boolean")
-        self.visitar(ctx.block())
+        bloque = self.visitar(ctx.block())
 
         # se elimina ambito de variable
         self.quitarAmbito()
-        return None
+        retorno = Nodo(tipos.VOID, tipos.WHILE)
+        '''
+            Codigo Intermedio
+        '''
+        inicio = self.nuevaEtiqueta('startWhile')
+        exp.etiquetaTrue = self.nuevaEtiqueta('true')
+        exp.etiquetaFalse = self.nuevaEtiqueta('endWhile')
+
+        retorno.codigo.append(Cuadrupla(op=inicio, tab=0))
+
+        retorno.codigo += exp.codigo
+
+        retorno.codigo.append(Cuadrupla(op='IF', arg1=f'{exp.direccion}>0',
+                                        arg2='GOTO', resultado=exp.etiquetaTrue, tab=1))
+
+        retorno.codigo.append(
+            Cuadrupla(op='GOTO', arg1=exp.etiquetaFalse, tab=1))
+
+        retorno.codigo.append(Cuadrupla(op=exp.etiquetaTrue, tab=0))
+
+        retorno.codigo += bloque.codigo
+
+        retorno.codigo.append(Cuadrupla(op='GOTO', arg1=inicio, tab=1))
+
+        retorno.codigo.append(Cuadrupla(op=exp.etiquetaFalse, tab=0))
+
+        return retorno
 
     def visitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
 
