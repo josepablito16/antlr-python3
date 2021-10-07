@@ -784,13 +784,24 @@ class EvalVisitor(decafVisitor):
         return retorno
 
     def visitReturnStmt(self, ctx: decafParser.ReturnStmtContext):
-
+        returnNodo = Nodo(tipos.VOID, tipos.RETURN)
+        exp = None
         try:
-            returnNodo = self.visitar(ctx.expression())
-            self.agregarReturn(returnNodo.tipo)
+            exp = self.visitar(ctx.expression())
+            self.agregarReturn(exp.tipo)
         except:
             print('err')
             pass
+        '''
+            CODIGO INTERMEDIO
+        '''
+        returnNodo.codigo += exp.codigo
+
+        returnNodo.codigo.append(
+            Cuadrupla(op='RETURN', arg1=exp.direccion, tab=1))
+
+        return returnNodo
+
     '''
     Manejo de expresiones
     '''

@@ -1,4 +1,9 @@
 class Program{
+	int test()
+	{
+		int a;
+		return 1 + a;
+	}
 	void main(void)
 	{
 		int x;

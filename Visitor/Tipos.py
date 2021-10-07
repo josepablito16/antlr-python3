@@ -19,6 +19,7 @@ METHOD = 'method'
 IFBLOCK = 'ifBlock'
 BLOQUE = 'bloque'
 WHILE = 'while'
+RETURN = 'return'
 
 
 def getidLocationType(nombre, pilaVariable):

@@ -21,6 +21,8 @@ class Cuadrupla:
             return f"{tab*self.tab}{self.op} {self.arg1}"
         elif(self.op == 'IF'):
             return f"{tab*self.tab}{self.op} {self.arg1} {self.arg2} {self.resultado}"
+        elif(self.op == 'RETURN'):
+            return f"{tab*self.tab}{self.op} {self.arg1}"
 
         return f"{tab*self.tab}{self.resultado} = {self.arg1} {self.op} {self.arg2}"
 
@@ -37,3 +39,4 @@ if __name__ == '__main__':
     print(Cuadrupla(op='GOTO', arg1='LABEL_TRUE_0'))
     print(Cuadrupla(op='IF', arg1='t0>0', arg2='GOTO',
                     resultado='LABEL_TRUE_0', tab=1))
+    print(Cuadrupla(op='RETURN', arg1='fp[0]', tab=1))
