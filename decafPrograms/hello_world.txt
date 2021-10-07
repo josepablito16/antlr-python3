@@ -5,14 +5,11 @@ class Program{
 		c = test(1,c+5);
 		return 1 + a;
 	}
+
+	
 	void main(void)
 	{
-		int x;
-		int y;
-		while (x!=1 || x!=y && x<=y)
-		{
-			x=3;
-		}
+		
 
 	}
 

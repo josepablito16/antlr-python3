@@ -374,7 +374,9 @@ class EvalVisitor(decafVisitor):
                 long = None
             if (i.tipo != tipos.VOID):
                 parametrosList.append(i.tipo)
-                variable = Variable(i.tipo, i.nombre, long)
+                offset, isLocal = self.calcularOffset(i.tipo)
+                variable = Variable(i.tipo, i.nombre, long,
+                                    offset=offset, local=isLocal)
                 errTemp = self.agregarVariableATabla(nombre, variable)
                 if isinstance(errTemp, Error):
                     return Error(f"Parametro '{i.nombre}' ya existe")
