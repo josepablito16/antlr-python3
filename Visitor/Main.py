@@ -466,6 +466,7 @@ class EvalVisitor(decafVisitor):
             CODIGO INTERMEDIO
         '''
         retorno = Nodo(tipo, tipos.METHOD)
+        retorno.direccion = 'R'
 
         for argumento in argumentos:
             retorno.codigo += argumento.codigo
