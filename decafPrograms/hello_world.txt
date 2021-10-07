@@ -1,7 +1,8 @@
 class Program{
-	int test()
+	int test(int a, int b)
 	{
-		int a;
+		int c;
+		c = test(1,c+5);
 		return 1 + a;
 	}
 	void main(void)

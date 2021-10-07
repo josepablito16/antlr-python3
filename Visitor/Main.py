@@ -453,13 +453,26 @@ class EvalVisitor(decafVisitor):
         # Se valida que los argumentos coincidan con la firma
         argumentos = self.visitar(ctx.arg())
 
-        errTemp = tipos.validarTiposArgumentos(nombre, argumentos, pilaFuncion)
+        errTemp = tipos.validarTiposArgumentos(
+            nombre, copy.deepcopy(argumentos), pilaFuncion)
         if (isinstance(errTemp, Error)):
             print(
                 f"{FAIL}Error en llamada de funcion linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
             return Nodo(tipos.ERROR, tipos.METHOD)
 
-        return Nodo(tipo, tipos.METHOD)
+        '''
+            CODIGO INTERMEDIO
+        '''
+        retorno = Nodo(tipo, tipos.METHOD)
+
+        for argumento in argumentos:
+            retorno.codigo += argumento.codigo
+            retorno.codigo.append(
+                Cuadrupla(op='PARAM', arg1=argumento.direccion, tab=1))
+
+        retorno.codigo.append(
+            Cuadrupla(op='CALL', arg1=nombre, arg2=len(argumentos), tab=1))
+        return retorno
 
     '''
     Declaracion de variable y arreglo
