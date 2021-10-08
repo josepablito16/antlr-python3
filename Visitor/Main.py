@@ -91,13 +91,14 @@ class EvalVisitor(decafVisitor):
             contadorEtiquetasEndWhile += 1
             return retorno
 
-    def calcularOffset(self, tipo):
+    def calcularOffset(self, tipo, num=1):
         '''
             Funcion para calcular el offset de una
             variable segun el tipo.
 
             Parametros:
             - tipo: tipo de variable
+            - num: cantidad de elementos (se usa para arreglos)
 
             Retorno:
             - <int>, <bool> : offset, si es local o no
@@ -111,12 +112,12 @@ class EvalVisitor(decafVisitor):
                 # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
                 isLocal = True
                 offset = offsetLocal[-1]
-                offsetLocal[-1] += ancho[tipo]
+                offsetLocal[-1] += ancho[tipo] * num
             else:
                 # sino es offsetGlobal
                 isLocal = False
                 offset = offsetGlobal
-                offsetGlobal += ancho[tipo]
+                offsetGlobal += ancho[tipo] * num
         except:
             pass
 
@@ -134,7 +135,7 @@ class EvalVisitor(decafVisitor):
             - <str> fp para variables locales, G para variables globales
             con su offset
         """
-        # TODO manejar arreglos, estructuras
+        # TODO manejar, estructuras
         for i in range(len(pilaVariable) - 1, -1, -1):
             ambito = pilaVariable[i]
             if(nombre in ambito.keys()):
@@ -145,6 +146,44 @@ class EvalVisitor(decafVisitor):
                     return f"fp[{offset}]"
                 else:
                     return f"G[{offset}]"
+
+    def getOffset(self, nombre):
+        """
+            Funcion para obtener el offset de una variable
+
+            Parametros:
+            - nombre: nombre de la variable
+
+            Retorno:
+            - <int> offset de la variable
+        """
+        for i in range(len(pilaVariable) - 1, -1, -1):
+            ambito = pilaVariable[i]
+            if(nombre in ambito.keys()):
+                return ambito[nombre].offset
+
+    def generarTemporalArray(self, nombre, temporal):
+        """
+            Funcion para calcular la temporal dada un
+            nombre de una variable tipo array
+
+            Parametros:
+            - nombre: nombre de la variable
+            - temporal: nombre de la temporal
+
+            Retorno:
+            - <str> fp para variables locales, G para variables globales
+            siendo su offset una temporal
+        """
+        # TODO manejar, estructuras
+        for i in range(len(pilaVariable) - 1, -1, -1):
+            ambito = pilaVariable[i]
+            if(nombre in ambito.keys()):
+
+                if (ambito[nombre].isLocal):
+                    return f"fp[{temporal}]"
+                else:
+                    return f"G[{temporal}]"
 
     def nuevaTemporal(self):
         global contadorTemporales
@@ -533,8 +572,11 @@ class EvalVisitor(decafVisitor):
                 return
             esEstructura = True
 
+        # Calculo de offset y isLocal
+        offset, isLocal = self.calcularOffset(tipo, num)
+
         errTemp = self.agregarVariableATabla(
-            nombre, Variable(tipo, isEstructura=esEstructura, long=num))
+            nombre, Variable(tipo, isEstructura=esEstructura, long=num, offset=offset, local=isLocal))
         if isinstance(errTemp, Error):
             print(
                 f"{FAIL}Error en declaracion de array linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
@@ -587,13 +629,32 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
             return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
 
+        retorno = None
         # Se valida que expression sea de tipo int
         if (expression.tipo == tipos.INT):
-            return Nodo(tipo, tipos.ARRAYLOCATION)
+            retorno = Nodo(tipo, tipos.ARRAYLOCATION)
         else:
             print(
                 f"{FAIL}Error en llamada de array linea {ctx.start.line}{ENDC}: exp no es de tipo 'int'")
             return Nodo(tipos.ERROR, tipos.ARRAYLOCATION)
+
+        '''
+            CODIGO INTERMEDIO
+        '''
+        indexTemp = self.nuevaTemporal()
+        returnTemp = self.nuevaTemporal()
+        retorno.direccion = self.generarTemporalArray(nombre, returnTemp)
+
+        retorno.codigo += expression.codigo
+
+        retorno.codigo.append(
+            Cuadrupla(op='*', arg1=ancho[tipo], arg2=expression.direccion, resultado=indexTemp, tab=1))
+
+        offset = self.getOffset(nombre)
+        retorno.codigo.append(
+            Cuadrupla(op='+', arg1=offset, arg2=indexTemp, resultado=returnTemp, tab=1))
+
+        return retorno
 
     def visitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
         nombre = ctx.id_tok().getText()
