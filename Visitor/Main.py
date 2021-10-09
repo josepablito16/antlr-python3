@@ -385,6 +385,9 @@ class EvalVisitor(decafVisitor):
             print(
                 f"{FAIL}Error en declaracion de estructura linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
 
+        # se agrega el ancho de la estructura declarada
+        ancho[nombre] = offsetLocal[-1]
+
         # se elimina ambito de variable
         self.quitarAmbito()
         return None

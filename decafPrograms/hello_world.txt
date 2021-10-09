@@ -1,13 +1,20 @@
 class Program
 {
-    int test()
+    struct Y
     {
-        return 1;
+        char z;
     }
-    void main()
+    struct X
     {
-        int a;
-        int b[3];
-        a = b[test()];
+        int m;
+        int n;
+        struct Y o;
+    }
+
+    void main(void)
+    {
+        struct X H;
+        H.m = H.m + H.n;
     }
 }
+      
