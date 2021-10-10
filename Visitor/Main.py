@@ -31,6 +31,10 @@ ancho = {'int': 4,
 offsetGlobal = 0
 offsetLocal = []
 
+offsetLocationDot = 0
+procesandoLocation = False
+isLocationLocal = True
+
 # contador de temporales
 contadorTemporales = 0
 
@@ -122,6 +126,26 @@ class EvalVisitor(decafVisitor):
             pass
 
         return offset, isLocal
+
+    def getIsLocal(self):
+        '''
+            Funcion para retorna si uan funcion es local o no
+
+            Retorno:
+            - <bool> : si es local o no
+        '''
+        isLocal = None
+        try:
+            if (len(pilaVariable) > 1):
+                # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
+                isLocal = True
+            else:
+                # sino es offsetGlobal
+                isLocal = False
+        except:
+            pass
+
+        return isLocal
 
     def generarTemporal(self, nombre):
         """
@@ -610,6 +634,10 @@ class EvalVisitor(decafVisitor):
     '''
 
     def visitIdLocation(self, ctx: decafParser.IdLocationContext):
+        global offsetLocationDot
+        global procesandoLocation
+        global isLocationLocal
+
         nombre = ctx.id_tok().getText()
         tipo = tipos.getidLocationType(nombre, pilaVariable)
 
@@ -618,7 +646,19 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en llamada de variable linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
             return Nodo(tipos.ERROR, tipos.IDLOCATION)
 
-        tempDir = self.generarTemporal(nombre)
+        tempDir = None
+        if (isinstance(ctx.parentCtx, (decafParser.IdLocationDotContext, decafParser.ArrayLocationDotContext))):
+
+            offset = offsetLocationDot + self.getOffset(nombre)
+            if (isLocationLocal):
+                tempDir = f'FP[{offset}]'
+            else:
+                tempDir = f'G[{offset}]'
+
+            offsetLocationDot = 0
+            procesandoLocation = False
+        else:
+            tempDir = self.generarTemporal(nombre)
         return Nodo(tipo, tipos.IDLOCATION, direccion=tempDir)
 
     def visitArrayLocation(self, ctx: decafParser.ArrayLocationContext):
@@ -660,6 +700,9 @@ class EvalVisitor(decafVisitor):
         return retorno
 
     def visitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
+        global offsetLocationDot
+        global procesandoLocation
+        global isLocationLocal
         nombre = ctx.id_tok().getText()
 
         # se valida que la variable sea de tipo estructura
@@ -671,6 +714,12 @@ class EvalVisitor(decafVisitor):
 
         # se hace push a la pila de variables con las propiedades de la struct
         self.agregarPropiedadesAPila(tipoEstructura)
+
+        if not procesandoLocation:
+            procesandoLocation = True
+            isLocationLocal = self.getIsLocal()
+
+        offsetLocationDot += self.getOffset(nombre)
 
         tipo = self.visitar(ctx.location())
 
@@ -724,11 +773,10 @@ class EvalVisitor(decafVisitor):
                 CODIGO INTERMEDIO
             '''
             retorno = Nodo(tipo, tipos.ASSIGNMENT)
-            resultadoTemp = self.generarTemporal(ctx.location().getText())
             retorno.codigo += expression.codigo
             retorno.codigo.append(
                 Cuadrupla(op='=',
-                          resultado=resultadoTemp,
+                          resultado=location.direccion,
                           arg1=expression.direccion,
                           tab=1
                           ))
@@ -791,7 +839,7 @@ class EvalVisitor(decafVisitor):
         '''
         Codigo intermedio
         '''
-        #print(f'bloques {bloques}')
+        # print(f'bloques {bloques}')
 
         resultado.etiquetaTrue = self.nuevaEtiqueta('true')
         resultado.etiquetaFalse = self.nuevaEtiqueta('false')
@@ -1002,10 +1050,10 @@ class EvalVisitor(decafVisitor):
         self.visitar(ctx.varDeclaration())
 
         statements = self.visitar(ctx.statement())
-        #print(f'statements {statements}')
+        # print(f'statements {statements}')
         for statement in statements:
             resultado.codigo += statement.codigo
-        #print(f'resultado {resultado}')
+        # print(f'resultado {resultado}')
         return resultado
 
 

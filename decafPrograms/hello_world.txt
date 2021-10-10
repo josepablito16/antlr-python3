@@ -11,7 +11,7 @@ class Program
         struct Y o;
     }
 
-    void main(void)
+    void main()
     {
         struct X H;
         H.m = H.m + H.n;
