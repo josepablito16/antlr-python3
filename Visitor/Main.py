@@ -1107,7 +1107,10 @@ class EvalVisitor(decafVisitor):
         statements = self.visitar(ctx.statement())
         # print(f'statements {statements}')
         for statement in statements:
-            resultado.codigo += statement.codigo
+            try:
+                resultado.codigo += statement.codigo
+            except:
+                pass
         # print(f'resultado {resultado}')
         return resultado
 

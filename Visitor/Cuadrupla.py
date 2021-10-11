@@ -16,7 +16,7 @@ class Cuadrupla:
         elif(self.op == 'END FUNCTION'):
             return f"{tab*self.tab}{self.op} {self.arg1}\n"
         elif(self.op.find('LABEL') != -1):
-            return f"{tab*self.tab}{self.op}:"
+            return f"\n{tab*self.tab}{self.op}:"
         elif(self.op == 'GOTO'):
             return f"{tab*self.tab}{self.op} {self.arg1}"
         elif(self.op == 'IF'):
