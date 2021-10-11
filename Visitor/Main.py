@@ -129,25 +129,20 @@ class EvalVisitor(decafVisitor):
 
         return offset, isLocal
 
-    def getIsLocal(self):
+    def getIsLocal(self, nombre):
         '''
             Funcion para retorna si uan funcion es local o no
+
+            Parametros:
+            - nombre: nombre de la variable
 
             Retorno:
             - <bool> : si es local o no
         '''
-        isLocal = None
-        try:
-            if (len(pilaVariable) > 1):
-                # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
-                isLocal = True
-            else:
-                # sino es offsetGlobal
-                isLocal = False
-        except:
-            pass
-
-        return isLocal
+        for i in range(len(pilaVariable) - 1, -1, -1):
+            ambito = pilaVariable[i]
+            if(nombre in ambito.keys()):
+                return ambito[nombre].isLocal
 
     def generarTemporal(self, nombre):
         """
@@ -161,7 +156,6 @@ class EvalVisitor(decafVisitor):
             - <str> fp para variables locales, G para variables globales
             con su offset
         """
-        # TODO manejar, estructuras
         for i in range(len(pilaVariable) - 1, -1, -1):
             ambito = pilaVariable[i]
             if(nombre in ambito.keys()):
@@ -737,7 +731,7 @@ class EvalVisitor(decafVisitor):
 
         if not procesandoLocation:
             procesandoLocation = True
-            isLocationLocal = self.getIsLocal()
+            isLocationLocal = self.getIsLocal(nombre)
 
         offsetLocationDot += self.getOffset(nombre)
 
@@ -779,7 +773,7 @@ class EvalVisitor(decafVisitor):
         '''
         if not procesandoLocation:
             procesandoLocation = True
-            isLocationLocal = self.getIsLocal()
+            isLocationLocal = self.getIsLocal(nombre)
 
         structTipo = tipos.getArrayLocationType(nombre, pilaVariable)
         try:
