@@ -1,4 +1,4 @@
-class Program
+class Structs
 {
 struct MyTest
 {
@@ -18,6 +18,8 @@ void main(void)
 {
 	struct OtherTest M[5];
 	int i;
+	i = 1;	
+	M[i].T[1].n = 2;
 	
 }
 

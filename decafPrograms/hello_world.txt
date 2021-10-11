@@ -1,20 +1,25 @@
 class Program
 {
-    struct Y
-    {
-        char z;
-    }
-    struct X
-    {
-        int m;
-        int n;
-        struct Y o;
-    }
+struct MyTest
+{
+	int n;
+};
 
-    void main()
-    {
-        struct X H;
-        H.m = H.m + H.n;
-    }
+struct OtherTest
+{
+	struct MyTest T[10];
+	int n;
+};
+
+int getInt()
+{
+    return 1;
 }
-      
+
+void main(void)
+{
+	struct OtherTest M[5];
+	M[getInt()].T[1].n = 2;
+}
+
+}

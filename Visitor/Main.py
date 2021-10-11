@@ -34,6 +34,8 @@ offsetLocal = []
 offsetLocationDot = 0
 procesandoLocation = False
 isLocationLocal = True
+codigoLocation = []
+ultimaDireccionLocation = None
 
 # contador de temporales
 contadorTemporales = 0
@@ -637,6 +639,8 @@ class EvalVisitor(decafVisitor):
         global offsetLocationDot
         global procesandoLocation
         global isLocationLocal
+        global codigoLocation
+        global ultimaDireccionLocation
 
         nombre = ctx.id_tok().getText()
         tipo = tipos.getidLocationType(nombre, pilaVariable)
@@ -646,20 +650,36 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en llamada de variable linea {ctx.start.line}{ENDC}: {tipo.mensaje}")
             return Nodo(tipos.ERROR, tipos.IDLOCATION)
 
+        '''
+            CODIGO INTERMEDIO
+        '''
+        retorno = Nodo(tipo, tipos.IDLOCATION)
         tempDir = None
         if (isinstance(ctx.parentCtx, (decafParser.IdLocationDotContext, decafParser.ArrayLocationDotContext))):
 
             offset = offsetLocationDot + self.getOffset(nombre)
-            if (isLocationLocal):
-                tempDir = f'FP[{offset}]'
+            if (len(codigoLocation) > 0):
+                retorno.codigo += codigoLocation
+                retorno.codigo.append(
+                    Cuadrupla(op='+', arg1=ultimaDireccionLocation, arg2=offset, resultado=ultimaDireccionLocation, tab=1))
+                if (isLocationLocal):
+                    tempDir = f'FP[{ultimaDireccionLocation}]'
+                else:
+                    tempDir = f'G[{ultimaDireccionLocation}]'
             else:
-                tempDir = f'G[{offset}]'
+                if (isLocationLocal):
+                    tempDir = f'FP[{offset}]'
+                else:
+                    tempDir = f'G[{offset}]'
 
             offsetLocationDot = 0
             procesandoLocation = False
+            codigoLocation = []
+            ultimaDireccionLocation = None
         else:
             tempDir = self.generarTemporal(nombre)
-        return Nodo(tipo, tipos.IDLOCATION, direccion=tempDir)
+        retorno.direccion = tempDir
+        return retorno
 
     def visitArrayLocation(self, ctx: decafParser.ArrayLocationContext):
         nombre = ctx.id_tok().getText()
@@ -729,6 +749,12 @@ class EvalVisitor(decafVisitor):
         return tipo
 
     def visitArrayLocationDot(self, ctx: decafParser.ArrayLocationDotContext):
+        global procesandoLocation
+        global isLocationLocal
+        global offsetLocationDot
+        global codigoLocation
+        global ultimaDireccionLocation
+
         nombre = ctx.id_tok().getText()
 
         # se valida que la variable sea de tipo estructura y sea un array
@@ -747,6 +773,34 @@ class EvalVisitor(decafVisitor):
 
         # se hace push a la pila de variables con las propiedades de la struct
         self.agregarPropiedadesAPila(tipoEstructura)
+
+        '''
+            CODIGO INTERMEDIO
+        '''
+        if not procesandoLocation:
+            procesandoLocation = True
+            isLocationLocal = self.getIsLocal()
+
+        structTipo = tipos.getArrayLocationType(nombre, pilaVariable)
+        try:
+            offset = self.getOffset(nombre)
+            offset += int(tipoExp.direccion) * ancho[structTipo]
+            offsetLocationDot += offset
+        except:
+            # ultimaDireccionLocation =
+            offset = self.getOffset(nombre)
+
+            codigoLocation += tipoExp.codigo
+
+            direccionTemp = self.nuevaTemporal()
+            codigoLocation.append(
+                Cuadrupla(op='*', arg1=tipoExp.direccion, arg2=ancho[structTipo], resultado=direccionTemp, tab=1))
+
+            if (ultimaDireccionLocation != None):
+                codigoLocation.append(
+                    Cuadrupla(op='+', arg1=direccionTemp, arg2=ultimaDireccionLocation, resultado=direccionTemp, tab=1))
+
+            ultimaDireccionLocation = direccionTemp
 
         tipo = self.visitar(ctx.location())
 
@@ -774,6 +828,7 @@ class EvalVisitor(decafVisitor):
             '''
             retorno = Nodo(tipo, tipos.ASSIGNMENT)
             retorno.codigo += expression.codigo
+            retorno.codigo += location.codigo
             retorno.codigo.append(
                 Cuadrupla(op='=',
                           resultado=location.direccion,

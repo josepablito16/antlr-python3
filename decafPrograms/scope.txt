@@ -1,11 +1,30 @@
 class Program
 {
-void OutputInt(int n)
-{
-}
 
-int InputInt(void)
-{return 0;}
+int a;
+int b;
+
+
+void main(void)
+{
+
+	a = 3;
+	b = 4;
+	
+	OutputInt(a);
+	Test(5,6,7,8);
+
+
+	if (a==3)
+	{
+		int b;
+		b = 5;
+		OutputInt(b);
+	}
+
+	OutputInt(b);
+
+}
 
 void Test(int a, int b, int c, int d)
 {
@@ -16,29 +35,12 @@ void Test(int a, int b, int c, int d)
 
 }
 
-int a;
-int b;
 
-
-void main(void)
+void OutputInt(int n)
 {
-
-	OutputInt(a);
-	Test(5,6,7,8);
-
-
-	if (a==3)
-	{
-		int b;
-		OutputInt(b);
-	}
-
-	OutputInt(b);
-
 }
 
-
-
-
+int InputInt(void)
+{return 0;}
 
 }
