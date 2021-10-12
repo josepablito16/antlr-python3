@@ -537,6 +537,7 @@ class EvalVisitor(decafVisitor):
 
         retorno.codigo.append(
             Cuadrupla(op='CALL', arg1=nombre, arg2=len(argumentos), tab=1))
+
         return retorno
 
     '''
@@ -811,6 +812,9 @@ class EvalVisitor(decafVisitor):
     '''
     Manejo de statement
     '''
+
+    def visitMethodStmt(self, ctx: decafParser.MethodStmtContext):
+        return self.visitar(ctx.methodCall())
 
     def visitAssignmentStmt(self, ctx: decafParser.AssignmentStmtContext):
         location = self.visitar(ctx.location())
