@@ -35,7 +35,8 @@ def getidLocationType(nombre, pilaVariable):
     - <Error> si el idLocation no se encuentra en los ambitos
     - tipo en el caso de que se encuentre el idLocation
     '''
-    for ambito in pilaVariable:
+    for i in range(len(pilaVariable) - 1, -1, -1):
+        ambito = pilaVariable[i]
         if(nombre in ambito.keys()):
             return ambito[nombre].tipo
 
@@ -56,7 +57,8 @@ def getArrayLocationType(nombre, pilaVariable):
     - <Error> si el arrayLocation no se encuentra en los ambitos
     - tipo en el caso de que se encuentre el arrayLocation
     '''
-    for ambito in pilaVariable:
+    for i in range(len(pilaVariable) - 1, -1, -1):
+        ambito = pilaVariable[i]
         if(nombre in ambito.keys()):
             # si existe la variable
             if(ambito[nombre].arrayLong != None):
@@ -167,7 +169,8 @@ def validarEstructura(nombre, pilaVariable):
     - <Error> en dado caso no exista una variable con ese nombre, o no sea de tipo
     estructura
     '''
-    for ambito in pilaVariable:
+    for i in range(len(pilaVariable) - 1, -1, -1):
+        ambito = pilaVariable[i]
         if(nombre in ambito.keys()):
             if (not ambito[nombre].isEstructura):
                 return Error(f"La variable '{nombre}' no es una estructura")
@@ -191,7 +194,8 @@ def validarEstructuraArray(nombre, pilaVariable):
     - <Error> en dado caso no exista una variable con ese nombre, o no sea de tipo
     estructura
     '''
-    for ambito in pilaVariable:
+    for i in range(len(pilaVariable) - 1, -1, -1):
+        ambito = pilaVariable[i]
         if(nombre in ambito.keys()):
             if (ambito[nombre].arrayLong == None):
                 return Error(f"La variable '{nombre}' no es un array")
