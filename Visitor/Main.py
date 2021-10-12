@@ -699,7 +699,12 @@ class EvalVisitor(decafVisitor):
         '''
             CODIGO INTERMEDIO
         '''
-        if (len(expression.codigo) > 0):
+        try:
+            offset = self.getOffset(nombre)
+            returnTemp = int(ancho[tipo]) * int(expression.direccion)
+            returnTemp += int(offset)
+            retorno.direccion = self.generarTemporalArray(nombre, returnTemp)
+        except:
             indexTemp = self.nuevaTemporal()
             returnTemp = self.nuevaTemporal()
             retorno.direccion = self.generarTemporalArray(nombre, returnTemp)
@@ -711,11 +716,6 @@ class EvalVisitor(decafVisitor):
             offset = self.getOffset(nombre)
             retorno.codigo.append(
                 Cuadrupla(op='+', arg1=offset, arg2=indexTemp, resultado=returnTemp, tab=1))
-        else:
-            offset = self.getOffset(nombre)
-            returnTemp = int(ancho[tipo]) * int(expression.direccion)
-            returnTemp += int(offset)
-            retorno.direccion = self.generarTemporalArray(nombre, returnTemp)
 
         return retorno
 
