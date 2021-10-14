@@ -25,7 +25,7 @@ int factorial(int n)
 
 }
 
-void main(void)
+void main()
 {
 	struct B y;
 	y.b = 5;

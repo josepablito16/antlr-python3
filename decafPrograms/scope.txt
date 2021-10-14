@@ -4,6 +4,24 @@ class Program
 int a;
 int b;
 
+void OutputInt(int n)
+{
+}
+
+int InputInt(void)
+{return 0;}
+
+void Test(int a, int b, int c, int d)
+{
+	OutputInt(a);
+	OutputInt(b);
+	OutputInt(c);
+	OutputInt(d);
+
+}
+
+
+
 
 void main(void)
 {
@@ -26,21 +44,6 @@ void main(void)
 
 }
 
-void Test(int a, int b, int c, int d)
-{
-	OutputInt(a);
-	OutputInt(b);
-	OutputInt(c);
-	OutputInt(d);
 
-}
-
-
-void OutputInt(int n)
-{
-}
-
-int InputInt(void)
-{return 0;}
 
 }

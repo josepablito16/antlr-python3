@@ -1,25 +1,72 @@
 class Program
 {
-struct MyTest
-{
-	int n;
-};
 
-struct OtherTest
-{
-	struct MyTest T[10];
-	int n;
-};
+	int A[10];
+	
+	int Minimo(int i)
+	{
+		int Min;
+		int index;
+		Min = A[i];
+		index = i;
+		while(i<10)
+		{
+			if (A[i]<Min)
+			{
+				Min = A[i];
+				index = i;
+			}
+			i = i + 1;
+		}
+		return index;
+	}
 
-int getInt()
-{
-    return 1;
-}
+	void Ordenar()
+	{
+		int i;
+		int j;
+		int temp;
+		i = 0;
+		while(i<10)
+		{
+			int Index;
+			Index = Minimo(i);
+			temp = A[Index];
+			A[Index] = A[i];
+			A[i]=temp;
+			i = i+1;
+		}
+	}
 
-void main(void)
-{
-	struct OtherTest M[5];
-	M[getInt()].T[1].n = 2;
-}
+
+	void OutputInt(int n)
+	{
+	}
+
+	int InputInt()
+	{return 0;}
+
+	void main()
+	{
+
+		int i;
+		i = 0;
+		while(i<10)
+		{
+			A[i]=InputInt();
+			i = i+1;		
+		}
+		Ordenar();
+		i = 0;
+		while(i<10)
+		{
+			OutputInt(A[i]);
+			i = i+1;
+		}
+
+	}
+
+
+
 
 }

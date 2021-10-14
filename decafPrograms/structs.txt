@@ -1,26 +1,28 @@
-class Structs
+class Program
 {
-struct MyTest
+struct MyTest //46
 {
 	int n;
 	char b;
 	int c[10];
 };
 
-struct OtherTest
+struct OtherTest //464
 {
 	struct MyTest T[10];
 	int n;
 };
 
 
-void main(void)
+void main()
 {
-	struct OtherTest M[5];
+	struct OtherTest M[5]; //2320
 	int i;
 	i = 1;	
 	M[i].T[1].n = 2;
 	
 }
+
+
 
 }

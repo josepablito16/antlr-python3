@@ -93,7 +93,7 @@ class EvalVisitor(decafVisitor):
             return retorno
 
         if (tipoEtiqueta == 'endWhile'):
-            retorno = f'LABEL_ENDTWHILE_{contadorEtiquetasEndWhile}'
+            retorno = f'LABEL_ENDWHILE_{contadorEtiquetasEndWhile}'
             contadorEtiquetasEndWhile += 1
             return retorno
 
@@ -451,6 +451,8 @@ class EvalVisitor(decafVisitor):
     def visitMethodDec(self, ctx: decafParser.MethodDecContext):
         # se crea ambito de variable
         global nombreFuncionTemp
+        global contadorTemporales
+        contadorTemporales = 0
         self.agregarAmbito()
 
         nombre = ctx.id_tok().getText()

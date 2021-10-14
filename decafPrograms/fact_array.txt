@@ -1,5 +1,5 @@
 class Program
-{ 
+{
 int factorial(int n)
 {
 	if (n==0)
@@ -13,7 +13,7 @@ int factorial(int n)
 
 }
 
-void main(void)
+void main()
 {
 	int y[10];
 	y[2] = 2;
