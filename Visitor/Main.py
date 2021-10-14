@@ -29,7 +29,7 @@ ancho = {'int': 4,
 
 # offsets de variables
 offsetGlobal = 0
-offsetLocal = []
+offsetLocal = 0
 
 offsetLocationDot = 0
 procesandoLocation = False
@@ -117,8 +117,8 @@ class EvalVisitor(decafVisitor):
             if (len(pilaVariable) > 1):
                 # si el largo del array de pilaVariable es mayor a 1 es offsetLocal
                 isLocal = True
-                offset = offsetLocal[-1]
-                offsetLocal[-1] += ancho[tipo] * num
+                offset = offsetLocal
+                offsetLocal += ancho[tipo] * num
             else:
                 # sino es offsetGlobal
                 isLocal = False
@@ -307,7 +307,6 @@ class EvalVisitor(decafVisitor):
         - funcion: bool para indicar si se desea agregar un ambito de funciones.
         '''
         if variable:
-            offsetLocal.append(0)
             pilaVariable.append({})
         if estructura:
             pilaEstructura.append({})
@@ -324,7 +323,6 @@ class EvalVisitor(decafVisitor):
         - funcion: bool para indicar si se desea quitar un ambito de funciones.
         '''
         if variable:
-            offsetLocal.pop()
             pilaVariable.pop()
         if estructura:
             pilaEstructura.pop()
@@ -393,6 +391,8 @@ class EvalVisitor(decafVisitor):
 
     def visitStructDec(self, ctx: decafParser.StructDecContext):
         # se crea ambito de variable
+        global offsetLocal
+        offsetLocal = 0
         self.agregarAmbito()
 
         nombre = ctx.id_tok().getText()
@@ -406,7 +406,7 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en declaracion de estructura linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
 
         # se agrega el ancho de la estructura declarada
-        ancho[nombre] = offsetLocal[-1]
+        ancho[nombre] = offsetLocal
 
         # se elimina ambito de variable
         self.quitarAmbito()
@@ -452,6 +452,8 @@ class EvalVisitor(decafVisitor):
         # se crea ambito de variable
         global nombreFuncionTemp
         global contadorTemporales
+        global offsetLocal
+        offsetLocal = 0
         contadorTemporales = 0
         self.agregarAmbito()
 
