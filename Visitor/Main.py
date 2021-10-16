@@ -268,10 +268,12 @@ class EvalVisitor(decafVisitor):
         else:
             pilaVariable[-1][nombre] = variable
 
+        """
         print(f'''
                 # Pila Variables
                 {pilaVariable}
                 ''')
+        """
 
     def agregarStructATabla(self, nombre, estructura):
         '''
@@ -532,8 +534,9 @@ class EvalVisitor(decafVisitor):
         # Codigo intermedio
         # Se agrega cuadruplas con etiquetas de funcion
         if(isinstance(resultados, list)):
-            print('revisame')
-            print(resultados)
+            pass
+            # print('revisame')
+            # print(resultados)
         else:
             resultados.codigo.insert(0, Cuadrupla(op='FUNCTION', arg1=nombre))
             resultados.codigo.append(Cuadrupla(op='END FUNCTION', arg1=nombre))
@@ -711,13 +714,13 @@ class EvalVisitor(decafVisitor):
                 retorno.codigo.append(
                     Cuadrupla(op='+', arg1=ultimaDireccionLocation, arg2=offset, resultado=ultimaDireccionLocation, tab=1))
                 if (isLocationLocal):
-                    tempDir = f'FP[{ultimaDireccionLocation}]'
+                    tempDir = f'fp[{ultimaDireccionLocation}]'
                 else:
                     tempDir = f'G[{ultimaDireccionLocation}]'
                 self.freeTemp(ultimaDireccionLocation)
             else:
                 if (isLocationLocal):
-                    tempDir = f'FP[{offset}]'
+                    tempDir = f'fp[{offset}]'
                 else:
                     tempDir = f'G[{offset}]'
 
@@ -1034,7 +1037,7 @@ class EvalVisitor(decafVisitor):
             exp = self.visitar(ctx.expression())
             self.agregarReturn(exp.tipo)
         except:
-            print('err')
+            # print('err')
             pass
         '''
             CODIGO INTERMEDIO
