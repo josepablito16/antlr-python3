@@ -39,6 +39,7 @@ ultimaDireccionLocation = None
 
 # contador de temporales
 contadorTemporales = 0
+colaTemporales = []
 
 # contadores de etiquetas
 contadorEtiquetasTrue = 0
@@ -206,10 +207,51 @@ class EvalVisitor(decafVisitor):
                     return f"G[{temporal}]"
 
     def nuevaTemporal(self):
+        '''
+        Funcion para generar o reutilizr una temporal. Si hay temporales
+        en cola ya no se crea una nueva.
+
+        Return:
+        - t<int>
+        '''
         global contadorTemporales
+        global colaTemporales
+
+        '''
+        '''
+        if (len(colaTemporales) > 0):
+            return colaTemporales.pop(0)
+
         temporal = f"t{contadorTemporales}"
         contadorTemporales += 1
         return temporal
+
+    def freeTemp(self, temporal):
+        '''
+        Funcion para agregar una temporal a cola
+        para posteriormente reutilizarla
+
+        Parametros:
+        - temporal: t<int> que se quiere agregar a cola de temporales
+        '''
+
+        try:
+            temporal = int(temporal)
+        except:
+            if (temporal == 'R'):
+                return
+            global colaTemporales
+            if (temporal.find('fp') == -1):
+                if (temporal.find('G') == 0):
+                    colaTemporales.append(
+                        temporal[temporal.find('t'):temporal.find(']')])
+                    #print(f'colaTemporales {colaTemporales}')
+                    return
+                colaTemporales.append(temporal)
+                #print(f'colaTemporales {colaTemporales}')
+            else:
+                #print(f'No se hace free {temporal}')
+                pass
 
     def agregarVariableATabla(self, nombre, variable):
         '''
@@ -453,6 +495,8 @@ class EvalVisitor(decafVisitor):
         global nombreFuncionTemp
         global contadorTemporales
         global offsetLocal
+        global colaTemporales
+        colaTemporales = []
         offsetLocal = 0
         contadorTemporales = 0
         self.agregarAmbito()
@@ -534,13 +578,18 @@ class EvalVisitor(decafVisitor):
         retorno = Nodo(tipo, tipos.METHOD)
         retorno.direccion = 'R'
 
+        direcciones = []
         for argumento in argumentos:
             retorno.codigo += argumento.codigo
             retorno.codigo.append(
                 Cuadrupla(op='PARAM', arg1=argumento.direccion, tab=1))
+            direcciones.append(argumento.direccion)
 
         retorno.codigo.append(
             Cuadrupla(op='CALL', arg1=nombre, arg2=len(argumentos), tab=1))
+
+        for direccion in direcciones:
+            self.freeTemp(direccion)
 
         return retorno
 
@@ -665,6 +714,7 @@ class EvalVisitor(decafVisitor):
                     tempDir = f'FP[{ultimaDireccionLocation}]'
                 else:
                     tempDir = f'G[{ultimaDireccionLocation}]'
+                self.freeTemp(ultimaDireccionLocation)
             else:
                 if (isLocationLocal):
                     tempDir = f'FP[{offset}]'
@@ -716,11 +766,11 @@ class EvalVisitor(decafVisitor):
 
             retorno.codigo.append(
                 Cuadrupla(op='*', arg1=ancho[tipo], arg2=expression.direccion, resultado=indexTemp, tab=1))
-
+            self.freeTemp(expression.direccion)
             offset = self.getOffset(nombre)
             retorno.codigo.append(
                 Cuadrupla(op='+', arg1=offset, arg2=indexTemp, resultado=returnTemp, tab=1))
-
+            self.freeTemp(indexTemp)
         return retorno
 
     def visitIdLocationDot(self, ctx: decafParser.IdLocationDotContext):
@@ -799,7 +849,7 @@ class EvalVisitor(decafVisitor):
             direccionTemp = self.nuevaTemporal()
             codigoLocation.append(
                 Cuadrupla(op='*', arg1=tipoExp.direccion, arg2=ancho[structTipo], resultado=direccionTemp, tab=1))
-
+            self.freeTemp(tipoExp.direccion)
             if (ultimaDireccionLocation != None):
                 codigoLocation.append(
                     Cuadrupla(op='+', arg1=direccionTemp, arg2=ultimaDireccionLocation, resultado=direccionTemp, tab=1))
@@ -842,6 +892,7 @@ class EvalVisitor(decafVisitor):
                           arg1=expression.direccion,
                           tab=1
                           ))
+            self.freeTemp(expression.direccion)
             return retorno
 
     def visitIfStmt(self, ctx: decafParser.IfStmtContext):
@@ -870,6 +921,7 @@ class EvalVisitor(decafVisitor):
 
         resultado.codigo.append(Cuadrupla(op='IF', arg1=f'{exp.direccion}>0', arg2='GOTO',
                                           resultado=resultado.etiquetaTrue, tab=1))
+        self.freeTemp(exp.direccion)
 
         resultado.codigo.append(
             Cuadrupla(op='GOTO', arg1=endIf, tab=1))
@@ -911,6 +963,7 @@ class EvalVisitor(decafVisitor):
 
         resultado.codigo.append(Cuadrupla(op='IF', arg1=f'{exp.direccion}>0', arg2='GOTO',
                                           resultado=resultado.etiquetaTrue, tab=1))
+        self.freeTemp(exp.direccion)
 
         resultado.codigo.append(
             Cuadrupla(op='GOTO', arg1=resultado.etiquetaFalse, tab=1))
@@ -959,6 +1012,7 @@ class EvalVisitor(decafVisitor):
 
         retorno.codigo.append(Cuadrupla(op='IF', arg1=f'{exp.direccion}>0',
                                         arg2='GOTO', resultado=exp.etiquetaTrue, tab=1))
+        self.freeTemp(exp.direccion)
 
         retorno.codigo.append(
             Cuadrupla(op='GOTO', arg1=exp.etiquetaFalse, tab=1))
@@ -989,6 +1043,7 @@ class EvalVisitor(decafVisitor):
 
         returnNodo.codigo.append(
             Cuadrupla(op='RETURN', arg1=exp.direccion, tab=1))
+        self.freeTemp(exp.direccion)
 
         return returnNodo
 
@@ -1038,16 +1093,19 @@ class EvalVisitor(decafVisitor):
                           op=ctx.op.text,
                           tab=1)
             )
+            self.freeTemp(expres[0].direccion)
+            self.freeTemp(expres[1].direccion)
         else:
             # si es operacion con una expresion
             retorno.codigo.append(expres.codigo)
             retorno.codigo.append(
                 Cuadrupla(resultado=dirTemp,
-                          arg1=0,
+                          arg1='',
                           arg2=expres.direccion,
                           op=ctx.op.text,
                           tab=1)
             )
+            self.freeTemp(expres.direccion)
         return retorno
 
     def visitFirstArithExpr(self, ctx: decafParser.FirstArithExprContext):
@@ -1086,6 +1144,8 @@ class EvalVisitor(decafVisitor):
                       op=ctx.op.text,
                       tab=1)
         )
+        self.freeTemp(expres[0].direccion)
+        self.freeTemp(expres[1].direccion)
         return retorno
 
     def visitCondExpr(self, ctx: decafParser.CondExprContext):
@@ -1139,7 +1199,7 @@ def procesarNodo(nodo):
 
 
 def main():
-    data = open('../decafPrograms/hello_world.txt').read()
+    data = open('../decafPrograms/UI.txt').read()
     lexer = decafLexer(InputStream(data))
     stream = CommonTokenStream(lexer)
     parser = decafParser(stream)

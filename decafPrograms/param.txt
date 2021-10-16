@@ -15,19 +15,19 @@ class Program
 	}
 
 
-	int InputInt(void)
+	int InputInt()
 	{
-
 		return 0;
 	}
-	void main(void)
+
+	void main()
 	{
 		int n;
 		int f;
-		
+
 		int i;
 		i = 0;
-		
+
 		Test(4,2,6,7,1,1,1,1,1,1,1,1,1,1,1,1);
 
 	}
