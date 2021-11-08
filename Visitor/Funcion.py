@@ -6,6 +6,7 @@ class Funcion:
         self.tipo = tipo
         self.argumentosTipos = argumentos  # array solo tipos
         self.retornoTipos = retorno  # array solo tipos
+        self.ancho = None
         self.err = None
 
     def validarRetorno(self):
@@ -47,4 +48,4 @@ class Funcion:
                         'El tipo de la funcion y el tipo de retorno no coinciden')
 
     def __repr__(self):
-        return f"<Funcion>{self.tipo}({self.argumentosTipos}): {self.retornoTipos}"
+        return f"<Funcion>{self.tipo}({self.argumentosTipos}): {self.retornoTipos}, {self.ancho}"

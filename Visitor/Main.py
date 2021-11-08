@@ -24,7 +24,8 @@ pilaEstructura = []
 # ancho de cada tipo de dato
 ancho = {'int': 4,
          'char': 2,
-         'boolean': 1
+         'boolean': 1,
+         'void': 0
          }
 
 # offsets de variables
@@ -527,6 +528,9 @@ class EvalVisitor(decafVisitor):
         if(isinstance(errTemp, Error)):
             print(
                 f"{FAIL}Error en declaracion de funcion linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
+
+        # Se calcula el ancho de una funcion
+        pilaFuncion[0][nombre].ancho = offsetLocal + ancho[tipo]
 
         # se elimina ambito de variable
         self.quitarAmbito()
