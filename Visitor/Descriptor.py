@@ -1,6 +1,10 @@
+import copy
+
+
 class Descriptor:
 
     def __init__(self):
+        self.registro = {}
         '''
             Para cada registro disponible:
 
@@ -13,8 +17,8 @@ class Descriptor:
             }
 
         '''
-        self.registro = {}
 
+        self.acceso = {}
         '''
             Para cada variable del programa:
 
@@ -27,14 +31,13 @@ class Descriptor:
                 registro
                 direccion de memoria
                 ubicacion en la pila
-            
+
             {
                 t1: [R1,...]
                 fp[0]: [R1,...]
                 G[0]: [R1,...]
             }
         '''
-        self.acceso = {}
 
     def actualizarCasoLD(self, R, x):
         '''
@@ -74,41 +77,163 @@ class Descriptor:
         self.registro[x] = [Ry]
         pass
 
-    def getReg(self, instruccion):
+    def buscarRegistroEnAcceso(self, variable):
         '''
-        x = y + z
+            Funcion para buscar un registro en
+            el acceso de una variable
 
-        Rx = None
-        Ry = None
-        Rz = None
+            Parametros:
+            - variable: variable a evaluar
 
-        for variable in [y, z, x]:
-
-            1. Evaluar si len(self.acceso[variable]) > 0
-                1.1 ---
-
-            4. Cuando no hay registro disponible
-
-                Evaluar si x no es un operando
-                    Borrar de forma temporal a x de todos los registros que lo contengan
-
-                Si hay un registro vacío devolver ese registro
-
-                Iterar sobre los registros que solo tengan un valor
-                Identificar si esa variable esta en otro registro,
-                de ser ese el caso seleccionar ese registro
-
-                Evaluar que registro tiene menos variables para liberar
-                    Pasar cada variable a su direccion de memoria y seleccionar ese registro
-
-
-            Si es una asignacion solo seleccionar un registro
-
-
-
-
-
+            Return:
+            - Registro o Nada si no hay un registro
         '''
+        for i in self.acceso[variable]:
+            if (i.find('R') != -1):
+                return i
+
+    def getRegistroVacio(self, registro=None):
+        '''
+            Funcion para obtener un registro libre
+
+            Retorno:
+            - R si hay registro libre, de lo contrario
+            nada.
+        '''
+        if (not registro):
+            registro = copy.deepcopy(self.registro)
+
+        for key, value in registro.items():
+            if (len(value) == 0):
+                return key
+
+    def eliminarXTemp(self, variable):
+        '''
+            Crea un registro sin variable
+
+            Parametro:
+            - variable: variable a eliminar
+
+            Retorno:
+            - registro sin variable
+        '''
+        registroTemp = {}
+        for key, value in copy.deepcopy(self.registro.items()):
+            try:
+                registroTemp[key] = value.remove(variable)
+            except:
+                continue
+        return registroTemp
+
+    def getRegAuxiliar(self, variable, x=None):
+        '''
+            Funcion auxiliar para obtener un registro
+
+            Parametros:
+            - variable: variable a obtener un registro.
+            - x: si se pasa como parametro, significa
+            que x es un operando.
+
+            Retorno:
+            - Registro disponible para variable.
+        '''
+        if (len(self.acceso[variable]) > 0):
+            # evaluar si en acceso[variable]
+            # hay algun registro, si lo hay
+            # lo llamaremos R
+            Rtemp = self.buscarRegistroEnAcceso(variable)
+            if (Rtemp):
+                return Rtemp
+
+        # Si hay algun registro libre, retornarlo
+        Rtemp = self.getRegistroVacio()
+        if(Rtemp):
+            return Rtemp
+
+        # cuando no hay registro disponible:
+
+        registroTemp = None
+
+        # Evaluar si x no es un operando
+        if (x):
+            # eliminar de forma temporal a x de los
+            # registros que lo contengan
+            registroTemp = self.eliminarXTemp(x)
+        else:
+            registroTemp = copy.deepcopy(self.registro)
+
+        # Si hay algun registro libre, retornarlo
+        Rtemp = self.getRegistroVacio(registroTemp)
+        if(Rtemp):
+            return Rtemp
+
+        # Iterar sobre los registros que solo tengan
+        # un valor, identificar si esa variable esta
+        # en otro registro, de ser ese el caso seleccionar
+        # ese registro (R)
+        return 'R'
+
+        # Evaluar que registro tiene menos variables para liberar
+        # Pasar cada variable a su direccion de memoria y
+        # seleccionar ese registro (R)
+        return 'R'
+
+    def getReg(self, x, y, z=None):
+        '''
+            Funcion principal para obtener
+            los registros dado x, y, z.
+
+            x = y + z
+            x = y
+
+            Parametros:
+            - x,y,z: variables de una instruccion
+
+            Retorno:
+            - lista de registros de la forma [Rx, Ry, Rz]
+        '''
+        registros = []
+        xOperando = None
+
+        if (z == None):
+            # sabemos que es asignacion
+            # asi que solo necesitamos
+            # 1 registro
+            if (x == y):
+                xOperando = x
+
+            registro = getRegAuxiliar(variable, xOperando)
+            registros.append(registro)
+            registros.append(registro)
+
+        return registros
 
     def __repr__(self):
         return f""
+
+
+if __name__ == '__main__':
+    d = Descriptor()
+    d.registro = {
+        'R1': [],
+        'R2': [],
+        'R3': []
+    }
+
+    d.acceso = {
+        'a': ['a'],
+        'b': ['b'],
+        'c': ['c'],
+        'd': ['d'],
+        't': [],
+        'u': [],
+        'v': [],
+    }
+
+    # t = a - b
+    print(d.getRegistroVacio())
+
+    # u = a - c
+    # v = t + u
+    # a = d
+    # d = v + u
