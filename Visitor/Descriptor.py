@@ -1,4 +1,6 @@
 import copy
+import json
+from typing import ItemsView
 
 
 class Descriptor:
@@ -43,6 +45,7 @@ class Descriptor:
         '''
             Caso LD R, x
         '''
+        print(f'LD {R}, {x}')
         self.registro[R] = [x]
 
         self.acceso[x].append(R)
@@ -51,7 +54,12 @@ class Descriptor:
         '''
             Caso ST x, R
         '''
+        print(f'ST {x}, {R}')
         self.acceso[x].append(R)
+
+    def actualizarMultipleST(self, R):
+        for var in self.registro[R]:
+            self.actualizarCasoST(var, R)
 
     def actualizarCasoOP(self, Rx, x):
         '''
@@ -125,6 +133,60 @@ class Descriptor:
                 continue
         return registroTemp
 
+    def getCantRegistrosEnAcceso(self, variable):
+        '''
+            Retorna la lista de registros en los
+            que esta una variable
+
+            Parametros:
+            - variable: variable a evaluar
+
+            Retorno:
+            - <list> registros
+        '''
+        registros = []
+        for i in self.acceso[variable]:
+            if (i.find('R') != -1):
+                registros.append(i)
+        return registros
+
+    def iterarRegistrosCasiLibres(self, registro):
+        '''
+            Itera sobre los registros que solo
+            tienen un valor, si esa variable
+            esta en otro registro, retorna R.
+
+            Parametros:
+            - registro: registroTemp para iterar
+
+            Retorno:
+            - R si hay un registro que cumpla,
+            de lo contrario nada.
+        '''
+        for key, value in registro.items():
+            if len(value) == 1:
+                registros = self.getCantRegistrosEnAcceso(value[0])
+
+                if (len(registros) > 2):
+                    registros.remove(key)
+                    return registros[0]
+
+    def getMejorRegistro(self, registro):
+        '''
+            Funcion para evaluar que registro tiene
+            menos variables para liberar.
+
+            Parametros:
+            - registro: registro temporal
+
+            Retorno:
+            - Registro con menos variables.
+        '''
+        registroSort = sorted(
+            registro.items(), key=lambda x: len(x[1]), reverse=False)
+
+        return registroSort[0][0]
+
     def getRegAuxiliar(self, variable, x=None):
         '''
             Funcion auxiliar para obtener un registro
@@ -143,11 +205,14 @@ class Descriptor:
             # lo llamaremos R
             Rtemp = self.buscarRegistroEnAcceso(variable)
             if (Rtemp):
+                print(f'{variable} -> Caso 1')
                 return Rtemp
 
         # Si hay algun registro libre, retornarlo
         Rtemp = self.getRegistroVacio()
         if(Rtemp):
+            print(f'{variable} -> Caso 2')
+            self.actualizarCasoLD(Rtemp, variable)
             return Rtemp
 
         # cuando no hay registro disponible:
@@ -165,18 +230,28 @@ class Descriptor:
         # Si hay algun registro libre, retornarlo
         Rtemp = self.getRegistroVacio(registroTemp)
         if(Rtemp):
+            print(f'{variable} -> Caso 3')
+            self.actualizarCasoLD(Rtemp, variable)
             return Rtemp
 
         # Iterar sobre los registros que solo tengan
         # un valor, identificar si esa variable esta
         # en otro registro, de ser ese el caso seleccionar
         # ese registro (R)
-        return 'R'
+        Rtemp = self.iterarRegistrosCasiLibres(registroTemp)
+        if Rtemp:
+            print(f'{variable} -> Caso 4')
+            self.actualizarCasoLD(Rtemp, variable)
+            return Rtemp
 
         # Evaluar que registro tiene menos variables para liberar
         # Pasar cada variable a su direccion de memoria y
         # seleccionar ese registro (R)
-        return 'R'
+        Rtemp = self.getMejorRegistro(registroTemp)
+        self.actualizarMultipleST(Rtemp)
+        self.actualizarCasoLD(Rtemp, variable)
+        print(f'{variable} -> Caso 5')
+        return Rtemp
 
     def getReg(self, x, y, z=None):
         '''
@@ -202,11 +277,32 @@ class Descriptor:
             if (x == y):
                 xOperando = x
 
-            registro = getRegAuxiliar(variable, xOperando)
+            registro = self.getRegAuxiliar(y, xOperando)
             registros.append(registro)
             registros.append(registro)
 
+        else:
+            # es una operacion de la
+            # forma x = y + z
+
+            if (x == y or x == z):
+                xOperando = x
+
+            for variable in [x, y, z]:
+                registros.append(self.getRegAuxiliar(variable, xOperando))
+
         return registros
+
+    def debug(self):
+        print('##################')
+        print('Registro:')
+        for key, item in self.registro.items():
+            print(f'{key}: {item}')
+
+        print('\nAcceso:')
+        for key, item in self.acceso.items():
+            print(f'{key}: {item}')
+        print('##################')
 
     def __repr__(self):
         return f""
@@ -231,9 +327,17 @@ if __name__ == '__main__':
     }
 
     # t = a - b
-    print(d.getRegistroVacio())
+    d.debug()
+    print('t = a - b')
+    print(d.getReg(x='t', y='a', z='b'))
+    print()
 
     # u = a - c
+    d.debug()
+    print('u = a - c')
+    print(d.getReg(x='u', y='a', z='c'))
+    print()
+
     # v = t + u
     # a = d
     # d = v + u
