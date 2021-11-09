@@ -50,12 +50,28 @@ class Descriptor:
 
         self.acceso[x].append(R)
 
+    def eliminarVariableDeRegistro(self, variable):
+        '''
+            Se elimina variable de todos los
+            registros
+
+            Parametro:
+            - variable: variable a eliminar
+
+        '''
+        for key, value in self.registro.items():
+            try:
+                self.registro[key] = value.remove(variable)
+            except:
+                continue
+
     def actualizarCasoST(self, x, R):
         '''
             Caso ST x, R
         '''
         print(f'ST {x}, {R}')
-        self.acceso[x].append(R)
+        self.eliminarVariableDeRegistro(x)
+        self.acceso[x] = [x]  # solo sería ella misma
 
     def actualizarMultipleST(self, R):
         for var in self.registro[R]:
@@ -150,7 +166,7 @@ class Descriptor:
                 registros.append(i)
         return registros
 
-    def iterarRegistrosCasiLibres(self, registro):
+    def iterarRegistrosCasiLibres(self, registro, usados):
         '''
             Itera sobre los registros que solo
             tienen un valor, si esa variable
@@ -158,6 +174,8 @@ class Descriptor:
 
             Parametros:
             - registro: registroTemp para iterar
+            - usados: parametros usados si no se
+            quieren repetir
 
             Retorno:
             - R si hay un registro que cumpla,
@@ -169,15 +187,19 @@ class Descriptor:
 
                 if (len(registros) > 2):
                     registros.remove(key)
+                    if registros[0] in usados:
+                        continue
                     return registros[0]
 
-    def getMejorRegistro(self, registro):
+    def getMejorRegistro(self, registro, usados):
         '''
             Funcion para evaluar que registro tiene
             menos variables para liberar.
 
             Parametros:
             - registro: registro temporal
+            - usados: registros usados por
+            si no se quieren repetir
 
             Retorno:
             - Registro con menos variables.
@@ -185,9 +207,11 @@ class Descriptor:
         registroSort = sorted(
             registro.items(), key=lambda x: len(x[1]), reverse=False)
 
-        return registroSort[0][0]
+        for i in registroSort:
+            if i[0] not in usados:
+                return i[0]
 
-    def getRegAuxiliar(self, variable, x=None):
+    def getRegAuxiliar(self, variable, x=None, usados=[]):
         '''
             Funcion auxiliar para obtener un registro
 
@@ -195,6 +219,8 @@ class Descriptor:
             - variable: variable a obtener un registro.
             - x: si se pasa como parametro, significa
             que x es un operando.
+            - usados: registros usados, si en dado caso
+            no se quieren repetir.
 
             Retorno:
             - Registro disponible para variable.
@@ -230,15 +256,16 @@ class Descriptor:
         # Si hay algun registro libre, retornarlo
         Rtemp = self.getRegistroVacio(registroTemp)
         if(Rtemp):
-            print(f'{variable} -> Caso 3')
-            self.actualizarCasoLD(Rtemp, variable)
-            return Rtemp
+            if not Rtemp in usados:
+                print(f'{variable} -> Caso 3')
+                self.actualizarCasoLD(Rtemp, variable)
+                return Rtemp
 
         # Iterar sobre los registros que solo tengan
         # un valor, identificar si esa variable esta
         # en otro registro, de ser ese el caso seleccionar
         # ese registro (R)
-        Rtemp = self.iterarRegistrosCasiLibres(registroTemp)
+        Rtemp = self.iterarRegistrosCasiLibres(registroTemp, usados)
         if Rtemp:
             print(f'{variable} -> Caso 4')
             self.actualizarCasoLD(Rtemp, variable)
@@ -247,10 +274,10 @@ class Descriptor:
         # Evaluar que registro tiene menos variables para liberar
         # Pasar cada variable a su direccion de memoria y
         # seleccionar ese registro (R)
-        Rtemp = self.getMejorRegistro(registroTemp)
+        print(f'{variable} -> Caso 5')
+        Rtemp = self.getMejorRegistro(registroTemp, usados)
         self.actualizarMultipleST(Rtemp)
         self.actualizarCasoLD(Rtemp, variable)
-        print(f'{variable} -> Caso 5')
         return Rtemp
 
     def getReg(self, x, y, z=None):
@@ -277,7 +304,7 @@ class Descriptor:
             if (x == y):
                 xOperando = x
 
-            registro = self.getRegAuxiliar(y, xOperando)
+            registro = self.getRegAuxiliar(y, xOperando, registros)
             registros.append(registro)
             registros.append(registro)
 
@@ -289,7 +316,8 @@ class Descriptor:
                 xOperando = x
 
             for variable in [x, y, z]:
-                registros.append(self.getRegAuxiliar(variable, xOperando))
+                registros.append(self.getRegAuxiliar(
+                    variable, xOperando, registros))
 
         return registros
 
@@ -330,12 +358,14 @@ if __name__ == '__main__':
     d.debug()
     print('t = a - b')
     print(d.getReg(x='t', y='a', z='b'))
+    d.debug()
     print()
 
     # u = a - c
     d.debug()
     print('u = a - c')
     print(d.getReg(x='u', y='a', z='c'))
+    d.debug()
     print()
 
     # v = t + u
