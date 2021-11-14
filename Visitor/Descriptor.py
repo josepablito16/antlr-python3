@@ -61,7 +61,7 @@ class Descriptor:
         '''
         for key, value in self.registro.items():
             try:
-                self.registro[key] = value.remove(variable)
+                value.remove(variable)
             except:
                 continue
 
@@ -339,9 +339,9 @@ class Descriptor:
 if __name__ == '__main__':
     d = Descriptor()
     d.registro = {
-        'R1': [],
-        'R2': [],
-        'R3': []
+        'R1': ['u'],
+        'R2': ['t'],
+        'R3': ['u']
     }
 
     d.acceso = {
@@ -349,8 +349,8 @@ if __name__ == '__main__':
         'b': ['b'],
         'c': ['c'],
         'd': ['d'],
-        't': [],
-        'u': [],
+        't': ['R2'],
+        'u': ['R1', 'R3'],
         'v': [],
     }
 
@@ -360,14 +360,3 @@ if __name__ == '__main__':
     print(d.getReg(x='t', y='a', z='b'))
     d.debug()
     print()
-
-    # u = a - c
-    d.debug()
-    print('u = a - c')
-    print(d.getReg(x='u', y='a', z='c'))
-    d.debug()
-    print()
-
-    # v = t + u
-    # a = d
-    # d = v + u
