@@ -1222,6 +1222,7 @@ def generarMIPS():
     # generar main
     # generar funciones
     # generar funcion terminarPrograma
+    mips.finPrograma()
     pass
 
 

@@ -170,6 +170,14 @@ class MIPS:
 .align 2
     G_: .space {espacioGlobal}
     mensajeInput: .asciiz "Ingrese un número entero: "
+.text
+        ''')
+
+    def finPrograma(self):
+        print('''
+# fin del programa
+li $v0, 10
+syscall
         ''')
 
     def __repr__(self):
