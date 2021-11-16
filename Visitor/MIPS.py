@@ -13,8 +13,7 @@ class MIPS:
         pass
 
     def construirEtiqueta(self, etiqueta):
-        retorno = f"{etiqueta}:"
-        pass
+        print(f"{etiqueta}:")
 
     def construirIf(self, Rsrc, etiqueta):
         '''
@@ -153,6 +152,9 @@ class MIPS:
         retorno = f"move $v0, {reg}"
         retorno += "jr $ra"
 
+    def construirRetornoSimple(self):
+        print('\tjr $ra')
+
     def construirRetornoVoid(self):
         '''
             Transfiere el control de nuevo a la llamada de funcion
@@ -160,6 +162,20 @@ class MIPS:
         retorno = "jr $ra"
         pass
 
+    def constuirInputInt(self):
+        print('''
+\t# Se imprime mensaje al usuario
+\tli $v0, 4
+\tla $a0, mensajeInput
+\tsyscall
+
+\t# Se lee el input del usuario
+\tli $v0,5
+\tsyscall
+        ''')
+
+    def constuirOutputInt(self):
+        pass
     '''
         Complementarias
     '''
@@ -175,10 +191,30 @@ class MIPS:
 
     def finPrograma(self):
         print('''
-# fin del programa
-li $v0, 10
-syscall
+\t# fin del programa
+\tli $v0, 10
+\tsyscall
         ''')
+
+    def generarCodigo(self, cuadruplas):
+        funcionActual = ""
+        for linea in cuadruplas:
+            if linea.op == 'FUNCTION':
+                self.construirEtiqueta(linea.arg1)
+                funcionActual = linea.arg1
+                if(linea.arg1 == 'InputInt'):
+                    self.constuirInputInt()
+                elif(linea.arg1 == 'OutputInt'):
+                    self.constuirOutputInt()
+            elif linea.op == 'RETURN':
+                if (funcionActual == 'InputInt'):
+                    self.construirRetornoSimple()
+
+            elif linea.op == 'END FUNCTION':
+                funcionActual = ""
+
+            else:
+                linea.debug()
 
     def __repr__(self):
         return f""

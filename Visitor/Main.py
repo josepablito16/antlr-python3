@@ -1215,14 +1215,16 @@ def printCodigo(codigo):
         print(linea)
 
 
-def generarMIPS():
+def generarMIPS(Main, Metodos):
     mips = MIPS()
     # generar encabezados
     mips.encabezado(offsetGlobal)
     # generar main
-    # generar funciones
+    mips.generarCodigo(Main)
     # generar funcion terminarPrograma
     mips.finPrograma()
+    # generar funciones
+    mips.generarCodigo(Metodos)
     pass
 
 
@@ -1244,7 +1246,7 @@ def clasificarFunciones():
     # printCodigo(Main)
     # printCodigo(Metodos)
 
-    generarMIPS()
+    generarMIPS(Main, Metodos)
 
 
 def main():
