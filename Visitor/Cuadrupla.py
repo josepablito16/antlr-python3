@@ -7,6 +7,15 @@ class Cuadrupla:
         self.resultado = resultado
         self.tab = tab
 
+    def debug(self):
+        print(f'''
+        op = {self.op}
+        arg1 = {self.arg1}
+        arg2 = {self.arg2}
+        resultado = {self.resultado}
+        tab = {self.tab}
+        ''')
+
     def representacion(self):
         tab = '    '
         if(self.op == '='):

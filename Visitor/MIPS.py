@@ -160,5 +160,17 @@ class MIPS:
         retorno = "jr $ra"
         pass
 
+    '''
+        Complementarias
+    '''
+
+    def encabezado(self, espacioGlobal):
+        print(f'''
+.data
+.align 2
+    G_: .space {espacioGlobal}
+    mensajeInput: .asciiz "Ingrese un número entero: "
+        ''')
+
     def __repr__(self):
         return f""

@@ -14,6 +14,8 @@ from Error import *
 from Nodo import Nodo
 import Tipos as tipos
 
+from MIPS import *
+
 import copy
 
 # pilas donde se manejan los ambitos
@@ -53,6 +55,8 @@ FAIL = '\033[91m'
 ENDC = '\033[0m'
 
 nombreFuncionTemp = ""
+
+codigoIntermedio = []
 
 
 class EvalVisitor(decafVisitor):
@@ -246,12 +250,12 @@ class EvalVisitor(decafVisitor):
                 if (temporal.find('G') == 0):
                     colaTemporales.append(
                         temporal[temporal.find('t'):temporal.find(']')])
-                    #print(f'colaTemporales {colaTemporales}')
+                    # print(f'colaTemporales {colaTemporales}')
                     return
                 colaTemporales.append(temporal)
-                #print(f'colaTemporales {colaTemporales}')
+                # print(f'colaTemporales {colaTemporales}')
             else:
-                #print(f'No se hace free {temporal}')
+                # print(f'No se hace free {temporal}')
                 pass
 
     def agregarVariableATabla(self, nombre, variable):
@@ -1189,12 +1193,13 @@ class EvalVisitor(decafVisitor):
         return resultado
 
 
-def aprocesarCodigo(nodo):
+def procesarCodigo(nodo):
+    global codigoIntermedio
     if (isinstance(nodo, list)):
         for i in nodo:
-            aprocesarCodigo(i)
+            procesarCodigo(i)
     else:
-        print(nodo)
+        codigoIntermedio.append(nodo)
 
 
 def procesarNodo(nodo):
@@ -1202,7 +1207,43 @@ def procesarNodo(nodo):
         for i in nodo:
             procesarNodo(i)
     else:
-        aprocesarCodigo(nodo.codigo)
+        procesarCodigo(nodo.codigo)
+
+
+def printCodigo(codigo):
+    for linea in codigo:
+        print(linea)
+
+
+def generarMIPS():
+    mips = MIPS()
+    # generar encabezados
+    mips.encabezado(offsetGlobal)
+    # generar main
+    # generar funciones
+    # generar funcion terminarPrograma
+    pass
+
+
+def clasificarFunciones():
+    Main = []
+    Metodos = []
+
+    funcionTemp = []
+    for linea in codigoIntermedio:
+        # linea.debug()
+        funcionTemp.append(linea)
+        if(linea.op == 'END FUNCTION'):
+            if(funcionTemp[0].arg1 == 'main'):
+                Main += copy.deepcopy(funcionTemp)
+            else:
+                Metodos += copy.deepcopy(funcionTemp)
+            funcionTemp = []
+
+    # printCodigo(Main)
+    # printCodigo(Metodos)
+
+    generarMIPS()
 
 
 def main():
@@ -1213,13 +1254,11 @@ def main():
     tree = parser.start()
     nodos = EvalVisitor().visit(tree)
 
-    codigoIntermedio = []
     for nodo in nodos:
         if nodo != None:
-            codigoIntermedio.append(nodo)
+            procesarNodo(nodo)
 
-    for linea in codigoIntermedio:
-        procesarNodo(linea)
+    clasificarFunciones()
 
 
 if __name__ == '__main__':
