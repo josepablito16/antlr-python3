@@ -1,7 +1,9 @@
 class MIPS:
 
-    def __init__(self):
-        pass
+    def __init__(self, datosFunciones):
+        self.datosFuncion = datosFunciones
+        self.registrosArg = ['$a0', '$a1', '$a2', '$a3']
+        print(self.datosFuncion)
 
     '''
         Etiquetas y saltos
@@ -14,6 +16,19 @@ class MIPS:
 
     def construirEtiqueta(self, etiqueta):
         print(f"{etiqueta}:")
+        self.construirConfiguracionStack(etiqueta)
+
+    def construirConfiguracionStack(self, etiqueta):
+        if (etiqueta == 'main'):
+            ancho = self.datosFuncion[etiqueta].ancho
+            if(ancho != 0):
+                # Hay variables en main, preparar stack
+                print(f'''
+\t# Preparar stack
+\tsw $fp, ($sp)
+\tsub $fp, $sp, {ancho}
+\tla $sp, ($fp)
+                ''')
 
     def construirIf(self, Rsrc, etiqueta):
         '''
@@ -138,29 +153,26 @@ class MIPS:
         Funciones
     '''
 
-    def construirLlamarFuncion(self, nombre, argumentos=[]):
-        # TODO que pasa si hay mas argumentos?
-        registrosArg = ['$a0', '$a1', '$a2', '$a3']
-        retorno = ""
-        for i in argumentos:
-            retorno += f"move {registrosArg.pop(0)}, {i}"
-
-        retorno = f"jal {nombre}"
-        pass
+    def construirLlamarFuncion(self, nombre):
+        print(f"\tjal {nombre}")
 
     def construirRetorno(self, reg):
         retorno = f"move $v0, {reg}"
         retorno += "jr $ra"
+        self.restablecerRegistroParametros()
+
+    def construirParametro(self, parametro):
+        if (parametro.find('fp') != -1):
+            offset = parametro[parametro.find('[') + 1:parametro.find(']')]
+            print(f"""\t# Cargar parametros
+\tlw {self.registrosArg.pop(0)}, {offset}($fp)""")
 
     def construirRetornoSimple(self):
-        print('\tjr $ra')
-
-    def construirRetornoVoid(self):
         '''
             Transfiere el control de nuevo a la llamada de funcion
         '''
-        retorno = "jr $ra"
-        pass
+        print('\tjr $ra')
+        self.restablecerRegistroParametros()
 
     def constuirInputInt(self):
         print('''
@@ -182,7 +194,8 @@ class MIPS:
 \tsyscall
 
 \t# Se hace un salto de linea
-\tli $a0, saltoLinea
+\tli $v0, 4
+\tla $a0, saltoLinea
 \tsyscall
 \tjr $ra
         ''')
@@ -191,13 +204,17 @@ class MIPS:
         Complementarias
     '''
 
+    def restablecerRegistroParametros(self):
+        self.registrosArg = ['$a0', '$a1', '$a2', '$a3']
+
     def encabezado(self, espacioGlobal):
+        newLine = "\n"
         print(f'''
 .data
 .align 2
     G_: .space {espacioGlobal}
     mensajeInput: .asciiz "Ingrese un número entero: "
-    saltoLinea: .asciiz "\n"
+    saltoLinea: .asciiz "{repr(newLine).replace("'","")}"
 .text
         ''')
 
@@ -224,6 +241,10 @@ class MIPS:
 
             elif linea.op == 'END FUNCTION':
                 funcionActual = ""
+            elif linea.op == 'CALL':
+                self.construirLlamarFuncion(linea.arg1)
+            elif linea.op == 'PARAM':
+                self.construirParametro(linea.arg1)
 
             else:
                 linea.debug()

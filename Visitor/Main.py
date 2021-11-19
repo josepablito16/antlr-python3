@@ -1216,7 +1216,7 @@ def printCodigo(codigo):
 
 
 def generarMIPS(Main, Metodos):
-    mips = MIPS()
+    mips = MIPS(pilaFuncion[0])
     # generar encabezados
     mips.encabezado(offsetGlobal)
     # generar main
@@ -1229,7 +1229,6 @@ def generarMIPS(Main, Metodos):
 
 
 def clasificarFunciones():
-    print(pilaFuncion)
     Main = []
     Metodos = []
 
