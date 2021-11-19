@@ -431,7 +431,7 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en linea {ctx.start.line}{ENDC}: {err.mensaje}")
 
         # se elimina ambito global
-        self.quitarAmbito(variable=True, funcion=True, estructura=True)
+        #self.quitarAmbito(variable=True, funcion=True, estructura=True)
         return declaraciones
 
     '''
@@ -534,7 +534,7 @@ class EvalVisitor(decafVisitor):
                 f"{FAIL}Error en declaracion de funcion linea {ctx.start.line}{ENDC}: {errTemp.mensaje}")
 
         # Se calcula el ancho de una funcion
-        pilaFuncion[0][nombre].ancho = offsetLocal + ancho[tipo]
+        pilaFuncion[0][nombre].ancho = offsetLocal
 
         # se elimina ambito de variable
         self.quitarAmbito()
@@ -1229,6 +1229,7 @@ def generarMIPS(Main, Metodos):
 
 
 def clasificarFunciones():
+    print(pilaFuncion)
     Main = []
     Metodos = []
 

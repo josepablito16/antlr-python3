@@ -172,10 +172,21 @@ class MIPS:
 \t# Se lee el input del usuario
 \tli $v0,5
 \tsyscall
+\tjr $ra
         ''')
 
     def constuirOutputInt(self):
-        pass
+        print('''
+\t# Se imprime numero en pantalla
+\tli $v0, 1
+\tsyscall
+
+\t# Se hace un salto de linea
+\tli $a0, saltoLinea
+\tsyscall
+\tjr $ra
+        ''')
+
     '''
         Complementarias
     '''
@@ -186,6 +197,7 @@ class MIPS:
 .align 2
     G_: .space {espacioGlobal}
     mensajeInput: .asciiz "Ingrese un número entero: "
+    saltoLinea: .asciiz "\n"
 .text
         ''')
 
