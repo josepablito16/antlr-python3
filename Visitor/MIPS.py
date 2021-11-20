@@ -18,6 +18,12 @@ class MIPS:
         print(f"{etiqueta}:")
         self.construirConfiguracionStack(etiqueta)
 
+    def guardarParametrosEnStack(self, cantidadParametros):
+        registrosParametros = ['$a0', '$a1', '$a2', '$a3']
+        print("\t# Guardar en Stack los parametros de la funcion")
+        for i in range(cantidadParametros):
+            print(f"\tsw {registrosParametros.pop(0)}, {4 * i}($fp)")
+
     def construirConfiguracionStack(self, etiqueta):
         if (etiqueta == 'main'):
             ancho = self.datosFuncion[etiqueta].ancho
@@ -29,6 +35,23 @@ class MIPS:
 \tsub $fp, $sp, {ancho}
 \tla $sp, ($fp)
                 ''')
+        elif (etiqueta != 'OutputInt'):
+            # es cualquier funcion
+            ancho = self.datosFuncion[etiqueta].ancho
+            if(ancho != 0):
+                # hay variables
+                print(f'''
+\t# Preparar stack
+\tsub $sp, $sp, 4
+\tsw, $ra, ($sp)
+\tsub $sp, $sp, 4
+\tsw $fp, ($sp)
+\tsub $fp, $sp, {ancho}
+\tla $sp, ($fp)
+                ''')
+                if(len(self.datosFuncion[etiqueta].argumentosTipos) > 0):
+                    self.guardarParametrosEnStack(
+                        len(self.datosFuncion[etiqueta].argumentosTipos))
 
     def construirIf(self, Rsrc, etiqueta):
         '''
