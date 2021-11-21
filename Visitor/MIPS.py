@@ -43,6 +43,9 @@ class MIPS:
     def construirConfiguracionStack(self, etiqueta):
         if (etiqueta == 'main'):
             ancho = self.datosFuncion[etiqueta].ancho
+            print(f'''
+\t# Cargar direccion de G
+\tla $s7, G''')
             if(ancho != 0):
                 # Hay variables en main, preparar stack
                 print(f'''
@@ -211,7 +214,6 @@ class MIPS:
         print('\t# Igualar')
         x = cuadrupla.resultado
         y = cuadrupla.arg1
-        # TODO manejar caso R, correr el programa
         if ((y == 'R') and (x.find('fp') != -1)):
             offset = x[x.find('[') + 1:x.find(']')]
             print(f"\tsw $v0, {offset}($fp)")
@@ -219,6 +221,17 @@ class MIPS:
             registros = self.descriptor.getReg(x, y)
             offset = x[x.find('[') + 1:x.find(']')]
             print(f"\tsw {registros[0]}, {offset}($fp)")
+        elif(x.find('G') != -1):
+            offset = x[x.find('[') + 1:x.find(']')]
+            try:
+                y = int(y)
+                print(f'''\tli $s5, {y}
+\tsw $s5, {offset}($s7)
+                ''')
+            except:
+                # TODO que pasa si no es literal
+                pass
+
         #retorno = f"move {Rdest}, {Rsrc}"
 
     '''
@@ -261,6 +274,12 @@ class MIPS:
             print(f"""
 \t# Cargar parametros
 \tmove {self.registrosArg.pop(0)}, $v0""")
+        elif(parametro.find('G') != -1):
+            offset = parametro[parametro.find('[') + 1:parametro.find(']')]
+            print(f"""
+\t# Cargar parametros
+\tlw $s0, {offset}($s7)
+\tmove {self.registrosArg.pop(0)}, $s0""")
 
     def construirRetornoSimple(self):
         '''
@@ -316,7 +335,7 @@ class MIPS:
         print(f'''
 .data
 .align 2
-    G_: .space {espacioGlobal}
+    G: .space {espacioGlobal}
     mensajeInput: .asciiz "Ingrese un número entero: "
     saltoLinea: .asciiz "{repr(newLine).replace("'","")}"
 .text
@@ -332,6 +351,7 @@ class MIPS:
     def generarCodigo(self, cuadruplas):
         funcionActual = ""
         for linea in cuadruplas:
+            # linea.debug()
             if linea.op == 'FUNCTION':
                 self.construirEtiqueta(linea.arg1)
                 funcionActual = linea.arg1
