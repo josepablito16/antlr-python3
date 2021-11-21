@@ -1,8 +1,12 @@
+from Descriptor import *
+
+
 class MIPS:
 
     def __init__(self, datosFunciones):
         self.datosFuncion = datosFunciones
         self.registrosArg = ['$a0', '$a1', '$a2', '$a3']
+        self.descriptor = Descriptor()
         print(self.datosFuncion)
 
     '''
@@ -23,6 +27,18 @@ class MIPS:
         print("\t# Guardar en Stack los parametros de la funcion")
         for i in range(cantidadParametros):
             print(f"\tsw {registrosParametros.pop(0)}, {4 * i}($fp)")
+
+    def construirRestauracionStack(self, etiqueta):
+        ancho = self.datosFuncion[etiqueta].ancho
+        if(ancho != 0):
+            print(f'''
+\t# Restauracion de stack
+\tadd $sp, $fp, {ancho}
+\tlw $fp, ($sp)
+\tadd $sp, $sp, 4
+\tlw $ra, ($sp)
+\tadd $sp, $sp, 4
+                ''')
 
     def construirConfiguracionStack(self, etiqueta):
         if (etiqueta == 'main'):
@@ -68,9 +84,42 @@ class MIPS:
         retorno = f"mul {Rdest}, {Rsrc1}, {Rsrc2}"
         pass
 
-    def construirSuma(self, Rdest, Rsrc1, Rsrc2):
-        retorno = f"add {Rdest}, {Rsrc1}, {Rsrc2}"
-        pass
+    def construirSuma(self, cuadrupla):
+        x = cuadrupla.resultado
+        y = cuadrupla.arg1
+        z = cuadrupla.arg2
+        print("\t# Suma")
+
+        self.descriptor.agregarAcceso(x)
+        self.descriptor.agregarAcceso(y)
+        self.descriptor.agregarAcceso(z)
+
+        esLiteral = False
+        literal = None
+        try:
+            y = int(y)
+            esLiteral = True
+            literal = y
+        except:
+            pass
+
+        try:
+            z = int(z)
+            esLiteral = True
+            literal = z
+        except:
+            pass
+
+        registros = self.descriptor.getReg(x, y, z)
+        if(esLiteral):
+            print(
+                f"\taddi {registros[0]}, {registros[1]}, {literal}")
+
+        self.descriptor.eliminarAccesoTemporal(y)
+        self.descriptor.eliminarAccesoTemporal(z)
+        # print(self.descriptor.registro)
+        # print(self.descriptor.acceso)
+        # retorno = f"add {Rdest}, {Rsrc1}, {Rsrc2}"
 
     def construirDivision(self, Rdest, Rsrc1, Rsrc2):
         retorno = f"div {Rdest}, {Rsrc1}, {Rsrc2}"
@@ -155,13 +204,18 @@ class MIPS:
         Cargas
     '''
 
-    def construirCarga(self, Rdest, Rsrc):
+    def construirCarga(self, cuadrupla):
         '''
-            TODO: preguntar como manejar este caso
             EJ: Rdest = Rsrc1
         '''
-        retorno = f"move {Rdest}, {Rsrc}"
-        pass
+        print('\t# Igualar')
+        x = cuadrupla.resultado
+        y = cuadrupla.arg1
+        registros = self.descriptor.getReg(x, y)
+        if (x.find('fp') != -1):
+            offset = x[x.find('[') + 1:x.find(']')]
+            print(f"\tsw {registros[0]}, {offset}($fp)")
+        #retorno = f"move {Rdest}, {Rsrc}"
 
     '''
         Almacenamiento
@@ -179,15 +233,25 @@ class MIPS:
     def construirLlamarFuncion(self, nombre):
         print(f"\tjal {nombre}")
 
-    def construirRetorno(self, reg):
-        retorno = f"move $v0, {reg}"
-        retorno += "jr $ra"
+    def construirRetorno(self, reg, etiqueta):
+        print("\n\t# Se carga valor de retorno")
+        try:
+            literal = int(reg)
+            print(f'\tli $v0, {literal}')
+        except:
+            # TODO cargar valor de retorno cuando no es una literal
+            retorno = f"move $v0, {reg}"
+            pass
+
+        self.construirRestauracionStack(etiqueta)
+        print("\tjr $ra")
         self.restablecerRegistroParametros()
 
     def construirParametro(self, parametro):
         if (parametro.find('fp') != -1):
             offset = parametro[parametro.find('[') + 1:parametro.find(']')]
-            print(f"""\t# Cargar parametros
+            print(f"""
+\t# Cargar parametros
 \tlw {self.registrosArg.pop(0)}, {offset}($fp)""")
 
     def construirRetornoSimple(self):
@@ -258,19 +322,38 @@ class MIPS:
                     self.constuirInputInt()
                 elif(linea.arg1 == 'OutputInt'):
                     self.constuirOutputInt()
+                continue
             elif linea.op == 'RETURN':
                 if (funcionActual == 'InputInt'):
                     self.construirRetornoSimple()
+                else:
+                    self.construirRetorno(linea.arg1, funcionActual)
+                continue
 
             elif linea.op == 'END FUNCTION':
                 funcionActual = ""
+                self.descriptor.limpiarDescriptores()
+                continue
             elif linea.op == 'CALL':
+                # TODO Guardar el estado de la maquina antes de llamara a la funcion
                 self.construirLlamarFuncion(linea.arg1)
+                continue
             elif linea.op == 'PARAM':
                 self.construirParametro(linea.arg1)
+                continue
+            elif linea.op == '+':
+                self.construirSuma(linea)
+                continue
+            elif linea.op == '=':
+                # print(self.descriptor.registro)
+                # print(self.descriptor.acceso)
+                self.construirCarga(linea)
+                continue
 
             else:
-                linea.debug()
+                pass
+                # linea.debug()
+            linea.debug()
 
     def __repr__(self):
         return f""
