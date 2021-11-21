@@ -83,9 +83,40 @@ class MIPS:
         Operaciones aritmeticas
     '''
 
-    def construirMultiplicacion(self, Rdest, Rsrc1, Rsrc2):
-        retorno = f"mul {Rdest}, {Rsrc1}, {Rsrc2}"
-        pass
+    def construirMultiplicacion(self, cuadrupla):
+        # TODO hacer multiplicacion
+        x = cuadrupla.resultado
+        y = cuadrupla.arg1
+        z = cuadrupla.arg2
+        print("\t# Multiplicacion")
+
+        self.descriptor.agregarAcceso(x)
+        self.descriptor.agregarAcceso(y)
+        self.descriptor.agregarAcceso(z)
+
+        esLiteral = False
+        literal = None
+
+        try:
+            y = int(y)
+            esLiteral = True
+            literal = y
+        except:
+            pass
+
+        try:
+            z = int(z)
+            esLiteral = True
+            literal = z
+        except:
+            pass
+
+        registros = self.descriptor.getReg(x, y, z)
+        if(esLiteral):
+            print(f'''
+\tli $s5, {literal}
+\tmul {registros[0]}, {registros[1]}, $s5
+            ''')
 
     def construirSuma(self, cuadrupla):
         x = cuadrupla.resultado
@@ -218,16 +249,32 @@ class MIPS:
             offset = x[x.find('[') + 1:x.find(']')]
             print(f"\tsw $v0, {offset}($fp)")
         elif (x.find('fp') != -1):
-            registros = self.descriptor.getReg(x, y)
-            offset = x[x.find('[') + 1:x.find(']')]
-            print(f"\tsw {registros[0]}, {offset}($fp)")
-        elif(x.find('G') != -1):
             offset = x[x.find('[') + 1:x.find(']')]
             try:
                 y = int(y)
                 print(f'''\tli $s5, {y}
-\tsw $s5, {offset}($s7)
+\tsw $s5, {offset}($fp)
                 ''')
+            except:
+                registros = self.descriptor.getReg(x, y)
+                print(f"\tsw {registros[0]}, {offset}($fp)")
+        elif(x.find('G') != -1):
+            offset = x[x.find('[') + 1:x.find(']')]
+            try:
+                y = int(y)
+                if (offset.find('t') != -1):
+                    registro = self.descriptor.buscarRegistroEnAcceso(offset)
+                    print(f'''\tli $s5, {y}
+\tadd $s3, {registro}, $s7
+\tsw $s5, ($s3)
+                    ''')
+
+                    self.descriptor.eliminarAccesoTemporal(offset)
+
+                else:
+                    print(f'''\tli $s5, {y}
+\tsw $s5, {offset}($s7)
+                    ''')
             except:
                 # TODO que pasa si no es literal
                 pass
@@ -276,7 +323,16 @@ class MIPS:
 \tmove {self.registrosArg.pop(0)}, $v0""")
         elif(parametro.find('G') != -1):
             offset = parametro[parametro.find('[') + 1:parametro.find(']')]
-            print(f"""
+            if (offset.find('t') != -1):
+                registro = self.descriptor.buscarRegistroEnAcceso(offset)
+                print(f'''\t# Cargar parametros
+\tadd $s3, {registro}, $s7
+\tlw $s0, ($s3)
+\tmove {self.registrosArg.pop(0)}, $s0
+            ''')
+                self.descriptor.eliminarAccesoTemporal(offset)
+            else:
+                print(f"""
 \t# Cargar parametros
 \tlw $s0, {offset}($s7)
 \tmove {self.registrosArg.pop(0)}, $s0""")
@@ -324,7 +380,7 @@ class MIPS:
             if(i.find('fp') != -1):
                 offset = i[i.find('[') + 1:i.find(']')]
                 print(
-                    f"sw {self.descriptor.buscarRegistroEnAcceso(i)}, {offset}($fp)")
+                    f"\tsw {self.descriptor.buscarRegistroEnAcceso(i)}, {offset}($fp)")
         self.descriptor.limpiarDescriptores()
 
     def restablecerRegistroParametros(self):
@@ -376,10 +432,14 @@ class MIPS:
                 self.construirLlamarFuncion(linea.arg1)
                 continue
             elif linea.op == 'PARAM':
+                # linea.debug()
                 self.construirParametro(linea.arg1)
                 continue
             elif linea.op == '+':
                 self.construirSuma(linea)
+                continue
+            elif linea.op == '*':
+                self.construirMultiplicacion(linea)
                 continue
             elif linea.op == '=':
                 # print(self.descriptor.registro)
