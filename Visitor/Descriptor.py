@@ -6,7 +6,17 @@ from typing import ItemsView
 class Descriptor:
 
     def __init__(self):
-        self.registro = {}
+        self.registro = {
+            '$t1': [],
+            '$t2': [],
+            '$t3': [],
+            '$t4': [],
+            '$t5': [],
+            '$t6': [],
+            '$t7': [],
+            '$t8': [],
+            '$t9': [],
+        }
         '''
             Para cada registro disponible:
 
@@ -41,11 +51,50 @@ class Descriptor:
             }
         '''
 
+    def agregarAcceso(self, variable):
+        try:
+            variable = int(variable)
+            return
+        except:
+            if variable not in self.acceso.keys():
+                if (variable.find('fp') != -1):
+                    self.acceso[variable] = [variable]
+                elif (variable.find('G') != -1):
+                    self.acceso[variable] = [variable]
+                else:
+                    self.acceso[variable] = []
+
+    def eliminarAccesoTemporal(self, temporal):
+        try:
+            temporal = int(temporal)
+            return
+        except:
+            pass
+
+        if (temporal.find('t') == -1):
+            return
+
+        for i in self.acceso[temporal]:
+            try:
+                self.registro[i].remove(temporal)
+            except:
+                continue
+        del self.acceso[temporal]
+
+    def limpiarDescriptores(self):
+        for key in self.registro.keys():
+            self.registro[key] = []
+        self.acceso = {}
+
     def actualizarCasoLD(self, R, x):
         '''
             Caso LD R, x
         '''
-        print(f'LD {R}, {x}')
+        if(x.find('t') == -1):
+            if (x.find('fp') != -1):
+                offset = x[x.find('[') + 1:x.find(']')]
+                print(f'\tlw {R}, {offset}($fp)')
+
         self.registro[R] = [x]
 
         self.acceso[x].append(R)
@@ -113,7 +162,7 @@ class Descriptor:
             - Registro o Nada si no hay un registro
         '''
         for i in self.acceso[variable]:
-            if (i.find('R') != -1):
+            if (i.find('$t') != -1):
                 return i
 
     def getRegistroVacio(self, registro=None):
@@ -231,13 +280,13 @@ class Descriptor:
             # lo llamaremos R
             Rtemp = self.buscarRegistroEnAcceso(variable)
             if (Rtemp):
-                print(f'{variable} -> Caso 1')
+                #print(f'{variable} -> Caso 1')
                 return Rtemp
 
         # Si hay algun registro libre, retornarlo
         Rtemp = self.getRegistroVacio()
         if(Rtemp):
-            print(f'{variable} -> Caso 2')
+            #print(f'{variable} -> Caso 2')
             self.actualizarCasoLD(Rtemp, variable)
             return Rtemp
 
@@ -257,7 +306,7 @@ class Descriptor:
         Rtemp = self.getRegistroVacio(registroTemp)
         if(Rtemp):
             if not Rtemp in usados:
-                print(f'{variable} -> Caso 3')
+                #print(f'{variable} -> Caso 3')
                 self.actualizarCasoLD(Rtemp, variable)
                 return Rtemp
 
@@ -267,14 +316,14 @@ class Descriptor:
         # ese registro (R)
         Rtemp = self.iterarRegistrosCasiLibres(registroTemp, usados)
         if Rtemp:
-            print(f'{variable} -> Caso 4')
+            #print(f'{variable} -> Caso 4')
             self.actualizarCasoLD(Rtemp, variable)
             return Rtemp
 
         # Evaluar que registro tiene menos variables para liberar
         # Pasar cada variable a su direccion de memoria y
         # seleccionar ese registro (R)
-        print(f'{variable} -> Caso 5')
+        #print(f'{variable} -> Caso 5')
         Rtemp = self.getMejorRegistro(registroTemp, usados)
         self.actualizarMultipleST(Rtemp)
         self.actualizarCasoLD(Rtemp, variable)
@@ -316,8 +365,12 @@ class Descriptor:
                 xOperando = x
 
             for variable in [x, y, z]:
-                registros.append(self.getRegAuxiliar(
-                    variable, xOperando, registros))
+                try:
+                    variable = int(variable)
+                    continue
+                except:
+                    registros.append(self.getRegAuxiliar(
+                        variable, xOperando, registros))
 
         return registros
 
@@ -339,24 +392,17 @@ class Descriptor:
 if __name__ == '__main__':
     d = Descriptor()
     d.registro = {
-        'R1': ['u'],
-        'R2': ['t'],
-        'R3': ['u']
+        'R1': ['t1'],
+        'R2': ['t1', 'fp[0]'],
+        'R3': []
     }
 
     d.acceso = {
-        'a': ['a'],
-        'b': ['b'],
-        'c': ['c'],
-        'd': ['d'],
-        't': ['R2'],
-        'u': ['R1', 'R3'],
-        'v': [],
+        't1': ['R1', 'R2'],
+        'fp[0]': ['R2'],
     }
 
-    # t = a - b
-    d.debug()
-    print('t = a - b')
-    print(d.getReg(x='t', y='a', z='b'))
-    d.debug()
-    print()
+    d.eliminarAccesoTemporal('fp[0]')
+    # d.eliminarAccesoTemporal('t1')
+    print(d.registro)
+    print(d.acceso)
