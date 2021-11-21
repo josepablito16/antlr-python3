@@ -22,6 +22,9 @@ class MIPS:
         print(f"{etiqueta}:")
         self.construirConfiguracionStack(etiqueta)
 
+    def construirEtiquetaSimple(self, etiqueta):
+        print(f"{etiqueta}:")
+
     def guardarParametrosEnStack(self, cantidadParametros):
         registrosParametros = ['$a0', '$a1', '$a2', '$a3']
         print("\t# Guardar en Stack los parametros de la funcion")
@@ -446,6 +449,9 @@ class MIPS:
                 # print(self.descriptor.acceso)
                 # linea.debug()
                 self.construirCarga(linea)
+                continue
+            elif linea.op.find('LABEL') != -1:
+                self.construirEtiquetaSimple(linea.op)
                 continue
 
             else:
