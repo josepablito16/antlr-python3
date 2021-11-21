@@ -291,6 +291,15 @@ class MIPS:
         Complementarias
     '''
 
+    def guardarEstadoMaquina(self):
+        print("\t# guardar estado de maquina")
+        for i in self.descriptor.acceso:
+            if(i.find('fp') != -1):
+                offset = i[i.find('[') + 1:i.find(']')]
+                print(
+                    f"sw {self.descriptor.buscarRegistroEnAcceso(i)}, {offset}($fp)")
+        self.descriptor.limpiarDescriptores()
+
     def restablecerRegistroParametros(self):
         self.registrosArg = ['$a0', '$a1', '$a2', '$a3']
 
@@ -335,7 +344,8 @@ class MIPS:
                 self.descriptor.limpiarDescriptores()
                 continue
             elif linea.op == 'CALL':
-                # TODO Guardar el estado de la maquina antes de llamara a la funcion
+                # TODO Guardar el estado de la maquina antes de llamar a la funcion
+                self.guardarEstadoMaquina()
                 self.construirLlamarFuncion(linea.arg1)
                 continue
             elif linea.op == 'PARAM':
