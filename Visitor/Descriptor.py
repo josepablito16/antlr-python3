@@ -71,7 +71,7 @@ class Descriptor:
         except:
             pass
 
-        if (temporal.find('t') != -1):
+        if (temporal.find('t') == -1):
             return
 
         for i in self.acceso[temporal]:
