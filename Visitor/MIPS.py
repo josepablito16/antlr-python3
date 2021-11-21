@@ -211,8 +211,12 @@ class MIPS:
         print('\t# Igualar')
         x = cuadrupla.resultado
         y = cuadrupla.arg1
-        registros = self.descriptor.getReg(x, y)
-        if (x.find('fp') != -1):
+        # TODO manejar caso R, correr el programa
+        if ((y == 'R') and (x.find('fp') != -1)):
+            offset = x[x.find('[') + 1:x.find(']')]
+            print(f"\tsw $v0, {offset}($fp)")
+        elif (x.find('fp') != -1):
+            registros = self.descriptor.getReg(x, y)
             offset = x[x.find('[') + 1:x.find(']')]
             print(f"\tsw {registros[0]}, {offset}($fp)")
         #retorno = f"move {Rdest}, {Rsrc}"
@@ -253,6 +257,10 @@ class MIPS:
             print(f"""
 \t# Cargar parametros
 \tlw {self.registrosArg.pop(0)}, {offset}($fp)""")
+        elif(parametro == 'R'):
+            print(f"""
+\t# Cargar parametros
+\tmove {self.registrosArg.pop(0)}, $v0""")
 
     def construirRetornoSimple(self):
         '''
@@ -344,7 +352,6 @@ class MIPS:
                 self.descriptor.limpiarDescriptores()
                 continue
             elif linea.op == 'CALL':
-                # TODO Guardar el estado de la maquina antes de llamar a la funcion
                 self.guardarEstadoMaquina()
                 self.construirLlamarFuncion(linea.arg1)
                 continue
@@ -357,6 +364,7 @@ class MIPS:
             elif linea.op == '=':
                 # print(self.descriptor.registro)
                 # print(self.descriptor.acceso)
+                # linea.debug()
                 self.construirCarga(linea)
                 continue
 
