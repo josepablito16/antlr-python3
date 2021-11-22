@@ -80,11 +80,12 @@ class MIPS:
             Bif. condicional si Rsrc es mayor que 0.
         '''
         temporal = cuadrupla.arg1[:cuadrupla.arg1.find('>')]
-        Rsrc = self.descriptor.buscarRegistroEnAcceso(temporal)
+        self.descriptor.agregarAcceso(temporal)
+        Rsrc = self.descriptor.getReg(temporal, temporal)
         etiqueta = cuadrupla.resultado
         print(f'''
 \t# If
-\tbgtz {Rsrc}, {etiqueta}
+\tbgtz {Rsrc[0]}, {etiqueta}
         ''')
         self.descriptor.eliminarAccesoTemporal(temporal)
 
@@ -124,6 +125,10 @@ class MIPS:
             print(f'''
 \tli $s5, {literal}
 \tmul {registros[0]}, {registros[1]}, $s5
+            ''')
+        elif(z == 'R'):
+            print(f'''
+\tmul {registros[0]}, {registros[1]}, $v0
             ''')
         self.descriptor.eliminarAccesoTemporal(y)
         self.descriptor.eliminarAccesoTemporal(z)
@@ -173,9 +178,41 @@ class MIPS:
         retorno = f"neg {Rdest}, {Rsrc1}"
         pass
 
-    def construirResta(self, Rdest, Rsrc1, Rsrc2):
-        retorno = f"sub {Rdest}, {Rsrc1}, {Rsrc2}"
-        pass
+    def construirResta(self, cuadrupla):
+        x = cuadrupla.resultado
+        y = cuadrupla.arg1
+        z = cuadrupla.arg2
+        print("\t# Resta")
+
+        self.descriptor.agregarAcceso(x)
+        self.descriptor.agregarAcceso(y)
+        self.descriptor.agregarAcceso(z)
+
+        esLiteral = False
+        literal = None
+
+        try:
+            y = int(y)
+            esLiteral = True
+            literal = y
+        except:
+            pass
+
+        try:
+            z = int(z)
+            esLiteral = True
+            literal = z
+        except:
+            pass
+
+        registros = self.descriptor.getReg(x, y, z)
+        if(esLiteral):
+            print(f'''
+\tli $s5, {literal}
+\tsub {registros[0]}, {registros[1]}, $s5
+            ''')
+        self.descriptor.eliminarAccesoTemporal(y)
+        self.descriptor.eliminarAccesoTemporal(z)
 
     '''
         Operaciones logicas
@@ -197,12 +234,43 @@ class MIPS:
         Operacion de comparacion
     '''
 
-    def construirComparacionIgual(self, Rdest, Rsrc1, Rsrc2):
+    def construirComparacionIgual(self, cuadrupla):
         '''
             Pone Rdest a 1 si Rsrc1 y Rsrc2 son iguales, en otro caso pone 0
         '''
-        retorno = f"seq {Rdest}, {Rsrc1}, {Rsrc2}"
-        pass
+        x = cuadrupla.resultado
+        y = cuadrupla.arg1
+        z = cuadrupla.arg2
+        print("\t# Menor que")
+        self.descriptor.agregarAcceso(x)
+        self.descriptor.agregarAcceso(y)
+        self.descriptor.agregarAcceso(z)
+
+        esLiteral = False
+        literal = None
+
+        try:
+            y = int(y)
+            esLiteral = True
+            literal = y
+        except:
+            pass
+
+        try:
+            z = int(z)
+            esLiteral = True
+            literal = z
+        except:
+            pass
+
+        registros = self.descriptor.getReg(x, y, z)
+        if (esLiteral):
+            print(f'''
+\tli $s5, {literal}
+\tseq {registros[0]}, {registros[1]}, $s5
+            ''')
+        self.descriptor.eliminarAccesoTemporal(y)
+        self.descriptor.eliminarAccesoTemporal(z)
 
     def construirComparacionMayorIgual(self, Rdest, Rsrc1, Rsrc2):
         '''
@@ -345,16 +413,29 @@ class MIPS:
             literal = int(reg)
             print(f'\tli $v0, {literal}')
         except:
-            # TODO cargar valor de retorno cuando no es una literal
-            retorno = f"move $v0, {reg}"
-            pass
+            reg = self.descriptor.buscarRegistroEnAcceso(reg)
+            print(f'\tmove $v0, {reg}')
 
         self.construirRestauracionStack(etiqueta)
         print("\tjr $ra")
         self.restablecerRegistroParametros()
 
     def construirParametro(self, parametro):
-        if (parametro.find('fp') != -1):
+        try:
+            parametro = int(parametro)
+            print(f"""
+\t# Cargar parametros
+\tli {self.registrosArg.pop(0)}, {parametro}""")
+            return
+        except:
+            pass
+        if (parametro[0] == 't'):
+            registro = self.descriptor.buscarRegistroEnAcceso(parametro)
+            print(f"""
+\t# Cargar parametros
+\tmove {self.registrosArg.pop(0)}, {registro}""")
+
+        elif (parametro.find('fp') != -1):
             offset = parametro[parametro.find('[') + 1:parametro.find(']')]
             print(f"""
 \t# Cargar parametros
@@ -472,6 +553,7 @@ class MIPS:
             elif linea.op == 'CALL':
                 self.guardarEstadoMaquina()
                 self.construirLlamarFuncion(linea.arg1)
+                self.restablecerRegistroParametros()
                 continue
             elif linea.op == 'PARAM':
                 # linea.debug()
@@ -479,6 +561,9 @@ class MIPS:
                 continue
             elif linea.op == '+':
                 self.construirSuma(linea)
+                continue
+            elif linea.op == '-':
+                self.construirResta(linea)
                 continue
             elif linea.op == '*':
                 self.construirMultiplicacion(linea)
@@ -490,17 +575,24 @@ class MIPS:
                 self.construirCarga(linea)
                 continue
             elif linea.op.find('LABEL') != -1:
+                self.guardarEstadoMaquina()
                 self.construirEtiquetaSimple(linea.op)
                 continue
             elif(linea.op == 'GOTO'):
+                self.guardarEstadoMaquina()
                 self.construirGOTO(linea.arg1)
                 continue
             elif(linea.op == '<'):
                 # linea.debug()
                 self.construirComparacionMenor(linea)
                 continue
+            elif(linea.op == '=='):
+                # linea.debug()
+                self.construirComparacionIgual(linea)
+                continue
             elif(linea.op == 'IF'):
                 # linea.debug()
+                self.guardarEstadoMaquina()
                 self.construirIf(linea)
                 continue
 

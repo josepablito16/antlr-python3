@@ -52,6 +52,8 @@ class Descriptor:
         '''
 
     def agregarAcceso(self, variable):
+        if(variable == 'R'):
+            return
         try:
             variable = int(variable)
             return
@@ -365,6 +367,8 @@ class Descriptor:
                 xOperando = x
 
             for variable in [x, y, z]:
+                if(variable == 'R'):
+                    continue
                 try:
                     variable = int(variable)
                     continue
