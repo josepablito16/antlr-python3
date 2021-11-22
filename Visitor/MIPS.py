@@ -15,8 +15,8 @@ class MIPS:
 
     def construirGOTO(self, etiqueta):
         # hay varios tipos de jumps
-        retorno = f"j {etiqueta}"
-        pass
+        print("\n\t# GOTO")
+        print(f"\tj {etiqueta}\n")
 
     def construirEtiqueta(self, etiqueta):
         print(f"{etiqueta}:")
@@ -75,19 +75,24 @@ class MIPS:
                     self.guardarParametrosEnStack(
                         len(self.datosFuncion[etiqueta].argumentosTipos))
 
-    def construirIf(self, Rsrc, etiqueta):
+    def construirIf(self, cuadrupla):
         '''
             Bif. condicional si Rsrc es mayor que 0.
         '''
-        retorno = f"bgtz {Rsrc}, {etiqueta}"
-        pass
+        temporal = cuadrupla.arg1[:cuadrupla.arg1.find('>')]
+        Rsrc = self.descriptor.buscarRegistroEnAcceso(temporal)
+        etiqueta = cuadrupla.resultado
+        print(f'''
+\t# If
+\tbgtz {Rsrc}, {etiqueta}
+        ''')
+        self.descriptor.eliminarAccesoTemporal(temporal)
 
     '''
         Operaciones aritmeticas
     '''
 
     def construirMultiplicacion(self, cuadrupla):
-        # TODO hacer multiplicacion
         x = cuadrupla.resultado
         y = cuadrupla.arg1
         z = cuadrupla.arg2
@@ -120,6 +125,8 @@ class MIPS:
 \tli $s5, {literal}
 \tmul {registros[0]}, {registros[1]}, $s5
             ''')
+        self.descriptor.eliminarAccesoTemporal(y)
+        self.descriptor.eliminarAccesoTemporal(z)
 
     def construirSuma(self, cuadrupla):
         x = cuadrupla.resultado
@@ -218,16 +225,48 @@ class MIPS:
             Pone Rdest a 1 si Rsrc1 es menor o igual a Rsrc2,
             y 0 en otro caso (para números con signo).
         '''
+
         retorno = f"sle {Rdest}, {Rsrc1}, {Rsrc2}"
         pass
 
-    def construirComparacionMenor(self, Rdest, Rsrc1, Rsrc2):
+    def construirComparacionMenor(self, cuadrupla):
         '''
             Pone Rdest a 1 si Rsrc1 es menor a Rsrc2,
             y 0 en otro caso (para números con signo).
         '''
-        retorno = f"slt {Rdest}, {Rsrc1}, {Rsrc2}"
-        pass
+        x = cuadrupla.resultado
+        y = cuadrupla.arg1
+        z = cuadrupla.arg2
+        print("\t# Menor que")
+        self.descriptor.agregarAcceso(x)
+        self.descriptor.agregarAcceso(y)
+        self.descriptor.agregarAcceso(z)
+
+        esLiteral = False
+        literal = None
+
+        try:
+            y = int(y)
+            esLiteral = True
+            literal = y
+        except:
+            pass
+
+        try:
+            z = int(z)
+            esLiteral = True
+            literal = z
+        except:
+            pass
+
+        registros = self.descriptor.getReg(x, y, z)
+        if (esLiteral):
+            print(f'''
+\tli $s5, {literal}
+\tslt {registros[0]}, {registros[1]}, $s5
+            ''')
+        self.descriptor.eliminarAccesoTemporal(y)
+        self.descriptor.eliminarAccesoTemporal(z)
 
     def construirComparacionNoIgual(self, Rdest, Rsrc1, Rsrc2):
         '''
@@ -452,6 +491,17 @@ class MIPS:
                 continue
             elif linea.op.find('LABEL') != -1:
                 self.construirEtiquetaSimple(linea.op)
+                continue
+            elif(linea.op == 'GOTO'):
+                self.construirGOTO(linea.arg1)
+                continue
+            elif(linea.op == '<'):
+                # linea.debug()
+                self.construirComparacionMenor(linea)
+                continue
+            elif(linea.op == 'IF'):
+                # linea.debug()
+                self.construirIf(linea)
                 continue
 
             else:
