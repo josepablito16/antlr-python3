@@ -391,7 +391,11 @@ class MIPS:
 \tsw $s5, {offset}($s7)
                     ''')
             except:
+                print('Entra aqui')
+
+                # if ((y == 'R') and (x.find('fp') != -1)):
                 # TODO que pasa si no es literal
+                # TODO me quede aqui
                 pass
 
         #retorno = f"move {Rdest}, {Rsrc}"
@@ -414,16 +418,17 @@ class MIPS:
 
     def construirRetorno(self, reg, etiqueta):
         print("\n\t# Se carga valor de retorno")
-        try:
-            literal = int(reg)
-            print(f'\tli $v0, {literal}')
-        except:
-            if(reg.find('fp') != -1):
-                offset = reg[reg.find('[') + 1:reg.find(']')]
-                print(f'\tlw $v0, {offset}($fp)')
-                return
-            reg = self.descriptor.buscarRegistroEnAcceso(reg)
-            print(f'\tmove $v0, {reg}')
+        if (reg != 'R'):
+            try:
+                literal = int(reg)
+                print(f'\tli $v0, {literal}')
+            except:
+                if(reg.find('fp') != -1):
+                    offset = reg[reg.find('[') + 1:reg.find(']')]
+                    print(f'\tlw $v0, {offset}($fp)')
+                    return
+                reg = self.descriptor.buscarRegistroEnAcceso(reg)
+                print(f'\tmove $v0, {reg}')
 
         self.construirRestauracionStack(etiqueta)
         print("\tjr $ra")
@@ -552,6 +557,7 @@ class MIPS:
                 if (funcionActual == 'InputInt'):
                     self.construirRetornoSimple()
                 else:
+                    # linea.debug()
                     self.construirRetorno(linea.arg1, funcionActual)
                 continue
 
@@ -581,7 +587,7 @@ class MIPS:
             elif linea.op == '=':
                 # print(self.descriptor.registro)
                 # print(self.descriptor.acceso)
-                # linea.debug()
+                linea.debug()
                 self.construirCarga(linea)
                 continue
             elif linea.op.find('LABEL') != -1:
