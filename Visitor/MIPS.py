@@ -391,7 +391,17 @@ class MIPS:
 \tsw $s5, {offset}($s7)
                     ''')
             except:
-                print('Entra aqui')
+                if((x.find('G') != -1) and y[0] == 't'):
+                    offset = x[x.find('[') + 1:x.find(']')]
+                    registro = self.descriptor.buscarRegistroEnAcceso(y)
+                    try:
+                        offset = int(offset)
+                        print(f'''
+\tsw {registro}, {offset}($s7)
+                        ''')
+                        self.descriptor.eliminarAccesoTemporal(y)
+                    except:
+                        pass
 
                 # if ((y == 'R') and (x.find('fp') != -1)):
                 # TODO que pasa si no es literal
@@ -587,7 +597,7 @@ class MIPS:
             elif linea.op == '=':
                 # print(self.descriptor.registro)
                 # print(self.descriptor.acceso)
-                linea.debug()
+                # linea.debug()
                 self.construirCarga(linea)
                 continue
             elif linea.op.find('LABEL') != -1:
