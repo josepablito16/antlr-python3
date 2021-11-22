@@ -163,6 +163,8 @@ class MIPS:
         if(esLiteral):
             print(
                 f"\taddi {registros[0]}, {registros[1]}, {literal}")
+        else:
+            print(f"\tadd {registros[0]}, {registros[1]}, {registros[2]}")
 
         self.descriptor.eliminarAccesoTemporal(y)
         self.descriptor.eliminarAccesoTemporal(z)
@@ -366,8 +368,11 @@ class MIPS:
 \tsw $s5, {offset}($fp)
                 ''')
             except:
+                if(y.find('G') != -1):
+                    y = y[y.find('[') + 1:y.find(']')]
                 registros = self.descriptor.getReg(x, y)
                 print(f"\tsw {registros[0]}, {offset}($fp)")
+                self.descriptor.eliminarAccesoTemporal(y)
         elif(x.find('G') != -1):
             offset = x[x.find('[') + 1:x.find(']')]
             try:
@@ -413,6 +418,10 @@ class MIPS:
             literal = int(reg)
             print(f'\tli $v0, {literal}')
         except:
+            if(reg.find('fp') != -1):
+                offset = reg[reg.find('[') + 1:reg.find(']')]
+                print(f'\tlw $v0, {offset}($fp)')
+                return
             reg = self.descriptor.buscarRegistroEnAcceso(reg)
             print(f'\tmove $v0, {reg}')
 
@@ -560,6 +569,7 @@ class MIPS:
                 self.construirParametro(linea.arg1)
                 continue
             elif linea.op == '+':
+                # linea.debug()
                 self.construirSuma(linea)
                 continue
             elif linea.op == '-':
